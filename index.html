@@ -1537,10 +1537,10 @@ function cfgClose(){document.getElementById("cfg-modal").style.display="none";}
 function cfgRenderList(){
   var users=authGetUsers();
   var div=document.getElementById("cfg-user-list-wrap");
-  if(!users.length){div.innerHTML="<p class="cfg-empty-msg">Nenhum usuario cadastrado.</p>";return;}
+  if(!users.length){div.innerHTML='<p class="cfg-empty-msg">Nenhum usuario cadastrado.</p>';return;}
   div.innerHTML=users.map(function(u,i){
-    return "<div class="cfg-user-row"><div><span class="cfg-user-row-name">" + u.login + "</span><span class="cfg-user-row-badge">usuario</span></div><button class="cfg-user-row-del" onclick="cfgRemoveUser(" + i + ")">Remover</button></div>";
-  }).join("");
+    return '<div class="cfg-user-row"><div><span class="cfg-user-row-name">'+u.login+'</span><span class="cfg-user-row-badge">usuario</span></div><button class="cfg-user-row-del" onclick="cfgRemoveUser('+i+')">Remover</button></div>';
+  }).join('');
 }
 
 async function cfgAddUser(){
