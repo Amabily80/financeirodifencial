@@ -2280,8 +2280,9 @@ function toast(icon,msg,type){
   document.getElementById('t-icon').textContent=icon;
   document.getElementById('t-msg').textContent=msg;
   el.className=`toast ${type} show`;
-  clearTimeout(toastTimer);
+  if(typeof toastTimer!=='undefined') clearTimeout(toastTimer);
   toastTimer=setTimeout(()=>el.classList.remove('show'),3500);
+  window.toastTimer=toastTimer;
 }
 /* ===================== AUTENTICACAO ===================== */
 var MASTER_LOGIN="Amabily";
