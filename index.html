@@ -472,6 +472,50 @@ input[type="checkbox"]{width:14px;height:14px;accent-color:var(--green-accent);c
 @media(max-width:1100px){.fin-kpi-grid{grid-template-columns:repeat(2,1fr)}}
 @media(max-width:600px){.fin-kpi-grid{grid-template-columns:1fr}#cad-panel{width:100vw}}
 
+
+/* ── RELATÓRIOS ── */
+.rel-type-grid{display:grid;grid-template-columns:repeat(4,1fr);gap:12px;margin-bottom:24px}
+.rel-type-card{background:#fff;border:2px solid var(--border);border-radius:14px;padding:20px 16px;cursor:pointer;transition:all .2s;text-align:center}
+.rel-type-card:hover{border-color:var(--brand);background:rgba(244,121,32,.04)}
+.rel-type-card.active{border-color:var(--brand);background:rgba(244,121,32,.07)}
+.rel-type-icon{font-size:28px;margin-bottom:8px}
+.rel-type-name{font-size:14px;font-weight:700;color:var(--navy);margin-bottom:4px}
+.rel-type-sub{font-size:11px;color:var(--text-muted)}
+.rel-filters-card{background:#fff;border:1px solid var(--border);border-radius:14px;padding:20px 24px;margin-bottom:20px}
+.rel-filters-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(180px,1fr));gap:14px;margin-bottom:16px}
+.rel-filter-grp{display:flex;flex-direction:column;gap:5px}
+.rel-filter-grp label{font-size:11px;font-weight:700;text-transform:uppercase;letter-spacing:.06em;color:var(--text-muted)}
+.rel-filter-grp input,.rel-filter-grp select{border:1.5px solid var(--border2);border-radius:9px;padding:8px 11px;font-size:13px;font-family:'DM Sans',sans-serif;color:var(--navy);background:#fff;outline:none;transition:border .2s}
+.rel-filter-grp input:focus,.rel-filter-grp select:focus{border-color:var(--brand)}
+.rel-actions-bar{display:flex;gap:10px;align-items:center;flex-wrap:wrap}
+.rel-btn{border:none;border-radius:9px;font-family:'DM Sans',sans-serif;font-size:13px;font-weight:600;padding:10px 18px;cursor:pointer;transition:opacity .2s}
+.rel-btn:hover{opacity:.88}
+.rel-btn-primary{background:linear-gradient(135deg,var(--brand),var(--brand-dark));color:#fff}
+.rel-btn-excel{background:linear-gradient(135deg,#16a34a,#15803d);color:#fff}
+.rel-btn-pdf{background:linear-gradient(135deg,#dc2626,#b91c1c);color:#fff}
+.rel-summary-bar{display:flex;align-items:center;justify-content:space-between;padding:12px 16px;background:var(--gray-50);border-bottom:1px solid var(--border);font-size:13px}
+.rel-summary-bar strong{color:var(--navy)}
+.rel-empty{padding:48px;text-align:center;color:var(--text-muted);font-size:14px}
+/* Recibo */
+@media print{
+  body *{visibility:hidden}
+  #recibo-print-area,#recibo-print-area *{visibility:visible}
+  #recibo-print-area{position:absolute;top:0;left:0;width:100%}
+}
+</style>
+<style>
+.recibo-wrap{font-family:'DM Sans',Arial,sans-serif;max-width:680px;margin:40px auto;padding:40px;border:2px solid #1a1d2e;border-radius:4px}
+.recibo-header{text-align:center;border-bottom:2px solid #F47920;padding-bottom:20px;margin-bottom:24px}
+.recibo-logo-text{font-size:24px;font-weight:800;color:#1a1d2e;letter-spacing:-.5px}
+.recibo-logo-sub{font-size:12px;color:#80868b;text-transform:uppercase;letter-spacing:.15em}
+.recibo-title{font-size:32px;font-weight:800;color:#F47920;margin-top:16px;letter-spacing:2px}
+.recibo-numero{font-size:12px;color:#6b7280;margin-top:4px}
+.recibo-body{margin-bottom:32px}
+.recibo-body p{font-size:15px;line-height:1.8;color:#374151;margin:0}
+.recibo-valor{font-size:24px;font-weight:800;color:#1a1d2e;background:#f0f9ff;border:1px solid #bae6fd;border-radius:8px;padding:12px 20px;display:inline-block;margin:16px 0}
+.recibo-footer{border-top:1px solid #e5e7eb;padding-top:24px;margin-top:24px}
+.recibo-assinatura{margin-top:48px;border-top:1px solid #1a1d2e;width:280px;padding-top:8px;font-size:13px;color:#374151}
+.recibo-data{font-size:12px;color:#6b7280;margin-bottom:16px}
 </style>
 </head>
 <body>
@@ -782,13 +826,99 @@ input[type="checkbox"]{width:14px;height:14px;accent-color:var(--green-accent);c
        PAGE: RELATÓRIOS
   ═══════════════════════════════════ -->
   <div id="page-relatorios" style="display:none">
-    <div class="ph-page">
-      <div class="ph-icon">📊</div>
-      <h2>Relatórios</h2>
-      <p>Relatórios gerenciais, exportações e análises históricas da operação financeira.</p>
-      <span class="coming-tag">Em desenvolvimento</span>
+  <div class="fin-page-hdr" style="margin-bottom:20px">
+    <div><h2 class="fin-page-title">📊 Relatórios</h2>
+    <p style="font-size:13px;color:var(--text-muted);margin-top:4px">Filtre, visualize e exporte seus lançamentos financeiros</p></div>
+  </div>
+
+  <!-- Tipo de relatório -->
+  <div class="rel-type-grid">
+    <div class="rel-type-card active" id="relcard-cp" onclick="relSetTipo('cp')">
+      <div class="rel-type-icon">💸</div>
+      <div class="rel-type-name">Contas a Pagar</div>
+      <div class="rel-type-sub">Por vencimento</div>
+    </div>
+    <div class="rel-type-card" id="relcard-cp_pagas" onclick="relSetTipo('cp_pagas')">
+      <div class="rel-type-icon">✅</div>
+      <div class="rel-type-name">Contas Pagas</div>
+      <div class="rel-type-sub">Por data de pagamento</div>
+    </div>
+    <div class="rel-type-card" id="relcard-cr" onclick="relSetTipo('cr')">
+      <div class="rel-type-icon">💰</div>
+      <div class="rel-type-name">Contas a Receber</div>
+      <div class="rel-type-sub">Por vencimento</div>
+    </div>
+    <div class="rel-type-card" id="relcard-cr_recebidas" onclick="relSetTipo('cr_recebidas')">
+      <div class="rel-type-icon">🏆</div>
+      <div class="rel-type-name">Contas Recebidas</div>
+      <div class="rel-type-sub">Por data de recebimento</div>
     </div>
   </div>
+
+  <!-- Filtros -->
+  <div class="rel-filters-card">
+    <div class="rel-filters-grid">
+      <div class="rel-filter-grp" style="grid-column:span 2">
+        <label>Período — De</label>
+        <input type="date" id="rel-de">
+      </div>
+      <div class="rel-filter-grp" style="grid-column:span 2">
+        <label>Período — Até</label>
+        <input type="date" id="rel-ate">
+      </div>
+      <div class="rel-filter-grp" style="grid-column:span 2">
+        <label>Nome / Descrição / Observação</label>
+        <input type="text" id="rel-busca" placeholder="Buscar...">
+      </div>
+      <div class="rel-filter-grp">
+        <label>Categoria</label>
+        <select id="rel-cat"><option value="">Todas</option></select>
+      </div>
+      <div class="rel-filter-grp">
+        <label>Projeto</label>
+        <select id="rel-proj"><option value="">Todos</option></select>
+      </div>
+      <div class="rel-filter-grp">
+        <label>Conta Bancária</label>
+        <select id="rel-banco"><option value="">Todas</option></select>
+      </div>
+      <div class="rel-filter-grp">
+        <label>Status</label>
+        <select id="rel-status"><option value="">Todos</option></select>
+      </div>
+      <div class="rel-filter-grp">
+        <label>Valor mínimo</label>
+        <input type="number" id="rel-vmin" placeholder="0,00" step="0.01" min="0">
+      </div>
+      <div class="rel-filter-grp">
+        <label>Valor máximo</label>
+        <input type="number" id="rel-vmax" placeholder="Sem limite" step="0.01" min="0">
+      </div>
+    </div>
+    <div class="rel-actions-bar">
+      <button class="rel-btn rel-btn-primary" onclick="relLoad()">🔍 Gerar Relatório</button>
+      <button class="rel-btn rel-btn-excel" id="rel-btn-csv" onclick="relExportCSV()" style="display:none">📊 Exportar Excel (.csv)</button>
+      <button class="rel-btn rel-btn-pdf" id="rel-btn-pdf" onclick="relExportPDF()" style="display:none">🖨️ Exportar PDF</button>
+      <span id="rel-loading" style="font-size:13px;color:var(--text-muted);display:none">Carregando...</span>
+    </div>
+  </div>
+
+  <!-- Resultados -->
+  <div id="rel-results-wrap" style="display:none">
+    <div class="fin-table-wrap">
+      <div class="rel-summary-bar">
+        <span id="rel-resumo-qtd">0 registros</span>
+        <strong id="rel-resumo-total">Total: R$ 0,00</strong>
+      </div>
+      <div style="overflow-x:auto">
+        <table class="fin-table" id="rel-table">
+          <thead id="rel-thead"></thead>
+          <tbody id="rel-tbody"></tbody>
+        </table>
+      </div>
+    </div>
+  </div>
+</div>
 
 
   <!-- ═══════════════════════════════════
@@ -1013,6 +1143,7 @@ function goTab(id){
   });
   if(id==='fc'&&allRows.length) renderFC();
   if(id==='sc'&&allRows.length) scRender();
+  if(id==='relatorios') relGoTab();
   if(id==='cp') cpLoad();
   if(id==='cr') crLoad();
   if(id==='saldo') saldoLoad();
@@ -2263,13 +2394,14 @@ function cpMarkPago(id, evt){
 }
 
 async function cpDelete(id){
-  if(!confirm('Excluir esta conta a pagar?')) return;
+  if(!confirm('Cancelar este lançamento? Ele ficará salvo no histórico com status Cancelado.')) return;
   try{
-    var {error} = await sb.from('contas_pagar').delete().eq('id',id);
+    var user = authCurrentUser();
+    var {error} = await sb.from('contas_pagar').update({status:'cancelado', alterado_por: user?user.login:''}).eq('id',id);
     if(error) throw error;
-    toast('✅','Conta excluída.','success');
+    toast('✅','Lançamento cancelado (salvo no histórico).','success');
     cpLoad();
-  }catch(e){ toast('❌','Erro ao excluir: '+e.message,'error'); }
+  }catch(e){ toast('❌','Erro: '+e.message,'error'); }
 }
 
 // ══════════════════════════════════════
@@ -2445,13 +2577,14 @@ function crMarkRecebido(id, evt){
 }
 
 async function crDelete(id){
-  if(!confirm('Excluir esta conta a receber?')) return;
+  if(!confirm('Cancelar este lançamento? Ele ficará salvo no histórico com status Cancelado.')) return;
   try{
-    var {error} = await sb.from('contas_receber').delete().eq('id',id);
+    var user = authCurrentUser();
+    var {error} = await sb.from('contas_receber').update({status:'cancelado', alterado_por: user?user.login:''}).eq('id',id);
     if(error) throw error;
-    toast('✅','Conta excluída.','success');
+    toast('✅','Lançamento cancelado (salvo no histórico).','success');
     crLoad();
-  }catch(e){ toast('❌','Erro ao excluir: '+e.message,'error'); }
+  }catch(e){ toast('❌','Erro: '+e.message,'error'); }
 }
 
 // ══════════════════════════════════════
@@ -2795,6 +2928,335 @@ document.addEventListener('DOMContentLoaded', function(){
   var fm = document.getElementById('fin-modal');
   if(fm) fm.addEventListener('click', function(e){ if(e.target===fm) finModalClose(); });
 });
+
+
+/* ====================================================
+   RELATÓRIOS
+==================================================== */
+var relTipo = 'cp';
+var relData = [];
+
+var REL_TIPOS = {
+  cp:          { table:'contas_pagar',   dateField:'vencimento',        label:'Contas a Pagar' },
+  cp_pagas:    { table:'contas_pagar',   dateField:'data_pagamento',    label:'Contas Pagas' },
+  cr:          { table:'contas_receber', dateField:'vencimento',        label:'Contas a Receber' },
+  cr_recebidas:{ table:'contas_receber', dateField:'data_recebimento',  label:'Contas Recebidas' }
+};
+
+function relSetTipo(tipo){
+  relTipo = tipo;
+  document.querySelectorAll('.rel-type-card').forEach(function(c){ c.classList.remove('active'); });
+  var card = document.getElementById('relcard-'+tipo);
+  if(card) card.classList.add('active');
+  // Update status options
+  var sel = document.getElementById('rel-status');
+  if(!sel) return;
+  sel.innerHTML = '<option value="">Todos</option>';
+  if(tipo.startsWith('cp')){
+    ['pendente','pago','vencido','cancelado'].forEach(function(s){
+      sel.innerHTML += '<option value="'+s+'">'+s.charAt(0).toUpperCase()+s.slice(1)+'</option>';
+    });
+  } else {
+    ['pendente','recebido','atrasado','cancelado'].forEach(function(s){
+      sel.innerHTML += '<option value="'+s+'">'+s.charAt(0).toUpperCase()+s.slice(1)+'</option>';
+    });
+  }
+  document.getElementById('rel-results-wrap').style.display='none';
+  document.getElementById('rel-btn-csv').style.display='none';
+  document.getElementById('rel-btn-pdf').style.display='none';
+}
+
+function relFillDropdowns(){
+  var catSel = document.getElementById('rel-cat');
+  var projSel = document.getElementById('rel-proj');
+  var bancoSel = document.getElementById('rel-banco');
+  if(!catSel) return;
+  catSel.innerHTML = '<option value="">Todas</option>';
+  (FS.refs.cats||[]).forEach(function(c){ catSel.innerHTML += '<option value="'+c.id+'">'+c.nome+'</option>'; });
+  projSel.innerHTML = '<option value="">Todos</option>';
+  (FS.refs.projetos||[]).forEach(function(p){ projSel.innerHTML += '<option value="'+p.id+'">'+p.nome+'</option>'; });
+  bancoSel.innerHTML = '<option value="">Todas</option>';
+  (FS.refs.bancarias||[]).forEach(function(b){ bancoSel.innerHTML += '<option value="'+b.id+'">'+b.nome+'</option>'; });
+  relSetTipo('cp');
+}
+
+async function relLoad(){
+  if(!sb){ toast('❌','Supabase não conectado','error'); return; }
+  var cfg = REL_TIPOS[relTipo];
+  if(!cfg) return;
+  document.getElementById('rel-loading').style.display='inline';
+  try {
+    var q = sb.from(cfg.table).select('*, pessoas(cpf_cnpj)');
+    var de  = document.getElementById('rel-de').value;
+    var ate = document.getElementById('rel-ate').value;
+    var busca = (document.getElementById('rel-busca').value||'').trim();
+    var cat   = document.getElementById('rel-cat').value;
+    var proj  = document.getElementById('rel-proj').value;
+    var banco = document.getElementById('rel-banco').value;
+    var status= document.getElementById('rel-status').value;
+    var vmin  = document.getElementById('rel-vmin').value;
+    var vmax  = document.getElementById('rel-vmax').value;
+
+    if(de)  q = q.gte(cfg.dateField, de);
+    if(ate) q = q.lte(cfg.dateField, ate);
+    if(status) q = q.eq('status', status);
+    if(cat)    q = q.eq('categoria_id', cat);
+    if(proj)   q = q.eq('projeto_id', proj);
+    if(banco)  q = q.eq('conta_bancaria_id', banco);
+    if(vmin)   q = q.gte('valor', parseFloat(vmin));
+    if(vmax)   q = q.lte('valor', parseFloat(vmax));
+    q = q.order(cfg.dateField, {ascending:true});
+
+    var res = await q;
+    if(res.error) throw res.error;
+    var data = res.data || [];
+
+    // Apply text search client-side
+    if(busca){
+      var bl = busca.toLowerCase();
+      data = data.filter(function(r){
+        return (r.descricao||'').toLowerCase().includes(bl)
+          || (r.pessoa_nome||'').toLowerCase().includes(bl)
+          || (r.observacoes||'').toLowerCase().includes(bl)
+          || (r.nota_fiscal||'').toLowerCase().includes(bl)
+          || ((r.pessoas && r.pessoas.cpf_cnpj)||'').toLowerCase().includes(bl);
+      });
+    }
+
+    relData = data;
+    relRender();
+    document.getElementById('rel-btn-csv').style.display='inline-flex';
+    document.getElementById('rel-btn-pdf').style.display='inline-flex';
+  } catch(e){
+    toast('❌','Erro ao carregar: '+e.message,'error');
+  } finally {
+    document.getElementById('rel-loading').style.display='none';
+  }
+}
+
+function relRender(){
+  var wrap = document.getElementById('rel-results-wrap');
+  wrap.style.display='block';
+  var isCp = relTipo.startsWith('cp');
+  var total = relData.reduce(function(s,r){ return s + (parseFloat(r.valor)||0); }, 0);
+  document.getElementById('rel-resumo-qtd').textContent = relData.length + ' registro(s)';
+  document.getElementById('rel-resumo-total').textContent = 'Total: ' + fmtBRL(total);
+
+  // Headers
+  var cols = isCp
+    ? ['Fornecedor','CPF/CNPJ','Descrição','Categoria','Projeto','Banco','Valor','Vencimento','Data Pgto','Valor Pago','Status','NF','Observação']
+    : ['Cliente','CPF/CNPJ','Descrição','Categoria','Projeto','Banco','Valor','Vencimento','Data Receb.','Valor Recebido','Status','Observação'];
+  document.getElementById('rel-thead').innerHTML = '<tr>'+cols.map(function(c){
+    return '<th>'+c+'</th>';
+  }).join('')+(isCp ? '<th style="text-align:center">Recibo</th>' : '')+'</tr>';
+
+  if(!relData.length){
+    document.getElementById('rel-tbody').innerHTML = '<tr><td colspan="'+(cols.length+1)+'"><div class="rel-empty">Nenhum registro encontrado com os filtros selecionados.</div></td></tr>';
+    return;
+  }
+
+  document.getElementById('rel-tbody').innerHTML = relData.map(function(r){
+    var cnpj = (r.pessoas && r.pessoas.cpf_cnpj) ? r.pessoas.cpf_cnpj : '—';
+    var cells;
+    if(isCp){
+      cells = [
+        r.pessoa_nome||'—', cnpj, r.descricao||'—', r.categoria_nome||'—',
+        r.projeto_nome||'—', r.conta_bancaria_nome||'—',
+        fmtBRL(r.valor), fmtDateBR(r.vencimento),
+        fmtDateBR(r.data_pagamento), r.valor_pago ? fmtBRL(r.valor_pago) : '—',
+        r.status||'—', r.nota_fiscal||'—', r.observacoes||'—'
+      ];
+    } else {
+      cells = [
+        r.pessoa_nome||'—', cnpj, r.descricao||'—', r.categoria_nome||'—',
+        r.projeto_nome||'—', r.conta_bancaria_nome||'—',
+        fmtBRL(r.valor), fmtDateBR(r.vencimento),
+        fmtDateBR(r.data_recebimento), r.valor_recebido ? fmtBRL(r.valor_recebido) : '—',
+        r.status||'—', r.observacoes||'—'
+      ];
+    }
+    var tds = cells.map(function(v,i){
+      var align = (i===6||i===9) ? ' style="text-align:right;font-family:monospace"' : '';
+      return '<td'+align+'>'+v+'</td>';
+    }).join('');
+    var reciboBtn = (isCp && r.status==='pago')
+      ? '<td style="text-align:center"><button class="btn-tbl primary" onclick="gerarRecibo(''+r.id+'')">🧾 Recibo</button></td>'
+      : (isCp ? '<td></td>' : '');
+    return '<tr>'+tds+reciboBtn+'</tr>';
+  }).join('');
+}
+
+/* ── EXPORT CSV ── */
+function relExportCSV(){
+  if(!relData.length){ toast('⚠️','Gere o relatório primeiro','warning'); return; }
+  var isCp = relTipo.startsWith('cp');
+  var cfg = REL_TIPOS[relTipo];
+  var BOM = '\uFEFF';
+  var headers = isCp
+    ? 'Fornecedor;CPF/CNPJ;Descrição;Categoria;Projeto;Banco;Valor;Vencimento;Data Pagamento;Valor Pago;Status;Nota Fiscal;Observação'
+    : 'Cliente;CPF/CNPJ;Descrição;Categoria;Projeto;Banco;Valor;Vencimento;Data Recebimento;Valor Recebido;Status;Observação';
+  var rows = relData.map(function(r){
+    var cnpj = (r.pessoas && r.pessoas.cpf_cnpj) ? r.pessoas.cpf_cnpj : '';
+    var cells = isCp
+      ? [r.pessoa_nome, cnpj, r.descricao, r.categoria_nome, r.projeto_nome, r.conta_bancaria_nome,
+         (r.valor||0).toFixed(2).replace('.',','), r.vencimento||'', r.data_pagamento||'',
+         r.valor_pago ? (r.valor_pago).toFixed(2).replace('.',',') : '',
+         r.status, r.nota_fiscal, r.observacoes]
+      : [r.pessoa_nome, cnpj, r.descricao, r.categoria_nome, r.projeto_nome, r.conta_bancaria_nome,
+         (r.valor||0).toFixed(2).replace('.',','), r.vencimento||'', r.data_recebimento||'',
+         r.valor_recebido ? (r.valor_recebido).toFixed(2).replace('.',',') : '',
+         r.status, r.observacoes];
+    return cells.map(function(v){ return '"'+(v||'').toString().replace(/"/g,'""')+'"'; }).join(';');
+  });
+  var csv = BOM + headers + '\n' + rows.join('\n');
+  var blob = new Blob([csv], {type:'text/csv;charset=utf-8;'});
+  var url = URL.createObjectURL(blob);
+  var a = document.createElement('a');
+  a.href = url; a.download = cfg.label.replace(/ /g,'_')+'_'+new Date().toISOString().slice(0,10)+'.csv';
+  document.body.appendChild(a); a.click(); document.body.removeChild(a);
+  URL.revokeObjectURL(url);
+  toast('✅','Arquivo gerado!','success');
+}
+
+/* ── EXPORT PDF ── */
+function relExportPDF(){
+  if(!relData.length){ toast('⚠️','Gere o relatório primeiro','warning'); return; }
+  var cfg = REL_TIPOS[relTipo];
+  var isCp = relTipo.startsWith('cp');
+  var hoje = new Date().toLocaleDateString('pt-BR');
+  var total = relData.reduce(function(s,r){ return s + (parseFloat(r.valor)||0); }, 0);
+  var cols = isCp
+    ? ['Fornecedor','CPF/CNPJ','Descrição','Categoria','Projeto','Valor','Vencimento','Status']
+    : ['Cliente','CPF/CNPJ','Descrição','Categoria','Projeto','Valor','Vencimento','Status'];
+  var rows = relData.map(function(r){
+    var cnpj = (r.pessoas && r.pessoas.cpf_cnpj) ? r.pessoas.cpf_cnpj : '—';
+    var vals = isCp
+      ? [r.pessoa_nome||'—', cnpj, r.descricao||'—', r.categoria_nome||'—', r.projeto_nome||'—', fmtBRL(r.valor), fmtDateBR(r.vencimento), r.status||'—']
+      : [r.pessoa_nome||'—', cnpj, r.descricao||'—', r.categoria_nome||'—', r.projeto_nome||'—', fmtBRL(r.valor), fmtDateBR(r.vencimento), r.status||'—'];
+    return '<tr>'+vals.map(function(v,i){ return '<td style="'+(i===5?'text-align:right':'')+'">'+(v||'—')+'</td>'; }).join('')+'</tr>';
+  }).join('');
+
+  var win = window.open('','_blank','width=1200,height=800');
+  win.document.write('<!DOCTYPE html><html><head><meta charset="UTF-8"><title>'+cfg.label+'</title><style>'
+    +'body{font-family:Arial,sans-serif;font-size:12px;margin:0;padding:24px;color:#1a1d2e}'
+    +'h1{font-size:18px;margin:0 0 4px;color:#1a1d2e}p.sub{font-size:11px;color:#6b7280;margin:0 0 16px}'
+    +'.hdr{display:flex;justify-content:space-between;align-items:flex-start;border-bottom:3px solid #F47920;padding-bottom:12px;margin-bottom:16px}'
+    +'.co{font-size:16px;font-weight:800;color:#1a1d2e}.co span{display:block;font-size:10px;color:#6b7280;font-weight:400;letter-spacing:.1em;text-transform:uppercase}'
+    +'table{width:100%;border-collapse:collapse;margin-top:8px}'
+    +'thead th{background:#1a1d2e;color:#fff;padding:8px 10px;font-size:11px;text-align:left;text-transform:uppercase;letter-spacing:.04em}'
+    +'tbody td{padding:7px 10px;border-bottom:1px solid #e5e7eb}'
+    +'tbody tr:nth-child(even){background:#f9fafb}'
+    +'.total-row td{font-weight:800;border-top:2px solid #1a1d2e;background:#fff8f0}'
+    +'.footer{margin-top:24px;font-size:10px;color:#9ca3af;text-align:center}'
+    +'@media print{@page{margin:15mm}}'
+    +'</style></head><body>'
+    +'<div class="hdr">'
+    +'<div class="co">DIFERENCIAL <span>IMÓVEIS</span></div>'
+    +'<div><h1>'+cfg.label+'</h1><p class="sub">Gerado em '+hoje+' &nbsp;|&nbsp; '+relData.length+' registro(s)</p></div>'
+    +'</div>'
+    +'<table><thead><tr>'+cols.map(function(c){ return '<th>'+c+'</th>'; }).join('')+'</tr></thead>'
+    +'<tbody>'+rows
+    +'<tr class="total-row"><td colspan="5" style="text-align:right">TOTAL</td><td style="text-align:right">'+fmtBRL(total)+'</td><td colspan="2"></td></tr>'
+    +'</tbody></table>'
+    +'<div class="footer">Diferencial Imóveis &mdash; Sistema Financeiro &mdash; '+hoje+'</div>'
+    +'</body></html>');
+  win.document.close();
+  setTimeout(function(){ win.print(); }, 600);
+}
+
+/* ── GERAR RECIBO ── */
+async function gerarRecibo(id){
+  try {
+    var res = await sb.from('contas_pagar').select('*, pessoas(nome,cpf_cnpj)').eq('id',id).single();
+    if(res.error) throw res.error;
+    var r = res.data;
+    var pessoa = r.pessoas || {};
+    var nomeFor = r.pessoa_nome || pessoa.nome || '—';
+    var cnpj    = pessoa.cpf_cnpj || '—';
+    var valor   = parseFloat(r.valor_pago || r.valor) || 0;
+    var valorExt= numExtenso(valor);
+    var dataPgto= fmtDateBR(r.data_pagamento || new Date().toISOString().slice(0,10));
+    var hoje    = new Date().toLocaleDateString('pt-BR',{day:'2-digit',month:'long',year:'numeric'});
+    var numRecibo= id.slice(-8).toUpperCase();
+
+    var win = window.open('','_blank','width=820,height:700');
+    win.document.write('<!DOCTYPE html><html><head><meta charset="UTF-8"><title>Recibo</title><style>'
+      +'*{margin:0;padding:0;box-sizing:border-box}'
+      +'body{font-family:"Arial",sans-serif;background:#f3f4f6;display:flex;justify-content:center;padding:40px 20px}'
+      +'.wrap{background:#fff;border:2px solid #1a1d2e;border-radius:4px;padding:40px;width:680px;max-width:100%}'
+      +'.hdr{text-align:center;border-bottom:3px solid #F47920;padding-bottom:20px;margin-bottom:24px}'
+      +'.co-name{font-size:22px;font-weight:800;color:#1a1d2e;letter-spacing:-.3px}'
+      +'.co-sub{font-size:10px;color:#6b7280;text-transform:uppercase;letter-spacing:.2em;margin-top:2px}'
+      +'.title{font-size:36px;font-weight:800;color:#F47920;letter-spacing:3px;margin-top:16px}'
+      +'.num{font-size:11px;color:#6b7280;margin-top:6px}'
+      +'.body{margin-bottom:28px;line-height:1.9;font-size:14px;color:#374151}'
+      +'.body strong{color:#1a1d2e}'
+      +'.valor-box{display:inline-block;background:#f0f9ff;border:1px solid #bae6fd;border-radius:8px;padding:10px 20px;margin:12px 0;font-size:22px;font-weight:800;color:#1a1d2e}'
+      +'.footer{border-top:1px solid #e5e7eb;padding-top:20px;margin-top:20px}'
+      +'.data{font-size:11px;color:#6b7280;margin-bottom:40px}'
+      +'.assinatura{border-top:1px solid #1a1d2e;width:280px;padding-top:6px;font-size:12px;color:#374151}'
+      +'.btn-print{display:block;margin:32px auto 0;background:#F47920;color:#fff;border:none;border-radius:8px;padding:12px 32px;font-size:14px;font-weight:700;cursor:pointer;font-family:Arial}'
+      +'@media print{.btn-print{display:none}body{background:#fff;padding:0}.wrap{border:none}}'
+      +'</style></head><body><div class="wrap">'
+      +'<div class="hdr"><div class="co-name">DIFERENCIAL IMÓVEIS</div>'
+      +'<div class="co-sub">Soluções em Imóveis</div>'
+      +'<div class="title">RECIBO</div>'
+      +'<div class="num">Nº '+numRecibo+'</div></div>'
+      +'<div class="body">'
+      +'<p>Eu, <strong>'+nomeFor+'</strong>'+(cnpj&&cnpj!=='—'?', inscrito(a) no CPF/CNPJ <strong>'+cnpj+'</strong>':'')
+      +', declaro ter recebido de <strong>DIFERENCIAL IMÓVEIS</strong></p>'
+      +'<p style="margin-top:8px">a importância de:</p>'
+      +'<div class="valor-box">'+fmtBRL(valor)+'</div>'
+      +'<p style="font-size:12px;color:#6b7280;margin-top:4px">('+valorExt+')</p>'
+      +'<p style="margin-top:12px">referente a: <strong>'+(r.descricao||'—')+'</strong></p>'
+      +(r.categoria_nome?'<p>categoria: <strong>'+r.categoria_nome+'</strong></p>':'')
+      +(r.observacoes?'<p>observação: '+r.observacoes+'</p>':'')
+      +'<p style="margin-top:12px">Pagamento efetuado em: <strong>'+dataPgto+'</strong></p>'
+      +'</div>'
+      +'<div class="footer">'
+      +'<div class="data">'+hoje+'</div>'
+      +'<div class="assinatura">'+nomeFor+'<br><span style="font-size:10px;color:#6b7280">'+(cnpj!=='—'?cnpj:'Assinatura / Carimbo')+'</span></div>'
+      +'</div>'
+      +'<button class="btn-print" onclick="window.print()">🖨️ Imprimir / Salvar PDF</button>'
+      +'</div></body></html>');
+    win.document.close();
+  } catch(e){
+    toast('❌','Erro ao gerar recibo: '+e.message,'error');
+  }
+}
+
+/* ── NÚMERO POR EXTENSO ── */
+function numExtenso(n){
+  var u=['','um','dois','três','quatro','cinco','seis','sete','oito','nove',
+         'dez','onze','doze','treze','quatorze','quinze','dezesseis','dezessete','dezoito','dezenove'];
+  var d=['','','vinte','trinta','quarenta','cinquenta','sessenta','setenta','oitenta','noventa'];
+  var c=['','cem','duzentos','trezentos','quatrocentos','quinhentos','seiscentos','setecentos','oitocentos','novecentos'];
+  function group(x){
+    if(x===100) return 'cem';
+    var r='';
+    var h=Math.floor(x/100); var t=Math.floor((x%100)/10); var un=x%10;
+    if(h) r+=c[h];
+    if(x%100===0) return r;
+    if(h) r+=' e ';
+    if(Math.floor(x%100)<=19) r+=u[x%100];
+    else{ r+=d[t]; if(un) r+=' e '+u[un]; }
+    return r;
+  }
+  var reais=Math.floor(n);
+  var cents=Math.round((n-reais)*100);
+  var partes=[];
+  if(reais===0) partes.push('zero');
+  if(reais>=1000000){ partes.push(group(Math.floor(reais/1000000))+' '+(Math.floor(reais/1000000)===1?'milhão':'milhões')); reais%=1000000; }
+  if(reais>=1000){ partes.push(group(Math.floor(reais/1000))+' '+(Math.floor(reais/1000)===1?'mil':'mil')); reais%=1000; }
+  if(reais>0) partes.push(group(reais));
+  var result=partes.join(', ')+' real'+(Math.floor(n)!==1?'is':'');
+  if(cents) result+=' e '+group(cents)+' centavo'+(cents!==1?'s':'');
+  return result.charAt(0).toUpperCase()+result.slice(1);
+}
+
+function relGoTab(){
+  relFillDropdowns();
+}
 
 </script>
 <div id="cfg-modal">
