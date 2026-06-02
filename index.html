@@ -3422,7 +3422,7 @@ function relRender(){
       return '<td'+align+'>'+v+'</td>';
     }).join('');
     var reciboBtn = (isCp && r.status==='pago')
-      ? '<td style="text-align:center"><button class="btn-tbl primary" onclick="gerarRecibo(''+r.id+'')">🧾 Recibo</button></td>'
+      ? '<td style="text-align:center"><button class="btn-tbl primary" onclick="gerarRecibo(\''+r.id+'\')">&#x1F9FE; Recibo</button></td>'
       : (isCp ? '<td></td>' : '');
     return '<tr>'+tds+reciboBtn+'</tr>';
   }).join('');
