@@ -7,6 +7,7 @@
 <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@400;600;700&family=DM+Sans:wght@300;400;500;600&family=DM+Mono:wght@400;500&display=swap" rel="stylesheet">
 <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.0/dist/chart.umd.min.js"></script>
 <script src="https://cdn.jsdelivr.net/npm/jszip@3.10.1/dist/jszip.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/dist/umd/supabase.min.js"></script>
 <style>
 :root {
   /* Identidade visual Diferencial Imóveis */
@@ -302,6 +303,175 @@ input[type="checkbox"]{width:14px;height:14px;accent-color:var(--green-accent);c
 .cfg-user-row-del{background:none;border:1px solid #dadce0;border-radius:7px;color:#c0392b;font-size:12px;padding:5px 11px;cursor:pointer;font-family:'DM Sans',sans-serif;transition:all .2s}
 .cfg-user-row-del:hover{background:#c0392b;color:#fff;border-color:#c0392b}
 .cfg-empty-msg{font-size:13px;color:#80868b;padding:4px 0}
+
+/* ══════════════════════════════════════════════════════════
+   MÓDULO FINANCEIRO — CSS COMPLETO
+══════════════════════════════════════════════════════════ */
+
+/* ── PAGE HEADER ── */
+.fin-page-hdr{display:flex;align-items:center;justify-content:space-between;margin-bottom:24px;flex-wrap:wrap;gap:12px}
+.fin-page-title{font-family:'Playfair Display',serif;font-size:22px;color:var(--navy);font-weight:700}
+.fin-page-sub{font-size:12px;color:var(--text-muted);margin-top:3px}
+.fin-page-actions{display:flex;align-items:center;gap:8px;flex-wrap:wrap}
+.btn-fin-new{display:flex;align-items:center;gap:6px;background:linear-gradient(135deg,var(--brand),var(--brand-dark));border:none;border-radius:8px;padding:9px 18px;color:#fff;font-family:'DM Sans',sans-serif;font-size:13px;font-weight:600;cursor:pointer;transition:all .2s;box-shadow:0 4px 12px rgba(244,121,32,.3)}
+.btn-fin-new:hover{transform:translateY(-1px);box-shadow:0 6px 18px rgba(244,121,32,.4)}
+.btn-fin-refresh{display:flex;align-items:center;gap:6px;background:var(--surface2);border:1px solid var(--border2);border-radius:8px;padding:9px 14px;color:var(--text-muted);font-family:'DM Sans',sans-serif;font-size:12px;cursor:pointer;transition:all .2s}
+.btn-fin-refresh:hover{background:var(--border2);color:var(--text)}
+.cad-open-btn{display:flex;align-items:center;gap:6px;background:rgba(46,123,180,.1);border:1px solid rgba(46,123,180,.25);border-radius:8px;padding:9px 14px;color:#1e6fa0;font-family:'DM Sans',sans-serif;font-size:12px;cursor:pointer;transition:all .2s;font-weight:600}
+.cad-open-btn:hover{background:rgba(46,123,180,.18)}
+
+/* ── KPI CARDS ── */
+.fin-kpi-grid{display:grid;grid-template-columns:repeat(4,1fr);gap:14px;margin-bottom:24px}
+.fin-kpi{background:var(--surface);border:1px solid var(--border2);border-radius:var(--radius-lg);padding:20px 22px;position:relative;overflow:hidden;box-shadow:0 1px 4px rgba(0,0,0,.05);transition:transform .2s,box-shadow .2s}
+.fin-kpi:hover{transform:translateY(-2px);box-shadow:0 4px 16px rgba(0,0,0,.1)}
+.fin-kpi::before{content:'';position:absolute;top:0;left:0;right:0;height:3px;background:var(--fkc,var(--brand));border-radius:var(--radius-lg) var(--radius-lg) 0 0}
+.fin-kpi.fk1{--fkc:var(--brand)}.fin-kpi.fk2{--fkc:#2e7bb4}.fin-kpi.fk3{--fkc:#c0392b}.fin-kpi.fk4{--fkc:var(--gold)}
+.fin-kpi-lbl{font-size:10px;text-transform:uppercase;letter-spacing:.1em;color:var(--text-muted);margin-bottom:8px;font-weight:600}
+.fin-kpi-val{font-family:'Playfair Display',serif;font-size:20px;font-weight:700;line-height:1.1;margin-bottom:4px;color:var(--navy)}
+.fin-kpi-sub{font-size:11px;color:var(--text-dim)}
+
+/* ── FILTER BAR ── */
+.fin-filter-bar{display:flex;align-items:center;gap:10px;margin-bottom:18px;flex-wrap:wrap;background:var(--surface);border:1px solid var(--border2);border-radius:10px;padding:12px 16px}
+.fin-filter-bar label{font-size:10px;font-weight:700;text-transform:uppercase;letter-spacing:.08em;color:var(--text-muted);white-space:nowrap}
+.fin-select{background:var(--surface2);border:1px solid var(--border2);border-radius:7px;padding:6px 11px;font-size:12px;color:var(--text);font-family:'DM Sans',sans-serif;cursor:pointer;height:34px}
+.fin-input-search{background:var(--surface2);border:1px solid var(--border2);border-radius:7px;padding:6px 11px;font-size:12px;color:var(--text);font-family:'DM Sans',sans-serif;width:180px;height:34px}
+.fin-input-search:focus,.fin-select:focus{outline:none;border-color:var(--brand)}
+.fin-date-range{display:flex;align-items:center;gap:6px}
+.fin-date-input{background:var(--surface2);border:1px solid var(--border2);border-radius:7px;padding:5px 9px;font-size:12px;color:var(--text);font-family:'DM Sans',monospace;height:34px;width:128px}
+.fin-date-input:focus{outline:none;border-color:var(--brand)}
+.fin-filter-sep{width:1px;height:22px;background:var(--border2);margin:0 4px}
+
+/* ── TABLE ── */
+.fin-table-card{background:var(--surface);border:1px solid var(--border2);border-radius:var(--radius-lg);overflow:hidden;box-shadow:0 1px 4px rgba(0,0,0,.05);margin-bottom:24px}
+.fin-table-hdr{padding:14px 18px;display:flex;align-items:center;justify-content:space-between;border-bottom:1px solid var(--border)}
+.fin-table-title{font-weight:600;font-size:13px;color:var(--text)}
+.fin-table-count{font-size:11px;color:var(--text-dim)}
+.fin-table-wrap{overflow-x:auto}
+.fin-table{width:100%;border-collapse:collapse;font-size:12.5px}
+.fin-table thead tr{background:linear-gradient(90deg,var(--navy),var(--navy2))}
+.fin-table th{padding:10px 13px;text-align:left;font-size:10px;font-weight:600;letter-spacing:.1em;text-transform:uppercase;color:rgba(255,255,255,.75);white-space:nowrap;cursor:pointer;user-select:none}
+.fin-table th:hover{color:var(--gold2)}
+.fin-table td{padding:10px 13px;border-bottom:1px solid var(--border);white-space:nowrap;vertical-align:middle}
+.fin-table tbody tr:hover td{background:#fafbff}
+.fin-table tbody tr:last-child td{border-bottom:none}
+.fin-table .col-actions{text-align:right;width:90px}
+.fin-empty{text-align:center;padding:56px 24px;color:var(--text-dim)}
+.fin-empty .icon{font-size:42px;margin-bottom:12px}
+.fin-empty p{font-size:13px}
+
+/* ── ACTION BUTTONS ── */
+.btn-tbl{background:none;border:1px solid var(--border2);border-radius:6px;padding:4px 9px;font-size:11px;cursor:pointer;font-family:'DM Sans',sans-serif;color:var(--text-muted);transition:all .15s;display:inline-flex;align-items:center;gap:4px}
+.btn-tbl:hover{background:var(--surface2);border-color:var(--border2);color:var(--text)}
+.btn-tbl.success{border-color:rgba(45,160,55,.3);color:#1a8a2a}.btn-tbl.success:hover{background:rgba(45,160,55,.08)}
+.btn-tbl.danger{border-color:rgba(192,57,43,.3);color:var(--red)}.btn-tbl.danger:hover{background:var(--red-bg)}
+.btn-tbl.primary{border-color:rgba(244,121,32,.35);color:var(--brand)}.btn-tbl.primary:hover{background:var(--brand-bg)}
+
+/* ── STATUS BADGES ── */
+.sbadge{display:inline-flex;align-items:center;gap:4px;border-radius:20px;padding:3px 10px;font-size:10px;font-weight:700;text-transform:uppercase;letter-spacing:.04em;white-space:nowrap}
+.sbadge::before{content:'';width:5px;height:5px;border-radius:50%;background:currentColor;flex-shrink:0}
+.sbadge.pendente{background:rgba(180,130,0,.1);color:#a07800;border:1px solid rgba(180,130,0,.2)}
+.sbadge.pago{background:rgba(34,139,34,.1);color:#1a7a1a;border:1px solid rgba(34,139,34,.2)}
+.sbadge.recebido{background:rgba(34,139,34,.1);color:#1a7a1a;border:1px solid rgba(34,139,34,.2)}
+.sbadge.vencido{background:rgba(192,57,43,.1);color:var(--red);border:1px solid rgba(192,57,43,.2)}
+.sbadge.atrasado{background:rgba(192,57,43,.1);color:var(--red);border:1px solid rgba(192,57,43,.2)}
+.sbadge.cancelado{background:rgba(100,100,100,.1);color:#666;border:1px solid rgba(100,100,100,.2)}
+
+/* ── PROJECT BADGES ── */
+.pbadge{display:inline-flex;align-items:center;border-radius:6px;padding:2px 8px;font-size:10px;font-weight:700;white-space:nowrap}
+.pbadge.venda{background:rgba(46,123,180,.12);color:#1e6fa0;border:1px solid rgba(46,123,180,.2)}
+.pbadge.locacao{background:rgba(130,50,180,.12);color:#7a28b0;border:1px solid rgba(130,50,180,.2)}
+.pbadge.compartilhado{background:rgba(180,130,0,.1);color:#a07800;border:1px solid rgba(180,130,0,.2)}
+.pbadge.geral{background:var(--surface2);color:var(--text-muted);border:1px solid var(--border2)}
+
+/* ── SALDO CARDS ── */
+.saldo-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(280px,1fr));gap:16px;margin-bottom:24px}
+.saldo-card{background:var(--surface);border:1px solid var(--border2);border-radius:var(--radius-lg);padding:22px 24px;box-shadow:0 1px 4px rgba(0,0,0,.05);transition:transform .2s,box-shadow .2s;position:relative;overflow:hidden}
+.saldo-card:hover{transform:translateY(-2px);box-shadow:0 4px 14px rgba(0,0,0,.1)}
+.saldo-card::before{content:'';position:absolute;top:0;left:0;right:0;height:3px;background:linear-gradient(90deg,var(--brand),var(--gold))}
+.saldo-card-bank{font-size:10px;font-weight:700;text-transform:uppercase;letter-spacing:.1em;color:var(--text-muted);margin-bottom:4px}
+.saldo-card-name{font-size:15px;font-weight:600;color:var(--navy);margin-bottom:14px}
+.saldo-card-amount{font-family:'Playfair Display',serif;font-size:26px;font-weight:700;margin-bottom:4px}
+.saldo-card-amount.positive{color:#1a7a1a}.saldo-card-amount.negative{color:var(--red)}.saldo-card-amount.zero{color:var(--text-muted)}
+.saldo-card-detail{display:flex;gap:16px;flex-wrap:wrap;margin-top:12px;padding-top:12px;border-top:1px solid var(--border)}
+.saldo-detail-item{display:flex;flex-direction:column;gap:2px}
+.saldo-detail-lbl{font-size:9px;font-weight:700;text-transform:uppercase;letter-spacing:.08em;color:var(--text-dim)}
+.saldo-detail-val{font-size:12px;font-weight:600;font-family:'DM Mono',monospace}
+.saldo-detail-val.green{color:#1a7a1a}.saldo-detail-val.red{color:var(--red)}
+
+/* ── CADASTROS PANEL ── */
+#cad-panel{position:fixed;top:0;right:0;width:480px;height:100vh;background:var(--surface);border-left:1px solid var(--border2);box-shadow:-8px 0 32px rgba(0,0,0,.12);z-index:500;display:flex;flex-direction:column;transform:translateX(100%);transition:transform .3s cubic-bezier(.4,0,.2,1)}
+#cad-panel.open{transform:translateX(0)}
+.cad-panel-hdr{background:linear-gradient(135deg,var(--navy),var(--navy2));padding:18px 22px;display:flex;align-items:center;justify-content:space-between;flex-shrink:0}
+.cad-panel-title{font-size:16px;font-weight:600;color:#fff}
+.cad-panel-close{background:rgba(255,255,255,.12);border:1px solid rgba(255,255,255,.2);border-radius:6px;width:30px;height:30px;cursor:pointer;color:#fff;font-size:14px;display:flex;align-items:center;justify-content:center;transition:background .15s}
+.cad-panel-close:hover{background:rgba(255,255,255,.22)}
+.cad-tabs{display:flex;border-bottom:1px solid var(--border);flex-shrink:0;background:var(--surface)}
+.cad-tab{flex:1;padding:12px 8px;font-size:12px;font-weight:600;color:var(--text-muted);cursor:pointer;background:none;border:none;border-bottom:2px solid transparent;transition:all .15s;font-family:'DM Sans',sans-serif;text-align:center}
+.cad-tab:hover{color:var(--text)}
+.cad-tab.active{color:var(--brand);border-bottom-color:var(--brand)}
+.cad-panel-body{flex:1;overflow-y:auto;padding:18px 20px;display:flex;flex-direction:column;gap:16px}
+.cad-section-pane{display:none}.cad-section-pane.active{display:block}
+.cad-inline-form{background:var(--surface2);border:1px solid var(--border2);border-radius:10px;padding:14px 16px;margin-bottom:14px}
+.cad-inline-form h4{font-size:11px;font-weight:700;text-transform:uppercase;letter-spacing:.08em;color:var(--text-muted);margin-bottom:10px}
+.cad-form-grid{display:grid;gap:8px}
+.cad-form-row{display:grid;grid-template-columns:1fr 1fr;gap:8px}
+.cad-form-row.three{grid-template-columns:1fr 1fr 1fr}
+.cad-field{display:flex;flex-direction:column;gap:4px}
+.cad-field label{font-size:10px;font-weight:600;text-transform:uppercase;letter-spacing:.07em;color:var(--text-muted)}
+.cad-field input,.cad-field select{background:var(--surface);border:1px solid var(--border2);border-radius:7px;padding:7px 10px;font-size:12px;color:var(--text);font-family:'DM Sans',sans-serif;width:100%}
+.cad-field input:focus,.cad-field select:focus{outline:none;border-color:var(--brand)}
+.cad-save-btn{background:linear-gradient(135deg,var(--brand),var(--brand-dark));border:none;border-radius:7px;padding:8px 18px;color:#fff;font-family:'DM Sans',sans-serif;font-size:12px;font-weight:600;cursor:pointer;transition:all .2s;margin-top:4px;align-self:flex-start}
+.cad-save-btn:hover{opacity:.9}
+.cad-list{display:flex;flex-direction:column;gap:6px}
+.cad-list-item{display:flex;align-items:center;justify-content:space-between;background:var(--surface);border:1px solid var(--border2);border-radius:8px;padding:10px 14px;font-size:12px}
+.cad-list-item-name{font-weight:600;color:var(--text)}
+.cad-list-item-sub{font-size:10px;color:var(--text-muted);margin-top:1px}
+.cad-list-item-del{background:none;border:1px solid var(--border2);border-radius:5px;padding:3px 8px;font-size:11px;color:var(--red);cursor:pointer;transition:all .15s;font-family:'DM Sans',sans-serif}
+.cad-list-item-del:hover{background:var(--red-bg);border-color:rgba(192,57,43,.3)}
+.cad-inactive{opacity:.5}
+.cad-overlay-bg{display:none;position:fixed;inset:0;background:rgba(0,0,0,.2);z-index:499}
+.cad-overlay-bg.open{display:block}
+
+/* ── FIN MODAL ── */
+#fin-modal{position:fixed;inset:0;z-index:600;background:rgba(26,29,46,.55);backdrop-filter:blur(5px);display:none;align-items:center;justify-content:center}
+#fin-modal.open{display:flex}
+.fin-modal-box{background:var(--surface);border:1px solid var(--border2);border-radius:var(--radius-lg);width:700px;max-width:96vw;max-height:90vh;overflow-y:auto;animation:up .25s ease;box-shadow:0 20px 60px rgba(0,0,0,.18)}
+.fin-modal-hdr{padding:22px 26px;border-bottom:1px solid var(--border);display:flex;align-items:flex-start;justify-content:space-between;position:sticky;top:0;background:var(--surface);z-index:1}
+.fin-modal-title{font-family:'Playfair Display',serif;font-size:19px;color:var(--navy)}
+.fin-modal-sub{font-size:12px;color:var(--text-muted);margin-top:3px}
+.fin-modal-close{background:var(--surface2);border:1px solid var(--border2);border-radius:6px;width:30px;height:30px;cursor:pointer;color:var(--text-muted);font-size:14px;display:flex;align-items:center;justify-content:center;flex-shrink:0}
+.fin-modal-close:hover{background:var(--border2)}
+.fin-modal-body{padding:24px 26px;display:flex;flex-direction:column;gap:16px}
+.fin-form-section{background:var(--surface2);border:1px solid var(--border2);border-radius:10px;padding:14px 16px}
+.fin-form-section-title{font-size:10px;font-weight:700;text-transform:uppercase;letter-spacing:.08em;color:var(--text-muted);margin-bottom:12px}
+.fin-form-grid{display:grid;gap:10px}
+.fin-form-row{display:grid;grid-template-columns:1fr 1fr;gap:10px}
+.fin-form-row.three{grid-template-columns:1fr 1fr 1fr}
+.fin-form-row.full{grid-template-columns:1fr}
+.fin-field{display:flex;flex-direction:column;gap:5px}
+.fin-field label{font-size:10px;font-weight:700;text-transform:uppercase;letter-spacing:.07em;color:var(--text-muted)}
+.fin-field label .req{color:var(--brand)}
+.fin-field input,.fin-field select,.fin-field textarea{background:var(--surface);border:1.5px solid var(--border2);border-radius:8px;padding:9px 12px;font-size:13px;color:var(--text);font-family:'DM Sans',sans-serif;width:100%;transition:border .2s}
+.fin-field textarea{resize:vertical;min-height:70px}
+.fin-field input:focus,.fin-field select:focus,.fin-field textarea:focus{outline:none;border-color:var(--brand);box-shadow:0 0 0 3px rgba(244,121,32,.1)}
+.fin-recorrencia-box{background:rgba(244,121,32,.05);border:1px solid rgba(244,121,32,.2);border-radius:10px;padding:14px 16px}
+.fin-recorrencia-box .fin-form-section-title{color:var(--brand)}
+.fin-modal-footer{padding:16px 26px;border-top:1px solid var(--border);display:flex;gap:10px;justify-content:flex-end;position:sticky;bottom:0;background:var(--surface)}
+.btn-fin-save{background:linear-gradient(135deg,var(--brand),var(--brand-dark));border:none;border-radius:8px;padding:10px 24px;color:#fff;font-family:'DM Sans',sans-serif;font-size:13px;font-weight:600;cursor:pointer;transition:all .2s;box-shadow:0 4px 12px rgba(244,121,32,.3);display:flex;align-items:center;gap:7px}
+.btn-fin-save:hover{transform:translateY(-1px)}
+.btn-fin-cancel{background:transparent;border:1px solid var(--border2);border-radius:8px;padding:10px 20px;color:var(--text-muted);font-family:'DM Sans',sans-serif;font-size:13px;cursor:pointer;transition:all .15s}
+.btn-fin-cancel:hover{border-color:var(--text-muted);color:var(--text)}
+
+/* ── PAGAMENTO INLINE ── */
+.pag-mini{background:var(--surface);border:1px solid var(--border2);border-radius:10px;padding:14px 16px;display:flex;flex-direction:column;gap:10px;box-shadow:0 4px 20px rgba(0,0,0,.12);min-width:240px}
+.pag-mini label{font-size:10px;font-weight:700;text-transform:uppercase;letter-spacing:.07em;color:var(--text-muted)}
+.pag-mini input{border:1.5px solid var(--border2);border-radius:7px;padding:8px 11px;font-size:13px;font-family:'DM Sans',monospace;color:var(--text);width:100%}
+.pag-mini input:focus{outline:none;border-color:var(--brand)}
+.pag-mini-btns{display:flex;gap:8px}
+
+@media(max-width:1100px){.fin-kpi-grid{grid-template-columns:repeat(2,1fr)}}
+@media(max-width:600px){.fin-kpi-grid{grid-template-columns:1fr}#cad-panel{width:100vw}}
+
 </style>
 </head>
 <body>
@@ -376,6 +546,9 @@ input[type="checkbox"]{width:14px;height:14px;accent-color:var(--green-accent);c
     <button class="nav-tab" onclick="goTab('relatorios')" id="tab-relatorios">
       <span class="ticon">📊</span> Relatórios <span class="nav-chip">em breve</span>
     </button>
+    <button class="nav-tab" onclick="goTab('cp')" id="tab-cp">💸 Contas a Pagar</button>
+    <button class="nav-tab" onclick="goTab('cr')" id="tab-cr">💰 Contas a Receber</button>
+    <button class="nav-tab" onclick="goTab('saldo')" id="tab-saldo">🏦 Saldo</button>
   </div>
 </nav>
 
@@ -617,6 +790,168 @@ input[type="checkbox"]{width:14px;height:14px;accent-color:var(--green-accent);c
     </div>
   </div>
 
+
+  <!-- ═══════════════════════════════════
+       PAGE: CONTAS A PAGAR
+  ═══════════════════════════════════ -->
+  <div id="page-cp" style="display:none">
+    <div class="fin-page-hdr">
+      <div>
+        <div class="fin-page-title">💸 Contas a Pagar</div>
+        <div class="fin-page-sub">Gestão de despesas e pagamentos</div>
+      </div>
+      <div class="fin-page-actions">
+        <button class="cad-open-btn" onclick="cadOpen('pessoas')">🗂️ Cadastros</button>
+        <button class="btn-fin-refresh" onclick="cpLoad()">🔄 Atualizar</button>
+        <button class="btn-fin-new" onclick="cpOpenNew()">+ Nova Conta</button>
+      </div>
+    </div>
+    <div class="fin-kpi-grid">
+      <div class="fin-kpi fk1"><div class="fin-kpi-lbl">📋 Total Pendente</div><div class="fin-kpi-val" id="cp-k1">—</div><div class="fin-kpi-sub">contas a pagar abertas</div></div>
+      <div class="fin-kpi fk2"><div class="fin-kpi-lbl">✅ Pago no Mês</div><div class="fin-kpi-val" id="cp-k2">—</div><div class="fin-kpi-sub">pagamentos do mês atual</div></div>
+      <div class="fin-kpi fk3"><div class="fin-kpi-lbl">⚠️ Vencidas</div><div class="fin-kpi-val" id="cp-k3">—</div><div class="fin-kpi-sub">em atraso</div></div>
+      <div class="fin-kpi fk4"><div class="fin-kpi-lbl">📅 Vence em 7 dias</div><div class="fin-kpi-val" id="cp-k4">—</div><div class="fin-kpi-sub">próximos vencimentos</div></div>
+    </div>
+    <div class="fin-filter-bar">
+      <label>Status</label>
+      <select class="fin-select" id="cp-f-status" onchange="cpLoad()">
+        <option value="">Todos</option>
+        <option value="pendente">Pendente</option>
+        <option value="pago">Pago</option>
+        <option value="vencido">Vencido</option>
+        <option value="cancelado">Cancelado</option>
+      </select>
+      <div class="fin-filter-sep"></div>
+      <label>Projeto</label>
+      <select class="fin-select" id="cp-f-proj" onchange="cpLoad()"><option value="">Todos</option></select>
+      <div class="fin-filter-sep"></div>
+      <label>Categoria</label>
+      <select class="fin-select" id="cp-f-cat" onchange="cpLoad()"><option value="">Todas</option></select>
+      <div class="fin-filter-sep"></div>
+      <label>Período</label>
+      <div class="fin-date-range">
+        <input type="date" class="fin-date-input" id="cp-f-de" onchange="cpLoad()">
+        <span style="color:var(--text-dim);font-size:12px">até</span>
+        <input type="date" class="fin-date-input" id="cp-f-ate" onchange="cpLoad()">
+      </div>
+      <div class="fin-filter-sep"></div>
+      <input type="text" class="fin-input-search" id="cp-f-search" placeholder="🔍 Buscar..." oninput="cpRender()">
+    </div>
+    <div class="fin-table-card">
+      <div class="fin-table-hdr">
+        <div class="fin-table-title">Lançamentos</div>
+        <div class="fin-table-count" id="cp-count"></div>
+      </div>
+      <div class="fin-table-wrap">
+        <table class="fin-table">
+          <thead><tr>
+            <th>Descrição</th>
+            <th>Fornecedor</th>
+            <th>Categoria</th>
+            <th>Projeto</th>
+            <th style="text-align:right">Valor</th>
+            <th>Vencimento</th>
+            <th>Status</th>
+            <th class="col-actions">Ações</th>
+          </tr></thead>
+          <tbody id="cp-tbody"></tbody>
+        </table>
+      </div>
+    </div>
+  </div><!-- /page-cp -->
+
+  <!-- ═══════════════════════════════════
+       PAGE: CONTAS A RECEBER
+  ═══════════════════════════════════ -->
+  <div id="page-cr" style="display:none">
+    <div class="fin-page-hdr">
+      <div>
+        <div class="fin-page-title">💰 Contas a Receber</div>
+        <div class="fin-page-sub">Gestão de receitas e recebimentos</div>
+      </div>
+      <div class="fin-page-actions">
+        <button class="cad-open-btn" onclick="cadOpen('pessoas')">🗂️ Cadastros</button>
+        <button class="btn-fin-refresh" onclick="crLoad()">🔄 Atualizar</button>
+        <button class="btn-fin-new" onclick="crOpenNew()">+ Nova Conta</button>
+      </div>
+    </div>
+    <div class="fin-kpi-grid">
+      <div class="fin-kpi fk1"><div class="fin-kpi-lbl">📋 Total Pendente</div><div class="fin-kpi-val" id="cr-k1">—</div><div class="fin-kpi-sub">contas a receber abertas</div></div>
+      <div class="fin-kpi fk2"><div class="fin-kpi-lbl">✅ Recebido no Mês</div><div class="fin-kpi-val" id="cr-k2">—</div><div class="fin-kpi-sub">recebimentos do mês atual</div></div>
+      <div class="fin-kpi fk3"><div class="fin-kpi-lbl">⚠️ Atrasadas</div><div class="fin-kpi-val" id="cr-k3">—</div><div class="fin-kpi-sub">em atraso</div></div>
+      <div class="fin-kpi fk4"><div class="fin-kpi-lbl">📅 Vence em 7 dias</div><div class="fin-kpi-val" id="cr-k4">—</div><div class="fin-kpi-sub">próximos vencimentos</div></div>
+    </div>
+    <div class="fin-filter-bar">
+      <label>Status</label>
+      <select class="fin-select" id="cr-f-status" onchange="crLoad()">
+        <option value="">Todos</option>
+        <option value="pendente">Pendente</option>
+        <option value="recebido">Recebido</option>
+        <option value="atrasado">Atrasado</option>
+        <option value="cancelado">Cancelado</option>
+      </select>
+      <div class="fin-filter-sep"></div>
+      <label>Projeto</label>
+      <select class="fin-select" id="cr-f-proj" onchange="crLoad()"><option value="">Todos</option></select>
+      <div class="fin-filter-sep"></div>
+      <label>Categoria</label>
+      <select class="fin-select" id="cr-f-cat" onchange="crLoad()"><option value="">Todas</option></select>
+      <div class="fin-filter-sep"></div>
+      <label>Período</label>
+      <div class="fin-date-range">
+        <input type="date" class="fin-date-input" id="cr-f-de" onchange="crLoad()">
+        <span style="color:var(--text-dim);font-size:12px">até</span>
+        <input type="date" class="fin-date-input" id="cr-f-ate" onchange="crLoad()">
+      </div>
+      <div class="fin-filter-sep"></div>
+      <input type="text" class="fin-input-search" id="cr-f-search" placeholder="🔍 Buscar..." oninput="crRender()">
+    </div>
+    <div class="fin-table-card">
+      <div class="fin-table-hdr">
+        <div class="fin-table-title">Lançamentos</div>
+        <div class="fin-table-count" id="cr-count"></div>
+      </div>
+      <div class="fin-table-wrap">
+        <table class="fin-table">
+          <thead><tr>
+            <th>Descrição</th>
+            <th>Cliente</th>
+            <th>Categoria</th>
+            <th>Projeto</th>
+            <th style="text-align:right">Valor</th>
+            <th>Vencimento</th>
+            <th>Status</th>
+            <th class="col-actions">Ações</th>
+          </tr></thead>
+          <tbody id="cr-tbody"></tbody>
+        </table>
+      </div>
+    </div>
+  </div><!-- /page-cr -->
+
+  <!-- ═══════════════════════════════════
+       PAGE: SALDO BANCÁRIO
+  ═══════════════════════════════════ -->
+  <div id="page-saldo" style="display:none">
+    <div class="fin-page-hdr">
+      <div>
+        <div class="fin-page-title">🏦 Saldo Bancário</div>
+        <div class="fin-page-sub">Posição atual por conta</div>
+      </div>
+      <div class="fin-page-actions">
+        <button class="cad-open-btn" onclick="cadOpen('bancarias')">⚙️ Contas Bancárias</button>
+        <button class="btn-fin-refresh" onclick="saldoLoad()">🔄 Atualizar</button>
+      </div>
+    </div>
+    <div class="fin-kpi-grid">
+      <div class="fin-kpi fk1"><div class="fin-kpi-lbl">🏦 Saldo Consolidado</div><div class="fin-kpi-val" id="sl-k1">—</div><div class="fin-kpi-sub">todas as contas ativas</div></div>
+      <div class="fin-kpi fk2"><div class="fin-kpi-lbl">📥 Entradas no Mês</div><div class="fin-kpi-val" id="sl-k2">—</div><div class="fin-kpi-sub">recebimentos realizados</div></div>
+      <div class="fin-kpi fk3"><div class="fin-kpi-lbl">📤 Saídas no Mês</div><div class="fin-kpi-val" id="sl-k3">—</div><div class="fin-kpi-sub">pagamentos realizados</div></div>
+      <div class="fin-kpi fk4"><div class="fin-kpi-lbl">📊 Resultado do Mês</div><div class="fin-kpi-val" id="sl-k4">—</div><div class="fin-kpi-sub">entradas − saídas</div></div>
+    </div>
+    <div class="saldo-grid" id="saldo-grid"></div>
+  </div><!-- /page-saldo -->
+
 </main>
 
 <!-- MODAL SC -->
@@ -670,7 +1005,7 @@ window.addEventListener('DOMContentLoaded',()=>{
   loadData();
 });
 
-const PAGES=['overview','fc','sc','relatorios'];
+const PAGES=['overview','fc','sc','relatorios','cp','cr','saldo'];
 function goTab(id){
   PAGES.forEach(p=>{
     document.getElementById('page-'+p).style.display=p===id?'':'none';
@@ -678,6 +1013,9 @@ function goTab(id){
   });
   if(id==='fc'&&allRows.length) renderFC();
   if(id==='sc'&&allRows.length) scRender();
+  if(id==='cp') cpLoad();
+  if(id==='cr') crLoad();
+  if(id==='saldo') saldoLoad();
 }
 
 // ═══════════════════════════════════════════════════════
@@ -1483,9 +1821,44 @@ function toast(icon,msg,type){
 var MASTER_LOGIN="Amabily";
 var MASTER_HASH="4c609781674c35b2bc9b623038571c3d6d748dbad14e18d72dc42773d5a0f640";
 
-async function sha256(str){
-  var buf=await crypto.subtle.digest("SHA-256",new TextEncoder().encode(str));
-  return Array.from(new Uint8Array(buf)).map(function(b){return b.toString(16).padStart(2,"0");}).join("");
+function sha256(str){
+  /* SHA-256 puro JS — funciona em HTTP e HTTPS */
+  function rot(n,k){return(n>>>k)|(n<<(32-k));}
+  var K=[0x428a2f98,0x71374491,0xb5c0fbcf,0xe9b5dba5,0x3956c25b,0x59f111f1,0x923f82a4,0xab1c5ed5,
+         0xd807aa98,0x12835b01,0x243185be,0x550c7dc3,0x72be5d74,0x80deb1fe,0x9bdc06a7,0xc19bf174,
+         0xe49b69c1,0xefbe4786,0x0fc19dc6,0x240ca1cc,0x2de92c6f,0x4a7484aa,0x5cb0a9dc,0x76f988da,
+         0x983e5152,0xa831c66d,0xb00327c8,0xbf597fc7,0xc6e00bf3,0xd5a79147,0x06ca6351,0x14292967,
+         0x27b70a85,0x2e1b2138,0x4d2c6dfc,0x53380d13,0x650a7354,0x766a0abb,0x81c2c92e,0x92722c85,
+         0xa2bfe8a1,0xa81a664b,0xc24b8b70,0xc76c51a3,0xd192e819,0xd6990624,0xf40e3585,0x106aa070,
+         0x19a4c116,0x1e376c08,0x2748774c,0x34b0bcb5,0x391c0cb3,0x4ed8aa4a,0x5b9cca4f,0x682e6ff3,
+         0x748f82ee,0x78a5636f,0x84c87814,0x8cc70208,0x90befffa,0xa4506ceb,0xbef9a3f7,0xc67178f2];
+  var H=[0x6a09e667,0xbb67ae85,0x3c6ef372,0xa54ff53a,0x510e527f,0x9b05688c,0x1f83d9ab,0x5be0cd19];
+  var bytes=[];
+  for(var i=0;i<str.length;i++){
+    var c=str.charCodeAt(i);
+    if(c<128)bytes.push(c);
+    else if(c<2048){bytes.push(192|(c>>6));bytes.push(128|(c&63));}
+    else{bytes.push(224|(c>>12));bytes.push(128|((c>>6)&63));bytes.push(128|(c&63));}
+  }
+  var blen=bytes.length;
+  bytes.push(0x80);
+  while(bytes.length%64!==56)bytes.push(0);
+  var bits=blen*8;
+  bytes.push(0,0,0,0,(bits>>>24)&0xff,(bits>>>16)&0xff,(bits>>>8)&0xff,bits&0xff);
+  for(var blk=0;blk<bytes.length;blk+=64){
+    var w=[];
+    for(var t=0;t<16;t++)w[t]=(bytes[blk+t*4]<<24)|(bytes[blk+t*4+1]<<16)|(bytes[blk+t*4+2]<<8)|bytes[blk+t*4+3];
+    for(t=16;t<64;t++)w[t]=((rot(w[t-15],7)^rot(w[t-15],18)^(w[t-15]>>>3))+(w[t-16]|0)+(rot(w[t-2],17)^rot(w[t-2],19)^(w[t-2]>>>10))+(w[t-7]|0))|0;
+    var a=H[0],bh=H[1],c=H[2],d=H[3],e=H[4],f=H[5],g=H[6],h=H[7];
+    for(t=0;t<64;t++){
+      var t1=(h+(rot(e,6)^rot(e,11)^rot(e,25))+((e&f)^(~e&g))+K[t]+w[t])|0;
+      var t2=((rot(a,2)^rot(a,13)^rot(a,22))+((a&bh)^(a&c)^(bh&c)))|0;
+      h=g;g=f;f=e;e=(d+t1)|0;d=c;c=bh;bh=a;a=(t1+t2)|0;
+    }
+    H[0]=(H[0]+a)|0;H[1]=(H[1]+bh)|0;H[2]=(H[2]+c)|0;H[3]=(H[3]+d)|0;
+    H[4]=(H[4]+e)|0;H[5]=(H[5]+f)|0;H[6]=(H[6]+g)|0;H[7]=(H[7]+h)|0;
+  }
+  return H.map(function(n){return('00000000'+(n>>>0).toString(16)).slice(-8);}).join('');
 }
 function authGetUsers(){try{return JSON.parse(localStorage.getItem("df_users")||"[]");}catch(e){return[];}}
 function authSaveUsers(u){localStorage.setItem("df_users",JSON.stringify(u));}
@@ -1517,6 +1890,8 @@ function authApplySession(session){
   document.getElementById("auth-user-label").textContent=session.login;
   document.getElementById("auth-avatar").textContent=session.login.charAt(0).toUpperCase();
   if(session.master)document.getElementById("cfg-open-btn").style.display="flex";
+  // Financeiro: botões cad visíveis para todos
+  document.querySelectorAll(".cad-open-btn").forEach(function(el){el.style.display="flex";});
 }
 
 function authLogout(){
@@ -1572,7 +1947,855 @@ function cfgRemoveUser(idx){
 document.addEventListener("DOMContentLoaded",function(){
   document.getElementById("cfg-modal").addEventListener("click",function(e){if(e.target===this)cfgClose();});
   authInit();
+  initFinanceiro();
 });
+
+// ══════════════════════════════════════════════════════════════════════════
+// MÓDULO FINANCEIRO — JAVASCRIPT COMPLETO
+// ══════════════════════════════════════════════════════════════════════════
+
+// ── SUPABASE CLIENT ──
+var sb = (typeof supabase !== 'undefined') ? supabase.createClient(
+  'https://dkrsgzouxlatoqmupguy.supabase.co',
+  'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImRrcnNnem91eGxhdG9xbXVwZ3V5Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODAzODM0NjAsImV4cCI6MjA5NTk1OTQ2MH0.ezewES_rZoS24-RlzEjSLxLvOxudWqANwrdNw-j-y2U'
+) : null;
+
+// ── ESTADO FINANCEIRO ──
+var FS = {
+  mode: null,         // 'cp' | 'cr'
+  editId: null,
+  cpRows: [],
+  crRows: [],
+  refs: { pessoas:[], categorias:[], bancarias:[], projetos:[] }
+};
+
+// ── FORMATADORES ──
+function fmtBRL(v){
+  v = parseFloat(v)||0;
+  return v.toLocaleString('pt-BR',{style:'currency',currency:'BRL'});
+}
+function fmtDateBR(d){
+  if(!d) return '—';
+  var dt = d instanceof Date ? d : new Date(d+'T00:00:00');
+  if(isNaN(dt)) return '—';
+  return dt.toLocaleDateString('pt-BR');
+}
+function statusBadge(s){
+  s = (s||'pendente').toLowerCase();
+  return '<span class="sbadge '+s+'">'+s.charAt(0).toUpperCase()+s.slice(1)+'</span>';
+}
+function projBadge(nome){
+  if(!nome) return '';
+  var cls = 'geral';
+  var n = (nome||'').toLowerCase();
+  if(n.includes('venda')) cls='venda';
+  else if(n.includes('loca')) cls='locacao';
+  else if(n.includes('compart')) cls='compartilhado';
+  return '<span class="pbadge '+cls+'">'+nome+'</span>';
+}
+
+// ── REFS ──
+async function loadRefs(){
+  if(!sb) return;
+  try{
+    var [rPessoas, rCats, rBanc, rProj] = await Promise.all([
+      sb.from('pessoas').select('*').eq('ativo',true).order('nome'),
+      sb.from('categorias').select('*').eq('ativo',true).order('nome'),
+      sb.from('contas_bancarias').select('*').eq('ativo',true).order('nome'),
+      sb.from('projetos').select('*').eq('ativo',true).order('nome'),
+    ]);
+    FS.refs.pessoas   = rPessoas.data  || [];
+    FS.refs.categorias= rCats.data     || [];
+    FS.refs.bancarias = rBanc.data     || [];
+    FS.refs.projetos  = rProj.data     || [];
+    fillProjDropdowns();
+    fillCatDropdowns();
+    cadRenderPessoas();
+    cadRenderCategorias();
+    cadRenderBancarias();
+  }catch(e){
+    toast('❌','Erro ao carregar refs: '+e.message,'error');
+  }
+}
+
+function fillProjDropdowns(){
+  var projs = FS.refs.projetos;
+  ['cp-f-proj','cr-f-proj','fm-projeto'].forEach(function(id){
+    var el = document.getElementById(id);
+    if(!el) return;
+    var cur = el.value;
+    el.innerHTML = '<option value="">Todos</option>';
+    if(id==='fm-projeto') el.innerHTML = '<option value="">Selecione...</option>';
+    projs.forEach(function(p){
+      el.innerHTML += '<option value="'+p.id+'">'+p.nome+'</option>';
+    });
+    el.value = cur;
+  });
+}
+
+function fillCatDropdowns(){
+  var cats = FS.refs.categorias;
+  ['cp-f-cat','cr-f-cat'].forEach(function(id){
+    var el = document.getElementById(id); if(!el) return;
+    var cur = el.value;
+    el.innerHTML = '<option value="">Todas</option>';
+    cats.forEach(function(c){ el.innerHTML += '<option value="'+c.id+'">'+c.nome+'</option>'; });
+    el.value = cur;
+  });
+  var fmCat = document.getElementById('fm-categoria'); if(!fmCat) return;
+  var cur2 = fmCat.value;
+  fmCat.innerHTML = '<option value="">Selecione...</option>';
+  cats.forEach(function(c){ fmCat.innerHTML += '<option value="'+c.id+'">'+c.nome+'</option>'; });
+  fmCat.value = cur2;
+}
+
+function fillPessoaDropdown(tipo){
+  var el = document.getElementById('fm-pessoa'); if(!el) return;
+  var cur = el.value;
+  el.innerHTML = '<option value="">Selecione...</option>';
+  FS.refs.pessoas.filter(function(p){
+    return !tipo || p.tipo===tipo || p.tipo==='ambos';
+  }).forEach(function(p){
+    el.innerHTML += '<option value="'+p.id+'">'+p.nome+'</option>';
+  });
+  el.value = cur;
+}
+
+function fillContaDropdown(){
+  var el = document.getElementById('fm-conta'); if(!el) return;
+  var cur = el.value;
+  el.innerHTML = '<option value="">Selecione...</option>';
+  FS.refs.bancarias.forEach(function(b){
+    el.innerHTML += '<option value="'+b.id+'">'+b.nome+(b.banco?' — '+b.banco:'')+'</option>';
+  });
+  el.value = cur;
+}
+
+// ── UPDATE VENCIDOS ──
+async function updateVencidos(){
+  if(!sb) return;
+  var hoje = new Date().toISOString().split('T')[0];
+  try{
+    await sb.from('contas_pagar')
+      .update({status:'vencido'})
+      .eq('status','pendente')
+      .lt('vencimento', hoje);
+    await sb.from('contas_receber')
+      .update({status:'atrasado'})
+      .eq('status','pendente')
+      .lt('vencimento', hoje);
+  }catch(e){ console.warn('updateVencidos:', e.message); }
+}
+
+// ══════════════════════════════════════
+// CONTAS A PAGAR
+// ══════════════════════════════════════
+async function cpLoad(){
+  if(!sb){ cpRender(); return; }
+  try{
+    var q = sb.from('contas_pagar').select('*').order('vencimento');
+    var fStatus = document.getElementById('cp-f-status')?.value;
+    var fProj   = document.getElementById('cp-f-proj')?.value;
+    var fCat    = document.getElementById('cp-f-cat')?.value;
+    var fDe     = document.getElementById('cp-f-de')?.value;
+    var fAte    = document.getElementById('cp-f-ate')?.value;
+    if(fStatus) q = q.eq('status', fStatus);
+    if(fProj)   q = q.eq('projeto_id', fProj);
+    if(fCat)    q = q.eq('categoria_id', fCat);
+    if(fDe)     q = q.gte('vencimento', fDe);
+    if(fAte)    q = q.lte('vencimento', fAte);
+    var {data, error} = await q;
+    if(error) throw error;
+    FS.cpRows = data || [];
+    cpRender();
+  }catch(e){
+    toast('❌','Erro ao carregar Contas a Pagar: '+e.message,'error');
+  }
+}
+
+function cpRender(){
+  var search = (document.getElementById('cp-f-search')?.value||'').toLowerCase();
+  var rows = FS.cpRows.filter(function(r){
+    if(!search) return true;
+    return (r.descricao||'').toLowerCase().includes(search)
+      || (r.pessoa_nome||'').toLowerCase().includes(search)
+      || (r.categoria_nome||'').toLowerCase().includes(search);
+  });
+
+  // KPIs
+  var hoje = new Date(); hoje.setHours(0,0,0,0);
+  var em7 = new Date(hoje); em7.setDate(em7.getDate()+7);
+  var mesAtual = hoje.getMonth(), anoAtual = hoje.getFullYear();
+  var totalPendente=0, pagoMes=0, vencidas=0, vence7=0;
+  FS.cpRows.forEach(function(r){
+    if(r.status==='pendente'||r.status==='vencido') totalPendente += parseFloat(r.valor)||0;
+    if(r.status==='pago'){
+      var dp = r.data_pagamento ? new Date(r.data_pagamento+'T00:00:00') : null;
+      if(dp && dp.getMonth()===mesAtual && dp.getFullYear()===anoAtual) pagoMes += parseFloat(r.valor_pago||r.valor)||0;
+    }
+    if(r.status==='vencido') vencidas++;
+    if((r.status==='pendente')){
+      var dv = r.vencimento ? new Date(r.vencimento+'T00:00:00') : null;
+      if(dv && dv>=hoje && dv<=em7) vence7++;
+    }
+  });
+  document.getElementById('cp-k1').textContent = fmtBRL(totalPendente);
+  document.getElementById('cp-k2').textContent = fmtBRL(pagoMes);
+  document.getElementById('cp-k3').textContent = vencidas + ' conta(s)';
+  document.getElementById('cp-k4').textContent = vence7 + ' conta(s)';
+
+  // Tabela
+  var count = document.getElementById('cp-count');
+  if(count) count.textContent = rows.length + ' registro(s)';
+  var tbody = document.getElementById('cp-tbody');
+  if(!tbody) return;
+  if(!rows.length){
+    tbody.innerHTML = '<tr><td colspan="8"><div class="fin-empty"><div class="icon">💸</div><p>Nenhuma conta encontrada.</p></div></td></tr>';
+    return;
+  }
+  tbody.innerHTML = rows.map(function(r){
+    var parc = (r.total_parcelas>1) ? ' <small style="color:var(--text-dim)">('+r.parcela_atual+'/'+r.total_parcelas+')</small>' : '';
+    return '<tr>'
+      +'<td><strong>'+(r.descricao||'—')+'</strong>'+parc+'</td>'
+      +'<td>'+(r.pessoa_nome||'<span class="muted">—</span>')+'</td>'
+      +'<td>'+(r.categoria_nome||'<span class="muted">—</span>')+'</td>'
+      +'<td>'+projBadge(r.projeto_nome)+'</td>'
+      +'<td style="text-align:right;font-family:\'DM Mono\',monospace">'+fmtBRL(r.valor)+'</td>'
+      +'<td style="font-family:\'DM Mono\',monospace">'+fmtDateBR(r.vencimento)+'</td>'
+      +'<td>'+statusBadge(r.status)+'</td>'
+      +'<td class="col-actions">'
+        +(r.status==='pendente'||r.status==='vencido' ? '<button class="btn-tbl success" onclick="cpMarkPago(\''+r.id+'\',event)">✓ Pago</button> ' : '')
+        +'<button class="btn-tbl primary" onclick="cpOpenEdit(\''+r.id+'\')">✏️</button> '
+        +'<button class="btn-tbl danger" onclick="cpDelete(\''+r.id+'\')">🗑️</button>'
+      +'</td>'
+    +'</tr>';
+  }).join('');
+}
+
+function cpOpenNew(){
+  FS.mode='cp'; FS.editId=null;
+  finModalOpen('Nova Conta a Pagar','Preencha os dados do lançamento');
+  document.getElementById('fm-pessoa-lbl').innerHTML = 'Fornecedor <span class="req">*</span>';
+  fillPessoaDropdown('fornecedor');
+  fillCatDropdownFor('pagar');
+  fillContaDropdown();
+}
+
+async function cpOpenEdit(id){
+  var r = FS.cpRows.find(function(x){return x.id==id;});
+  if(!r) return;
+  FS.mode='cp'; FS.editId=id;
+  finModalOpen('Editar Conta a Pagar','ID: '+id);
+  document.getElementById('fm-pessoa-lbl').innerHTML = 'Fornecedor <span class="req">*</span>';
+  fillPessoaDropdown('fornecedor');
+  fillCatDropdownFor('pagar');
+  fillContaDropdown();
+  document.getElementById('fm-descricao').value = r.descricao||'';
+  document.getElementById('fm-pessoa').value    = r.pessoa_id||'';
+  document.getElementById('fm-categoria').value = r.categoria_id||'';
+  document.getElementById('fm-projeto').value   = r.projeto_id||'';
+  document.getElementById('fm-conta').value     = r.conta_bancaria_id||'';
+  document.getElementById('fm-valor').value     = r.valor||'';
+  document.getElementById('fm-vencimento').value= r.vencimento||'';
+  document.getElementById('fm-nota').value      = r.nota_fiscal||'';
+  document.getElementById('fm-obs').value       = r.observacoes||'';
+  document.getElementById('fm-parcela-atual').value   = r.parcela_atual||1;
+  document.getElementById('fm-total-parcelas').value  = r.total_parcelas||1;
+}
+
+async function cpSave(data){
+  if(FS.editId){
+    data.alterado_por = (authCurrentUser()||{}).login||'';
+    var {error} = await sb.from('contas_pagar').update(data).eq('id',FS.editId);
+    if(error) throw error;
+    toast('✅','Conta atualizada!','success');
+  } else {
+    var totalParcelas = parseInt(document.getElementById('fm-total-parcelas').value)||1;
+    var parcelaAtual  = parseInt(document.getElementById('fm-parcela-atual').value)||1;
+    data.criado_por   = (authCurrentUser()||{}).login||'';
+    if(totalParcelas>1){
+      var grupo = (typeof crypto !== 'undefined' && crypto.randomUUID) ? crypto.randomUUID() : Date.now().toString(36)+Math.random().toString(36);
+      var baseDate = new Date((data.vencimento||new Date().toISOString().split('T')[0])+'T00:00:00');
+      var inserts = [];
+      for(var i=0;i<totalParcelas;i++){
+        var d = new Date(baseDate.getFullYear(), baseDate.getMonth()+i, baseDate.getDate());
+        var venc = d.toISOString().split('T')[0];
+        inserts.push(Object.assign({},data,{
+          vencimento: venc,
+          parcela_atual: parcelaAtual+i,
+          total_parcelas: totalParcelas,
+          recorrencia_grupo: grupo
+        }));
+      }
+      var {error} = await sb.from('contas_pagar').insert(inserts);
+      if(error) throw error;
+      toast('✅',totalParcelas+' parcelas criadas!','success');
+    } else {
+      data.total_parcelas=1; data.parcela_atual=1;
+      var {error} = await sb.from('contas_pagar').insert([data]);
+      if(error) throw error;
+      toast('✅','Conta a pagar criada!','success');
+    }
+  }
+  finModalClose();
+  cpLoad();
+}
+
+function cpMarkPago(id, evt){
+  evt && evt.stopPropagation();
+  var r = FS.cpRows.find(function(x){return x.id==id;});
+  if(!r) return;
+  var hoje = new Date().toISOString().split('T')[0];
+  var vp = prompt('Valor pago (R$):',r.valor||'');
+  if(vp===null) return;
+  var dp = prompt('Data do pagamento (AAAA-MM-DD):',hoje);
+  if(dp===null) return;
+  sb.from('contas_pagar').update({
+    status:'pago',
+    valor_pago: parseFloat(vp)||parseFloat(r.valor)||0,
+    data_pagamento: dp,
+    alterado_por: (authCurrentUser()||{}).login||''
+  }).eq('id',id).then(function(res){
+    if(res.error){ toast('❌','Erro: '+res.error.message,'error'); return; }
+    toast('✅','Pagamento registrado!','success');
+    cpLoad();
+  });
+}
+
+async function cpDelete(id){
+  if(!confirm('Excluir esta conta a pagar?')) return;
+  try{
+    var {error} = await sb.from('contas_pagar').delete().eq('id',id);
+    if(error) throw error;
+    toast('✅','Conta excluída.','success');
+    cpLoad();
+  }catch(e){ toast('❌','Erro ao excluir: '+e.message,'error'); }
+}
+
+// ══════════════════════════════════════
+// CONTAS A RECEBER
+// ══════════════════════════════════════
+async function crLoad(){
+  if(!sb){ crRender(); return; }
+  try{
+    var q = sb.from('contas_receber').select('*').order('vencimento');
+    var fStatus = document.getElementById('cr-f-status')?.value;
+    var fProj   = document.getElementById('cr-f-proj')?.value;
+    var fCat    = document.getElementById('cr-f-cat')?.value;
+    var fDe     = document.getElementById('cr-f-de')?.value;
+    var fAte    = document.getElementById('cr-f-ate')?.value;
+    if(fStatus) q = q.eq('status', fStatus);
+    if(fProj)   q = q.eq('projeto_id', fProj);
+    if(fCat)    q = q.eq('categoria_id', fCat);
+    if(fDe)     q = q.gte('vencimento', fDe);
+    if(fAte)    q = q.lte('vencimento', fAte);
+    var {data, error} = await q;
+    if(error) throw error;
+    FS.crRows = data || [];
+    crRender();
+  }catch(e){
+    toast('❌','Erro ao carregar Contas a Receber: '+e.message,'error');
+  }
+}
+
+function crRender(){
+  var search = (document.getElementById('cr-f-search')?.value||'').toLowerCase();
+  var rows = FS.crRows.filter(function(r){
+    if(!search) return true;
+    return (r.descricao||'').toLowerCase().includes(search)
+      || (r.pessoa_nome||'').toLowerCase().includes(search)
+      || (r.categoria_nome||'').toLowerCase().includes(search);
+  });
+
+  var hoje = new Date(); hoje.setHours(0,0,0,0);
+  var em7 = new Date(hoje); em7.setDate(em7.getDate()+7);
+  var mesAtual = hoje.getMonth(), anoAtual = hoje.getFullYear();
+  var totalPendente=0, recMes=0, atrasadas=0, vence7=0;
+  FS.crRows.forEach(function(r){
+    if(r.status==='pendente'||r.status==='atrasado') totalPendente += parseFloat(r.valor)||0;
+    if(r.status==='recebido'){
+      var dp = r.data_recebimento ? new Date(r.data_recebimento+'T00:00:00') : null;
+      if(dp && dp.getMonth()===mesAtual && dp.getFullYear()===anoAtual) recMes += parseFloat(r.valor_recebido||r.valor)||0;
+    }
+    if(r.status==='atrasado') atrasadas++;
+    if(r.status==='pendente'){
+      var dv = r.vencimento ? new Date(r.vencimento+'T00:00:00') : null;
+      if(dv && dv>=hoje && dv<=em7) vence7++;
+    }
+  });
+  document.getElementById('cr-k1').textContent = fmtBRL(totalPendente);
+  document.getElementById('cr-k2').textContent = fmtBRL(recMes);
+  document.getElementById('cr-k3').textContent = atrasadas + ' conta(s)';
+  document.getElementById('cr-k4').textContent = vence7 + ' conta(s)';
+
+  var count = document.getElementById('cr-count');
+  if(count) count.textContent = rows.length + ' registro(s)';
+  var tbody = document.getElementById('cr-tbody');
+  if(!tbody) return;
+  if(!rows.length){
+    tbody.innerHTML = '<tr><td colspan="8"><div class="fin-empty"><div class="icon">💰</div><p>Nenhuma conta encontrada.</p></div></td></tr>';
+    return;
+  }
+  tbody.innerHTML = rows.map(function(r){
+    var parc = (r.total_parcelas>1) ? ' <small style="color:var(--text-dim)">('+r.parcela_atual+'/'+r.total_parcelas+')</small>' : '';
+    return '<tr>'
+      +'<td><strong>'+(r.descricao||'—')+'</strong>'+parc+'</td>'
+      +'<td>'+(r.pessoa_nome||'<span class="muted">—</span>')+'</td>'
+      +'<td>'+(r.categoria_nome||'<span class="muted">—</span>')+'</td>'
+      +'<td>'+projBadge(r.projeto_nome)+'</td>'
+      +'<td style="text-align:right;font-family:\'DM Mono\',monospace">'+fmtBRL(r.valor)+'</td>'
+      +'<td style="font-family:\'DM Mono\',monospace">'+fmtDateBR(r.vencimento)+'</td>'
+      +'<td>'+statusBadge(r.status)+'</td>'
+      +'<td class="col-actions">'
+        +(r.status==='pendente'||r.status==='atrasado' ? '<button class="btn-tbl success" onclick="crMarkRecebido(\''+r.id+'\',event)">✓ Rec.</button> ' : '')
+        +'<button class="btn-tbl primary" onclick="crOpenEdit(\''+r.id+'\')">✏️</button> '
+        +'<button class="btn-tbl danger" onclick="crDelete(\''+r.id+'\')">🗑️</button>'
+      +'</td>'
+    +'</tr>';
+  }).join('');
+}
+
+function crOpenNew(){
+  FS.mode='cr'; FS.editId=null;
+  finModalOpen('Nova Conta a Receber','Preencha os dados do lançamento');
+  document.getElementById('fm-pessoa-lbl').innerHTML = 'Cliente <span class="req">*</span>';
+  fillPessoaDropdown('cliente');
+  fillCatDropdownFor('receber');
+  fillContaDropdown();
+}
+
+async function crOpenEdit(id){
+  var r = FS.crRows.find(function(x){return x.id==id;});
+  if(!r) return;
+  FS.mode='cr'; FS.editId=id;
+  finModalOpen('Editar Conta a Receber','ID: '+id);
+  document.getElementById('fm-pessoa-lbl').innerHTML = 'Cliente <span class="req">*</span>';
+  fillPessoaDropdown('cliente');
+  fillCatDropdownFor('receber');
+  fillContaDropdown();
+  document.getElementById('fm-descricao').value = r.descricao||'';
+  document.getElementById('fm-pessoa').value    = r.pessoa_id||'';
+  document.getElementById('fm-categoria').value = r.categoria_id||'';
+  document.getElementById('fm-projeto').value   = r.projeto_id||'';
+  document.getElementById('fm-conta').value     = r.conta_bancaria_id||'';
+  document.getElementById('fm-valor').value     = r.valor||'';
+  document.getElementById('fm-vencimento').value= r.vencimento||'';
+  document.getElementById('fm-nota').value      = r.nota_fiscal||'';
+  document.getElementById('fm-obs').value       = r.observacoes||'';
+  document.getElementById('fm-parcela-atual').value  = r.parcela_atual||1;
+  document.getElementById('fm-total-parcelas').value = r.total_parcelas||1;
+}
+
+async function crSave(data){
+  if(FS.editId){
+    data.alterado_por = (authCurrentUser()||{}).login||'';
+    var {error} = await sb.from('contas_receber').update(data).eq('id',FS.editId);
+    if(error) throw error;
+    toast('✅','Conta atualizada!','success');
+  } else {
+    var totalParcelas = parseInt(document.getElementById('fm-total-parcelas').value)||1;
+    var parcelaAtual  = parseInt(document.getElementById('fm-parcela-atual').value)||1;
+    data.criado_por   = (authCurrentUser()||{}).login||'';
+    if(totalParcelas>1){
+      var grupo = (typeof crypto !== 'undefined' && crypto.randomUUID) ? crypto.randomUUID() : Date.now().toString(36)+Math.random().toString(36);
+      var baseDate = new Date((data.vencimento||new Date().toISOString().split('T')[0])+'T00:00:00');
+      var inserts = [];
+      for(var i=0;i<totalParcelas;i++){
+        var d = new Date(baseDate.getFullYear(), baseDate.getMonth()+i, baseDate.getDate());
+        inserts.push(Object.assign({},data,{
+          vencimento: d.toISOString().split('T')[0],
+          parcela_atual: parcelaAtual+i,
+          total_parcelas: totalParcelas,
+          recorrencia_grupo: grupo
+        }));
+      }
+      var {error} = await sb.from('contas_receber').insert(inserts);
+      if(error) throw error;
+      toast('✅',totalParcelas+' parcelas criadas!','success');
+    } else {
+      data.total_parcelas=1; data.parcela_atual=1;
+      var {error} = await sb.from('contas_receber').insert([data]);
+      if(error) throw error;
+      toast('✅','Conta a receber criada!','success');
+    }
+  }
+  finModalClose();
+  crLoad();
+}
+
+function crMarkRecebido(id, evt){
+  evt && evt.stopPropagation();
+  var r = FS.crRows.find(function(x){return x.id==id;});
+  if(!r) return;
+  var hoje = new Date().toISOString().split('T')[0];
+  var vr = prompt('Valor recebido (R$):',r.valor||'');
+  if(vr===null) return;
+  var dr = prompt('Data do recebimento (AAAA-MM-DD):',hoje);
+  if(dr===null) return;
+  sb.from('contas_receber').update({
+    status:'recebido',
+    valor_recebido: parseFloat(vr)||parseFloat(r.valor)||0,
+    data_recebimento: dr,
+    alterado_por: (authCurrentUser()||{}).login||''
+  }).eq('id',id).then(function(res){
+    if(res.error){ toast('❌','Erro: '+res.error.message,'error'); return; }
+    toast('✅','Recebimento registrado!','success');
+    crLoad();
+  });
+}
+
+async function crDelete(id){
+  if(!confirm('Excluir esta conta a receber?')) return;
+  try{
+    var {error} = await sb.from('contas_receber').delete().eq('id',id);
+    if(error) throw error;
+    toast('✅','Conta excluída.','success');
+    crLoad();
+  }catch(e){ toast('❌','Erro ao excluir: '+e.message,'error'); }
+}
+
+// ══════════════════════════════════════
+// SALDO BANCÁRIO
+// ══════════════════════════════════════
+async function saldoLoad(){
+  if(!sb){ saldoRender([]); return; }
+  try{
+    var [rBanc, rCP, rCR] = await Promise.all([
+      sb.from('contas_bancarias').select('*').eq('ativo',true).order('nome'),
+      sb.from('contas_pagar').select('conta_bancaria_id,valor_pago,data_pagamento').eq('status','pago'),
+      sb.from('contas_receber').select('conta_bancaria_id,valor_recebido,data_recebimento').eq('status','recebido'),
+    ]);
+    var bancos = rBanc.data||[];
+    var pagamentos = rCP.data||[];
+    var recebimentos = rCR.data||[];
+
+    var hoje = new Date();
+    var mesAtual = hoje.getMonth(), anoAtual = hoje.getFullYear();
+
+    var result = bancos.map(function(b){
+      var pagsBanco   = pagamentos.filter(function(p){return p.conta_bancaria_id===b.id;});
+      var recsBanco   = recebimentos.filter(function(r){return r.conta_bancaria_id===b.id;});
+      var totalPago   = pagsBanco.reduce(function(acc,p){return acc+(parseFloat(p.valor_pago)||0);},0);
+      var totalRec    = recsBanco.reduce(function(acc,r){return acc+(parseFloat(r.valor_recebido)||0);},0);
+      var saldo       = (parseFloat(b.saldo_inicial)||0) + totalRec - totalPago;
+
+      var pagoMes   = pagsBanco.filter(function(p){
+        if(!p.data_pagamento) return false;
+        var d=new Date(p.data_pagamento+'T00:00:00');
+        return d.getMonth()===mesAtual&&d.getFullYear()===anoAtual;
+      }).reduce(function(acc,p){return acc+(parseFloat(p.valor_pago)||0);},0);
+
+      var recMes    = recsBanco.filter(function(r){
+        if(!r.data_recebimento) return false;
+        var d=new Date(r.data_recebimento+'T00:00:00');
+        return d.getMonth()===mesAtual&&d.getFullYear()===anoAtual;
+      }).reduce(function(acc,r){return acc+(parseFloat(r.valor_recebido)||0);},0);
+
+      return {banco:b, saldo:saldo, totalPago:totalPago, totalRec:totalRec, pagoMes:pagoMes, recMes:recMes};
+    });
+
+    saldoRender(result);
+  }catch(e){ toast('❌','Erro ao carregar saldo: '+e.message,'error'); }
+}
+
+function saldoRender(items){
+  // KPIs globais
+  var totalSaldo=0, totalEntMes=0, totalSaiMes=0;
+  (items||[]).forEach(function(x){
+    totalSaldo += x.saldo;
+    totalEntMes += x.recMes;
+    totalSaiMes += x.pagoMes;
+  });
+  var resultado = totalEntMes - totalSaiMes;
+  document.getElementById('sl-k1').textContent = fmtBRL(totalSaldo);
+  document.getElementById('sl-k2').textContent = fmtBRL(totalEntMes);
+  document.getElementById('sl-k3').textContent = fmtBRL(totalSaiMes);
+  var k4 = document.getElementById('sl-k4');
+  k4.textContent = fmtBRL(resultado);
+  k4.style.color = resultado>=0?'#1a7a1a':'var(--red)';
+
+  var grid = document.getElementById('saldo-grid');
+  if(!grid) return;
+  if(!items||!items.length){
+    grid.innerHTML = '<div class="fin-empty"><div class="icon">🏦</div><p>Nenhuma conta bancária cadastrada.<br>Cadastre contas em <strong>Cadastros → Contas Bancárias</strong>.</p></div>';
+    return;
+  }
+  grid.innerHTML = items.map(function(x){
+    var cls = x.saldo>0?'positive':x.saldo<0?'negative':'zero';
+    return '<div class="saldo-card">'
+      +'<div class="saldo-card-bank">'+(x.banco.banco||'Banco não informado')+'</div>'
+      +'<div class="saldo-card-name">'+x.banco.nome+'</div>'
+      +'<div class="saldo-card-amount '+cls+'">'+fmtBRL(x.saldo)+'</div>'
+      +'<div class="saldo-card-detail">'
+        +'<div class="saldo-detail-item"><div class="saldo-detail-lbl">Saldo Inicial</div><div class="saldo-detail-val">'+fmtBRL(x.banco.saldo_inicial||0)+'</div></div>'
+        +'<div class="saldo-detail-item"><div class="saldo-detail-lbl">Entradas</div><div class="saldo-detail-val green">'+fmtBRL(x.totalRec)+'</div></div>'
+        +'<div class="saldo-detail-item"><div class="saldo-detail-lbl">Saídas</div><div class="saldo-detail-val red">'+fmtBRL(x.totalPago)+'</div></div>'
+        +'<div class="saldo-detail-item"><div class="saldo-detail-lbl">Mês (Ent.)</div><div class="saldo-detail-val green">'+fmtBRL(x.recMes)+'</div></div>'
+        +'<div class="saldo-detail-item"><div class="saldo-detail-lbl">Mês (Saí.)</div><div class="saldo-detail-val red">'+fmtBRL(x.pagoMes)+'</div></div>'
+      +'</div>'
+    +'</div>';
+  }).join('');
+}
+
+// ══════════════════════════════════════
+// MODAL FINANCEIRO
+// ══════════════════════════════════════
+function finModalOpen(title, sub){
+  document.getElementById('fin-modal-title').textContent = title;
+  document.getElementById('fin-modal-sub').textContent = sub||'';
+  // Limpar campos
+  ['fm-descricao','fm-valor','fm-vencimento','fm-nota','fm-obs'].forEach(function(id){
+    var el=document.getElementById(id); if(el) el.value='';
+  });
+  document.getElementById('fm-pessoa').innerHTML='<option value="">Selecione...</option>';
+  document.getElementById('fm-categoria').innerHTML='<option value="">Selecione...</option>';
+  document.getElementById('fm-projeto').innerHTML='<option value="">Selecione...</option>';
+  document.getElementById('fm-conta').innerHTML='<option value="">Selecione...</option>';
+  document.getElementById('fm-parcela-atual').value='1';
+  document.getElementById('fm-total-parcelas').value='1';
+  fillProjDropdowns();
+  document.getElementById('fin-modal').classList.add('open');
+}
+
+function finModalClose(){
+  document.getElementById('fin-modal').classList.remove('open');
+  FS.mode=null; FS.editId=null;
+}
+
+async function finModalSave(){
+  var descricao = document.getElementById('fm-descricao').value.trim();
+  var pessoaId  = document.getElementById('fm-pessoa').value;
+  var valor     = parseFloat(document.getElementById('fm-valor').value)||0;
+  var vencimento= document.getElementById('fm-vencimento').value;
+
+  if(!descricao){ toast('⚠️','Informe a descrição.','warn'); return; }
+  if(!valor||valor<=0){ toast('⚠️','Informe um valor válido.','warn'); return; }
+  if(!vencimento){ toast('⚠️','Informe o vencimento.','warn'); return; }
+
+  var catId   = document.getElementById('fm-categoria').value;
+  var projId  = document.getElementById('fm-projeto').value;
+  var contaId = document.getElementById('fm-conta').value;
+  var nota    = document.getElementById('fm-nota').value.trim();
+  var obs     = document.getElementById('fm-obs').value.trim();
+
+  // Denormalizar nomes
+  var pessoaNome = '';
+  if(pessoaId){
+    var p = FS.refs.pessoas.find(function(x){return x.id==pessoaId;});
+    pessoaNome = p ? p.nome : '';
+  }
+  var catNome = '';
+  if(catId){
+    var c = FS.refs.categorias.find(function(x){return x.id==catId;});
+    catNome = c ? c.nome : '';
+  }
+  var projNome = '';
+  if(projId){
+    var pr = FS.refs.projetos.find(function(x){return x.id==projId;});
+    projNome = pr ? pr.nome : '';
+  }
+
+  var data = {
+    descricao: descricao,
+    pessoa_id: pessoaId||null,
+    pessoa_nome: pessoaNome,
+    categoria_id: catId||null,
+    categoria_nome: catNome,
+    projeto_id: projId||null,
+    projeto_nome: projNome,
+    conta_bancaria_id: contaId||null,
+    valor: valor,
+    vencimento: vencimento,
+    nota_fiscal: nota||null,
+    observacoes: obs||null,
+    status: 'pendente',
+    parcela_atual: parseInt(document.getElementById('fm-parcela-atual').value)||1,
+    total_parcelas: parseInt(document.getElementById('fm-total-parcelas').value)||1,
+  };
+
+  var btn = document.getElementById('fin-modal-save-btn');
+  btn.disabled=true; btn.textContent='Salvando...';
+  try{
+    if(FS.mode==='cp') await cpSave(data);
+    else if(FS.mode==='cr') await crSave(data);
+  }catch(e){
+    toast('❌','Erro ao salvar: '+e.message,'error');
+  }finally{
+    btn.disabled=false; btn.innerHTML='💾 Salvar';
+  }
+}
+
+function fillCatDropdownFor(tipo){
+  var el = document.getElementById('fm-categoria'); if(!el) return;
+  var cur = el.value;
+  el.innerHTML = '<option value="">Selecione...</option>';
+  FS.refs.categorias.filter(function(c){return c.tipo===tipo||c.tipo==='ambos';}).forEach(function(c){
+    el.innerHTML += '<option value="'+c.id+'">'+c.nome+'</option>';
+  });
+  el.value = cur;
+}
+
+// ══════════════════════════════════════
+// CADASTROS PANEL
+// ══════════════════════════════════════
+function cadOpen(tab){
+  document.getElementById('cad-panel').classList.add('open');
+  document.getElementById('cad-overlay-bg').classList.add('open');
+  cadTab(tab||'pessoas');
+}
+
+function cadClose(){
+  document.getElementById('cad-panel').classList.remove('open');
+  document.getElementById('cad-overlay-bg').classList.remove('open');
+}
+
+function cadTab(t){
+  ['pessoas','categorias','bancarias'].forEach(function(x){
+    document.getElementById('cadtab-'+x).classList.toggle('active',x===t);
+    document.getElementById('cadpane-'+x).classList.toggle('active',x===t);
+  });
+}
+
+// CRUD PESSOAS
+async function cadSavePessoa(){
+  var nome = document.getElementById('cad-p-nome').value.trim();
+  if(!nome){ toast('⚠️','Informe o nome.','warn'); return; }
+  var data = {
+    nome: nome,
+    tipo: document.getElementById('cad-p-tipo').value,
+    cpf_cnpj: document.getElementById('cad-p-doc').value.trim()||null,
+    email: document.getElementById('cad-p-email').value.trim()||null,
+    telefone: document.getElementById('cad-p-fone').value.trim()||null,
+    ativo: true
+  };
+  try{
+    var {error} = await sb.from('pessoas').insert([data]);
+    if(error) throw error;
+    toast('✅','Pessoa cadastrada!','success');
+    ['cad-p-nome','cad-p-doc','cad-p-email','cad-p-fone'].forEach(function(id){document.getElementById(id).value='';});
+    await loadRefs();
+  }catch(e){ toast('❌','Erro: '+e.message,'error'); }
+}
+
+async function cadDeletePessoa(id){
+  if(!confirm('Desativar esta pessoa?')) return;
+  try{
+    var {error} = await sb.from('pessoas').update({ativo:false}).eq('id',id);
+    if(error) throw error;
+    toast('✅','Pessoa desativada.','success');
+    await loadRefs();
+  }catch(e){ toast('❌','Erro: '+e.message,'error'); }
+}
+
+function cadRenderPessoas(){
+  var list = document.getElementById('cad-pessoas-list'); if(!list) return;
+  if(!FS.refs.pessoas.length){ list.innerHTML='<div style="font-size:12px;color:var(--text-dim);padding:8px">Nenhuma pessoa cadastrada.</div>'; return; }
+  list.innerHTML = FS.refs.pessoas.map(function(p){
+    return '<div class="cad-list-item">'
+      +'<div><div class="cad-list-item-name">'+p.nome+'</div>'
+      +'<div class="cad-list-item-sub">'+p.tipo+(p.cpf_cnpj?' · '+p.cpf_cnpj:'')+(p.email?' · '+p.email:'')+'</div></div>'
+      +'<button class="cad-list-item-del" onclick="cadDeletePessoa(\''+p.id+'\')">🗑️</button>'
+    +'</div>';
+  }).join('');
+}
+
+// CRUD CATEGORIAS
+async function cadSaveCategoria(){
+  var nome = document.getElementById('cad-c-nome').value.trim();
+  if(!nome){ toast('⚠️','Informe o nome.','warn'); return; }
+  var data = { nome:nome, tipo:document.getElementById('cad-c-tipo').value, ativo:true };
+  try{
+    var {error} = await sb.from('categorias').insert([data]);
+    if(error) throw error;
+    toast('✅','Categoria criada!','success');
+    document.getElementById('cad-c-nome').value='';
+    await loadRefs();
+  }catch(e){ toast('❌','Erro: '+e.message,'error'); }
+}
+
+async function cadDeleteCategoria(id){
+  if(!confirm('Desativar esta categoria?')) return;
+  try{
+    var {error} = await sb.from('categorias').update({ativo:false}).eq('id',id);
+    if(error) throw error;
+    toast('✅','Categoria desativada.','success');
+    await loadRefs();
+  }catch(e){ toast('❌','Erro: '+e.message,'error'); }
+}
+
+function cadRenderCategorias(){
+  var list = document.getElementById('cad-categorias-list'); if(!list) return;
+  if(!FS.refs.categorias.length){ list.innerHTML='<div style="font-size:12px;color:var(--text-dim);padding:8px">Nenhuma categoria cadastrada.</div>'; return; }
+  list.innerHTML = FS.refs.categorias.map(function(c){
+    return '<div class="cad-list-item">'
+      +'<div><div class="cad-list-item-name">'+c.nome+'</div>'
+      +'<div class="cad-list-item-sub">'+c.tipo+'</div></div>'
+      +'<button class="cad-list-item-del" onclick="cadDeleteCategoria(\''+c.id+'\')">🗑️</button>'
+    +'</div>';
+  }).join('');
+}
+
+// CRUD BANCARIAS
+async function cadSaveBancaria(){
+  var nome = document.getElementById('cad-b-nome').value.trim();
+  if(!nome){ toast('⚠️','Informe o nome.','warn'); return; }
+  var data = {
+    nome: nome,
+    banco: document.getElementById('cad-b-banco').value.trim()||null,
+    saldo_inicial: parseFloat(document.getElementById('cad-b-saldo').value)||0,
+    ativo: true
+  };
+  try{
+    var {error} = await sb.from('contas_bancarias').insert([data]);
+    if(error) throw error;
+    toast('✅','Conta bancária criada!','success');
+    ['cad-b-nome','cad-b-banco','cad-b-saldo'].forEach(function(id){document.getElementById(id).value='';});
+    await loadRefs();
+  }catch(e){ toast('❌','Erro: '+e.message,'error'); }
+}
+
+async function cadDeleteBancaria(id){
+  if(!confirm('Desativar esta conta bancária?')) return;
+  try{
+    var {error} = await sb.from('contas_bancarias').update({ativo:false}).eq('id',id);
+    if(error) throw error;
+    toast('✅','Conta desativada.','success');
+    await loadRefs();
+  }catch(e){ toast('❌','Erro: '+e.message,'error'); }
+}
+
+function cadRenderBancarias(){
+  var list = document.getElementById('cad-bancarias-list'); if(!list) return;
+  if(!FS.refs.bancarias.length){ list.innerHTML='<div style="font-size:12px;color:var(--text-dim);padding:8px">Nenhuma conta cadastrada.</div>'; return; }
+  list.innerHTML = FS.refs.bancarias.map(function(b){
+    return '<div class="cad-list-item">'
+      +'<div><div class="cad-list-item-name">'+b.nome+'</div>'
+      +'<div class="cad-list-item-sub">'+(b.banco||'—')+' · Saldo inicial: '+fmtBRL(b.saldo_inicial||0)+'</div></div>'
+      +'<button class="cad-list-item-del" onclick="cadDeleteBancaria(\''+b.id+'\')">🗑️</button>'
+    +'</div>';
+  }).join('');
+}
+
+// ══════════════════════════════════════
+// INIT FINANCEIRO
+// ══════════════════════════════════════
+async function initFinanceiro(){
+  if(!sb){
+    console.warn('Supabase não carregado. Módulo financeiro em modo offline.');
+    return;
+  }
+  try{
+    await loadRefs();
+    await updateVencidos();
+  }catch(e){ console.warn('initFinanceiro:', e.message); }
+}
+
+// Fechar modal ao clicar fora
+document.addEventListener('DOMContentLoaded', function(){
+  var fm = document.getElementById('fin-modal');
+  if(fm) fm.addEventListener('click', function(e){ if(e.target===fm) finModalClose(); });
+});
+
 </script>
 <div id="cfg-modal">
   <div class="cfg-box">
@@ -1597,5 +2820,166 @@ document.addEventListener("DOMContentLoaded",function(){
     </div>
   </div>
 </div>
+
+<!-- ── CADASTROS OVERLAY ── -->
+<div class="cad-overlay-bg" id="cad-overlay-bg" onclick="cadClose()"></div>
+
+<!-- ── CADASTROS PANEL ── -->
+<div id="cad-panel">
+  <div class="cad-panel-hdr">
+    <span class="cad-panel-title">🗂️ Cadastros</span>
+    <button class="cad-panel-close" onclick="cadClose()">✕</button>
+  </div>
+  <div class="cad-tabs">
+    <button class="cad-tab active" onclick="cadTab('pessoas')" id="cadtab-pessoas">Pessoas</button>
+    <button class="cad-tab" onclick="cadTab('categorias')" id="cadtab-categorias">Categorias</button>
+    <button class="cad-tab" onclick="cadTab('bancarias')" id="cadtab-bancarias">Contas Banc.</button>
+  </div>
+  <div class="cad-panel-body">
+
+    <!-- PESSOAS -->
+    <div class="cad-section-pane active" id="cadpane-pessoas">
+      <div class="cad-inline-form">
+        <h4>Nova Pessoa</h4>
+        <div class="cad-form-grid">
+          <div class="cad-field"><label>Nome *</label><input type="text" id="cad-p-nome" placeholder="Nome completo"></div>
+          <div class="cad-form-row">
+            <div class="cad-field"><label>Tipo</label>
+              <select id="cad-p-tipo">
+                <option value="fornecedor">Fornecedor</option>
+                <option value="cliente">Cliente</option>
+                <option value="ambos">Ambos</option>
+              </select>
+            </div>
+            <div class="cad-field"><label>CPF/CNPJ</label><input type="text" id="cad-p-doc" placeholder="000.000.000-00"></div>
+          </div>
+          <div class="cad-form-row">
+            <div class="cad-field"><label>E-mail</label><input type="email" id="cad-p-email" placeholder="email@exemplo.com"></div>
+            <div class="cad-field"><label>Telefone</label><input type="tel" id="cad-p-fone" placeholder="(00) 00000-0000"></div>
+          </div>
+        </div>
+        <button class="cad-save-btn" onclick="cadSavePessoa()">Salvar Pessoa</button>
+      </div>
+      <div class="cad-list" id="cad-pessoas-list"></div>
+    </div>
+
+    <!-- CATEGORIAS -->
+    <div class="cad-section-pane" id="cadpane-categorias">
+      <div class="cad-inline-form">
+        <h4>Nova Categoria</h4>
+        <div class="cad-form-grid">
+          <div class="cad-field"><label>Nome *</label><input type="text" id="cad-c-nome" placeholder="Ex: Aluguel, Honorários..."></div>
+          <div class="cad-field"><label>Tipo</label>
+            <select id="cad-c-tipo">
+              <option value="pagar">Pagar</option>
+              <option value="receber">Receber</option>
+              <option value="ambos">Ambos</option>
+            </select>
+          </div>
+        </div>
+        <button class="cad-save-btn" onclick="cadSaveCategoria()">Salvar Categoria</button>
+      </div>
+      <div class="cad-list" id="cad-categorias-list"></div>
+    </div>
+
+    <!-- CONTAS BANCÁRIAS -->
+    <div class="cad-section-pane" id="cadpane-bancarias">
+      <div class="cad-inline-form">
+        <h4>Nova Conta Bancária</h4>
+        <div class="cad-form-grid">
+          <div class="cad-field"><label>Nome da conta *</label><input type="text" id="cad-b-nome" placeholder="Ex: Conta Corrente PJ"></div>
+          <div class="cad-form-row">
+            <div class="cad-field"><label>Banco</label><input type="text" id="cad-b-banco" placeholder="Ex: Itaú, Bradesco..."></div>
+            <div class="cad-field"><label>Saldo Inicial (R$)</label><input type="number" id="cad-b-saldo" placeholder="0,00" step="0.01"></div>
+          </div>
+        </div>
+        <button class="cad-save-btn" onclick="cadSaveBancaria()">Salvar Conta</button>
+      </div>
+      <div class="cad-list" id="cad-bancarias-list"></div>
+    </div>
+
+  </div><!-- /cad-panel-body -->
+</div><!-- /cad-panel -->
+
+<!-- ── MODAL NOVA/EDITAR CONTA ── -->
+<div id="fin-modal">
+  <div class="fin-modal-box">
+    <div class="fin-modal-hdr">
+      <div>
+        <div class="fin-modal-title" id="fin-modal-title">Nova Conta</div>
+        <div class="fin-modal-sub" id="fin-modal-sub"></div>
+      </div>
+      <button class="fin-modal-close" onclick="finModalClose()">✕</button>
+    </div>
+    <div class="fin-modal-body">
+
+      <!-- Dados principais -->
+      <div class="fin-form-section">
+        <div class="fin-form-section-title">Dados Principais</div>
+        <div class="fin-form-grid">
+          <div class="fin-form-row full">
+            <div class="fin-field"><label>Descrição <span class="req">*</span></label><input type="text" id="fm-descricao" placeholder="Ex: Aluguel escritório mês 01/2025"></div>
+          </div>
+          <div class="fin-form-row">
+            <div class="fin-field"><label id="fm-pessoa-lbl">Fornecedor <span class="req">*</span></label>
+              <select id="fm-pessoa"><option value="">Selecione...</option></select>
+            </div>
+            <div class="fin-field"><label>Categoria</label>
+              <select id="fm-categoria"><option value="">Selecione...</option></select>
+            </div>
+          </div>
+          <div class="fin-form-row three">
+            <div class="fin-field"><label>Projeto</label>
+              <select id="fm-projeto"><option value="">Selecione...</option></select>
+            </div>
+            <div class="fin-field"><label>Conta Bancária</label>
+              <select id="fm-conta"><option value="">Selecione...</option></select>
+            </div>
+            <div class="fin-field"><label>Valor (R$) <span class="req">*</span></label>
+              <input type="number" id="fm-valor" placeholder="0,00" step="0.01" min="0">
+            </div>
+          </div>
+          <div class="fin-form-row">
+            <div class="fin-field"><label>Vencimento <span class="req">*</span></label>
+              <input type="date" id="fm-vencimento">
+            </div>
+            <div class="fin-field"><label>Nota Fiscal</label>
+              <input type="text" id="fm-nota" placeholder="Número NF (opcional)">
+            </div>
+          </div>
+          <div class="fin-form-row full">
+            <div class="fin-field"><label>Observações</label>
+              <textarea id="fm-obs" placeholder="Observações adicionais..."></textarea>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Recorrência -->
+      <div class="fin-recorrencia-box">
+        <div class="fin-form-section-title">🔁 Recorrência (parcelamento)</div>
+        <div class="fin-form-row">
+          <div class="fin-field">
+            <label>Parcela atual</label>
+            <input type="number" id="fm-parcela-atual" placeholder="1" min="1" value="1">
+          </div>
+          <div class="fin-field">
+            <label>Total de parcelas</label>
+            <input type="number" id="fm-total-parcelas" placeholder="1 = sem recorrência" min="1" value="1">
+          </div>
+        </div>
+        <div style="font-size:11px;color:var(--text-muted);margin-top:6px">
+          Se Total &gt; 1, serão criados N lançamentos com vencimentos mensais consecutivos, agrupados por ID de recorrência.
+        </div>
+      </div>
+
+    </div><!-- /fin-modal-body -->
+    <div class="fin-modal-footer">
+      <button class="btn-fin-cancel" onclick="finModalClose()">Cancelar</button>
+      <button class="btn-fin-save" id="fin-modal-save-btn" onclick="finModalSave()">💾 Salvar</button>
+    </div>
+  </div>
+</div><!-- /fin-modal -->
+
 </body>
 </html>
