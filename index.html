@@ -719,6 +719,30 @@ input[type="checkbox"]{width:14px;height:14px;accent-color:var(--green-accent);c
 .bulk-form-grp label{font-size:11px;font-weight:700;text-transform:uppercase;letter-spacing:.06em;color:var(--text-muted)}
 .bulk-form-grp select,.bulk-form-grp input{border:1.5px solid var(--border2);border-radius:9px;padding:9px 12px;font-size:13px;font-family:'DM Sans',sans-serif;color:var(--navy);background:#fff;outline:none}
 .bulk-form-grp select:focus,.bulk-form-grp input:focus{border-color:var(--brand)}
+
+/* ── CP DETAIL PANEL ── */
+#cp-detail-panel{position:fixed;top:0;right:-520px;width:500px;height:100%;background:#fff;z-index:9200;box-shadow:-4px 0 32px rgba(0,0,0,.18);transition:right .3s ease;display:flex;flex-direction:column;overflow:hidden}
+#cp-detail-panel.open{right:0}
+.cdp-hdr{background:linear-gradient(135deg,#1a1d2e,#252840);padding:20px 24px;display:flex;align-items:center;justify-content:space-between;flex-shrink:0}
+.cdp-hdr h3{color:#fff;font-size:15px;font-weight:600;margin:0}
+.cdp-close{background:rgba(255,255,255,.1);border:1px solid rgba(255,255,255,.2);border-radius:8px;color:#fff;width:30px;height:30px;cursor:pointer;font-size:14px;display:flex;align-items:center;justify-content:center}
+.cdp-body{flex:1;overflow-y:auto;padding:24px}
+.cdp-section{margin-bottom:20px}
+.cdp-section-title{font-size:10px;font-weight:700;text-transform:uppercase;letter-spacing:.1em;color:var(--text-muted);margin-bottom:12px;padding-bottom:6px;border-bottom:1px solid var(--border)}
+.cdp-grid{display:grid;grid-template-columns:1fr 1fr;gap:12px}
+.cdp-field{display:flex;flex-direction:column;gap:3px}
+.cdp-field.full{grid-column:span 2}
+.cdp-label{font-size:10px;font-weight:700;text-transform:uppercase;letter-spacing:.06em;color:var(--text-muted)}
+.cdp-value{font-size:13px;color:var(--navy);word-break:break-word}
+.cdp-value.mono{font-family:'DM Mono',monospace}
+.cdp-value.muted{color:var(--text-muted)}
+.cdp-footer{padding:16px 24px;border-top:1px solid var(--border);display:flex;gap:8px;flex-shrink:0;background:#fff}
+.cdp-footer .btn-primary{flex:1;text-align:center}
+#cp-detail-overlay{position:fixed;inset:0;background:rgba(0,0,0,.3);z-index:9100;display:none}
+#cp-detail-overlay.show{display:block}
+/* Row hover cursor */
+.fin-table tbody tr{cursor:pointer}
+.fin-table tbody tr:hover{background:var(--gray-50)}
 </style>
 <style>
 .recibo-wrap{font-family:'DM Sans',Arial,sans-serif;max-width:680px;margin:40px auto;padding:40px;border:2px solid #1a1d2e;border-radius:4px}
@@ -1203,14 +1227,15 @@ input[type="checkbox"]{width:14px;height:14px;accent-color:var(--green-accent);c
         <table class="fin-table">
           <colgroup>
             <col style="width:36px">
-            <col style="width:180px">
-            <col style="width:150px">
-            <col style="width:115px">
-            <col style="width:105px">
-            <col style="width:105px">
-            <col style="width:220px">
-            <col style="width:120px">
+            <col style="width:170px">
+            <col style="width:140px">
+            <col style="width:110px">
             <col style="width:100px">
+            <col style="width:100px">
+            <col style="width:100px">
+            <col style="width:190px">
+            <col style="width:120px">
+            <col style="width:90px">
           </colgroup>
           <thead><tr>
             <th style="width:36px;text-align:center;padding:8px"><input type="checkbox" id="cp-chk-all" onchange="cpToggleAll(this)" title="Selecionar todos" style="width:15px;height:15px;cursor:pointer;accent-color:#F47920;vertical-align:middle"></th>
@@ -1218,6 +1243,7 @@ input[type="checkbox"]{width:14px;height:14px;accent-color:var(--green-accent);c
             <th>Categoria</th>
             <th style="text-align:right">Valor</th>
             <th>Vencimento</th>
+            <th>Data Pgto</th>
             <th>Status</th>
             <th>Descri&#231;&#227;o</th>
             <th class="col-actions">A&#231;&#245;es</th>
@@ -2543,12 +2569,13 @@ function cpRender(){
   tbody.innerHTML = rows.map(function(r){
     var parc = (r.total_parcelas>1) ? ' <small style="color:var(--text-dim)">('+r.parcela_atual+'/'+r.total_parcelas+')</small>' : '';
     var sel = (typeof cpSelected!=='undefined' && cpSelected.has(r.id));
-    return '<tr style="'+(sel?'background:rgba(244,121,32,.06)':'')+'">'
-      +'<td style="width:36px;text-align:center;padding:8px"><input type="checkbox" class="cp-row-chk"'+(sel?' checked':'')+' onchange="cpToggleRow(\''+r.id+'\',this)" style="width:15px;height:15px;cursor:pointer;accent-color:#F47920;vertical-align:middle"></td>'
+    return '<tr style="'+(sel?'background:rgba(244,121,32,.08)':'')+'cursor:pointer" onclick="cpRowClick(event,\''+r.id+'\')">'
+      +'<td style="width:36px;text-align:center;padding:8px" onclick="event.stopPropagation()"><input type="checkbox" class="cp-row-chk"'+(sel?' checked':'')+' onchange="cpToggleRow(\''+r.id+'\',this)" style="width:15px;height:15px;cursor:pointer;accent-color:#F47920;vertical-align:middle"></td>'
       +'<td style="overflow:hidden;text-overflow:ellipsis;white-space:nowrap" title="'+(r.pessoa_nome||'')+'">'+(r.pessoa_nome||'<span style="color:#9ca3af">—</span>')+'</td>'
       +'<td style="overflow:hidden;text-overflow:ellipsis;white-space:nowrap">'+(r.categoria_nome||'<span style="color:#9ca3af">—</span>')+'</td>'
       +'<td style="text-align:right;font-family:\'DM Mono\',monospace;white-space:nowrap">'+fmtBRL(r.valor)+'</td>'
       +'<td style="font-family:\'DM Mono\',monospace;white-space:nowrap">'+fmtDateBR(r.vencimento)+'</td>'
+      +'<td style="font-family:\'DM Mono\',monospace;white-space:nowrap;color:'+(r.data_pagamento?'#059669':'#d1d5db')+'">'+fmtDateBR(r.data_pagamento)+'</td>'
       +'<td>'+statusBadge(r.status)+'</td>'
       +'<td style="overflow:hidden;text-overflow:ellipsis;white-space:nowrap" title="'+(r.descricao||'')+'">'+(r.descricao||'—')+parc+'</td>'
       +'<td class="col-actions" style="white-space:nowrap">'
@@ -4554,6 +4581,76 @@ async function cpCancelSelected(){
   } catch(e){ toast('\u274c','Erro: '+e.message,'error'); }
 }
 
+
+function cpRowClick(e, id){
+  // Ignore clicks on buttons/checkboxes
+  if(e.target.tagName==='INPUT' || e.target.tagName==='BUTTON') return;
+  cpDetailOpen(id);
+}
+
+/* ====================================================
+   CP DETAIL PANEL
+==================================================== */
+var cpDetailId = null;
+
+function cpDetailOpen(id) {
+  // Don't open if clicking on a checkbox or button
+  cpDetailId = id;
+  var r = (FS.cpRows||[]).find(function(x){return x.id===id;});
+  if(!r) return;
+
+  document.getElementById('cdp-title').textContent = r.descricao || 'Lançamento';
+  document.getElementById('cdp-descricao').textContent = r.descricao || '—';
+  document.getElementById('cdp-fornecedor').textContent = r.pessoa_nome || '—';
+  document.getElementById('cdp-categoria').textContent = r.categoria_nome || '—';
+  document.getElementById('cdp-projeto').textContent = r.projeto_nome || '—';
+  document.getElementById('cdp-nf').textContent = r.nota_fiscal || '—';
+  document.getElementById('cdp-status').innerHTML = statusBadge(r.status);
+  document.getElementById('cdp-valor').textContent = fmtBRL(r.valor);
+  document.getElementById('cdp-valor-pago').textContent = r.valor_pago ? fmtBRL(r.valor_pago) : '—';
+  document.getElementById('cdp-vencimento').textContent = fmtDateBR(r.vencimento);
+  document.getElementById('cdp-data-pgto').textContent = fmtDateBR(r.data_pagamento) || '—';
+  document.getElementById('cdp-prev-pgto').textContent = fmtDateBR(r.previsao_pagamento) || '—';
+  document.getElementById('cdp-obs').textContent = r.observacoes || '—';
+  document.getElementById('cdp-criado').textContent = (r.criado_por||'') + (r.created_at ? ' • '+fmtDateBR(r.created_at.slice(0,10)) : '');
+  document.getElementById('cdp-alterado').textContent = (r.alterado_por||'') + (r.updated_at ? ' • '+fmtDateBR(r.updated_at.slice(0,10)) : '');
+
+  // Banco
+  var banco = (FS.refs.bancarias||[]).find(function(b){return b.id===r.conta_bancaria_id;});
+  document.getElementById('cdp-banco').textContent = banco ? banco.nome : (r.conta_bancaria_id ? '...' : '—');
+
+  // Parcela
+  if(r.total_parcelas > 1) {
+    document.getElementById('cdp-parcela').textContent = r.parcela_atual+'/'+r.total_parcelas;
+    document.getElementById('cdp-parcela-grp').style.display = '';
+  } else {
+    document.getElementById('cdp-parcela-grp').style.display = 'none';
+  }
+
+  // Botão pagar
+  var btnPago = document.getElementById('cdp-btn-pago');
+  btnPago.style.display = (r.status==='pendente'||r.status==='vencido') ? 'block' : 'none';
+
+  document.getElementById('cp-detail-overlay').classList.add('show');
+  document.getElementById('cp-detail-panel').classList.add('open');
+}
+
+function cpDetailClose() {
+  document.getElementById('cp-detail-overlay').classList.remove('show');
+  document.getElementById('cp-detail-panel').classList.remove('open');
+  cpDetailId = null;
+}
+
+function cpDetailEdit() {
+  cpDetailClose();
+  if(cpDetailId) cpOpenEdit(cpDetailId);
+}
+
+function cpDetailPagar() {
+  cpDetailClose();
+  if(cpDetailId) cpMarkPago(cpDetailId, null);
+}
+
 </script>
 <div id="cfg-modal">
   <div class="cfg-box">
@@ -4968,6 +5065,56 @@ async function cpCancelSelected(){
       <button class="fin-btn-cancel" onclick="bulkEditClose()">Cancelar</button>
       <button class="fin-btn-save" onclick="bulkEditConfirm()">Salvar Altera&#231;&#245;es</button>
     </div>
+  </div>
+</div>
+
+
+<div id="cp-detail-overlay" onclick="cpDetailClose()"></div>
+<div id="cp-detail-panel">
+  <div class="cdp-hdr">
+    <h3 id="cdp-title">Detalhes do Lan&ccedil;amento</h3>
+    <button class="cdp-close" onclick="cpDetailClose()">&#10005;</button>
+  </div>
+  <div class="cdp-body">
+    <div class="cdp-section">
+      <div class="cdp-section-title">Informa&ccedil;&otilde;es Gerais</div>
+      <div class="cdp-grid">
+        <div class="cdp-field full"><div class="cdp-label">Descri&ccedil;&atilde;o</div><div class="cdp-value" id="cdp-descricao">—</div></div>
+        <div class="cdp-field"><div class="cdp-label">Fornecedor</div><div class="cdp-value" id="cdp-fornecedor">—</div></div>
+        <div class="cdp-field"><div class="cdp-label">Categoria</div><div class="cdp-value" id="cdp-categoria">—</div></div>
+        <div class="cdp-field"><div class="cdp-label">Projeto</div><div class="cdp-value" id="cdp-projeto">—</div></div>
+        <div class="cdp-field"><div class="cdp-label">Conta Banc&aacute;ria</div><div class="cdp-value" id="cdp-banco">—</div></div>
+        <div class="cdp-field"><div class="cdp-label">Nota Fiscal</div><div class="cdp-value" id="cdp-nf">—</div></div>
+        <div class="cdp-field"><div class="cdp-label">Status</div><div class="cdp-value" id="cdp-status">—</div></div>
+      </div>
+    </div>
+    <div class="cdp-section">
+      <div class="cdp-section-title">Valores e Datas</div>
+      <div class="cdp-grid">
+        <div class="cdp-field"><div class="cdp-label">Valor</div><div class="cdp-value mono" id="cdp-valor">—</div></div>
+        <div class="cdp-field"><div class="cdp-label">Valor Pago</div><div class="cdp-value mono" id="cdp-valor-pago">—</div></div>
+        <div class="cdp-field"><div class="cdp-label">Vencimento</div><div class="cdp-value mono" id="cdp-vencimento">—</div></div>
+        <div class="cdp-field"><div class="cdp-label">Data de Pagamento</div><div class="cdp-value mono" id="cdp-data-pgto">—</div></div>
+        <div class="cdp-field"><div class="cdp-label">Prev. Pagamento</div><div class="cdp-value mono" id="cdp-prev-pgto">—</div></div>
+        <div class="cdp-field" id="cdp-parcela-grp"><div class="cdp-label">Parcela</div><div class="cdp-value" id="cdp-parcela">—</div></div>
+      </div>
+    </div>
+    <div class="cdp-section">
+      <div class="cdp-section-title">Observa&ccedil;&otilde;es</div>
+      <div class="cdp-value" id="cdp-obs" style="white-space:pre-wrap;line-height:1.6">—</div>
+    </div>
+    <div class="cdp-section">
+      <div class="cdp-section-title">Auditoria</div>
+      <div class="cdp-grid">
+        <div class="cdp-field"><div class="cdp-label">Criado por</div><div class="cdp-value muted" id="cdp-criado">—</div></div>
+        <div class="cdp-field"><div class="cdp-label">Alterado por</div><div class="cdp-value muted" id="cdp-alterado">—</div></div>
+      </div>
+    </div>
+  </div>
+  <div class="cdp-footer">
+    <button class="btn-primary" id="cdp-btn-edit" onclick="cpDetailEdit()" style="background:var(--brand)">&#9998; Editar</button>
+    <button class="btn-primary" id="cdp-btn-pago" onclick="cpDetailPagar()" style="background:#059669;display:none">&#10003; Marcar como Pago</button>
+    <button class="fin-btn-cancel" onclick="cpDetailClose()">Fechar</button>
   </div>
 </div>
 
