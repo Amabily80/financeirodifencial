@@ -4710,12 +4710,25 @@ async function comLoad() {
     var _session = authCurrentUser();
     var _restricted = _session && !_session.master && _session.role==='restricted';
     if(_restricted && _session.nome) {
-      var _nome = _session.nome.toLowerCase();
+      var _myNome = _session.nome.trim().toLowerCase();
+
+      // Blacklist dinâmica: nomes de TODOS os usuários internos cadastrados
+      var _allUsers = authGetUsers();
+      var _blacklist = _allUsers
+        .filter(function(u){ return u.nome && u.nome.trim(); })
+        .map(function(u){ return u.nome.trim().toLowerCase(); });
+
       data = data.filter(function(r){
-        var tipo = comGetTipo(r);
-        if(tipo==='corretor') return true; // vê todas as comissões de corretores
-        // Gerência: vê apenas a própria
-        return (r.pessoa_nome||'').toLowerCase().includes(_nome);
+        var pnome = (r.pessoa_nome || '').toLowerCase();
+
+        // Sempre mostra as próprias comissões
+        if(pnome.includes(_myNome)) return true;
+
+        // Esconde comissões de outros internos (blacklist)
+        var isInternal = _blacklist.some(function(n){
+          return n && pnome.includes(n);
+        });
+        return !isInternal;
       });
     }
 
