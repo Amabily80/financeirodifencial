@@ -2388,7 +2388,7 @@ async function authDoLogin(){
       session={login:MASTER_LOGIN,master:true};
     } else {
       var found=authGetUsers().find(function(u){return u.login.toLowerCase()===user.toLowerCase()&&u.hash===hash;});
-      if(found) session={login:found.login,master:false};
+      if(found) session={login:found.login,master:false,role:found.role||'admin',nome:found.nome||''};
     }
     if(!session){errEl.textContent="Usuário ou senha incorretos.";return;}
     sessionStorage.setItem("df_session",JSON.stringify(session));
@@ -2405,11 +2405,27 @@ function authApplySession(session){
   document.getElementById("auth-logout-btn").style.display="flex";
   document.getElementById("auth-user-label").textContent=session.login;
   document.getElementById("auth-avatar").textContent=session.login.charAt(0).toUpperCase();
-  if(session.master)document.getElementById("cfg-open-btn").style.display="flex";
-  // Financeiro: botões cad visíveis para todos
-  document.querySelectorAll(".cad-open-btn").forEach(function(el){el.style.display="flex";});
-  // Financeiro: botões cad visíveis para todos
-  document.querySelectorAll(".cad-open-btn").forEach(function(el){el.style.display="flex";});
+  var isRestricted = !session.master && session.role==="restricted";
+
+  if(session.master) document.getElementById("cfg-open-btn").style.display="flex";
+
+  if(isRestricted){
+    // Ocultar abas financeiras
+    ["overview","fc","relatorios","cp","cr","saldo"].forEach(function(t){
+      var el=document.getElementById("tab-"+t); if(el) el.style.display="none";
+    });
+    var cfgBtn=document.getElementById("cfg-open-btn");
+    if(cfgBtn) cfgBtn.style.display="none";
+    document.querySelectorAll(".cad-open-btn").forEach(function(el){el.style.display="none";});
+    // Redirecionar para SC
+    setTimeout(function(){ if(typeof goTab==="function") goTab("sc"); },100);
+  } else {
+    // Acesso total — mostrar todas as abas
+    ["overview","fc","relatorios","cp","cr","saldo"].forEach(function(t){
+      var el=document.getElementById("tab-"+t); if(el) el.style.removeProperty("display");
+    });
+    document.querySelectorAll(".cad-open-btn").forEach(function(el){el.style.display="flex";});
+  }
 }
 
 function authLogout(){
@@ -2432,7 +2448,11 @@ function cfgRenderList(){
   var div=document.getElementById("cfg-user-list-wrap");
   if(!users.length){div.innerHTML='<p class="cfg-empty-msg">Nenhum usuario cadastrado.</p>';return;}
   div.innerHTML=users.map(function(u,i){
-    return '<div class="cfg-user-row"><div><span class="cfg-user-row-name">'+u.login+'</span><span class="cfg-user-row-badge">usuario</span></div><button class="cfg-user-row-del" onclick="cfgRemoveUser('+i+')">Remover</button></div>';
+    var roleLbl = u.role==='restricted'
+      ? '<span class="cfg-user-row-badge" style="background:#ede9fe;color:#6d28d9">Restrito</span>'
+      : '<span class="cfg-user-row-badge" style="background:#d1fae5;color:#065f46">Admin</span>';
+    var nomeLbl = (u.nome && u.role==='restricted') ? '<br><span style="font-size:11px;color:#6b7280">comissões: '+u.nome+'</span>' : '';
+    return '<div class="cfg-user-row"><div><span class="cfg-user-row-name">'+u.login+'</span> '+roleLbl+nomeLbl+'</div><button class="cfg-user-row-del" onclick="cfgRemoveUser('+i+')">Remover</button></div>';
   }).join('');
 }
 
@@ -2447,10 +2467,13 @@ async function cfgAddUser(){
   var users=authGetUsers();
   if(users.find(function(u){return u.login.toLowerCase()===login.toLowerCase();})){errEl.textContent="Login ja existe.";return;}
   var hash=await sha256(pass);
-  users.push({login:login,hash:hash});
+  var role = document.getElementById("cfg-new-role") ? document.getElementById("cfg-new-role").value : "admin";
+  var nome = document.getElementById("cfg-new-nome") ? document.getElementById("cfg-new-nome").value.trim() : "";
+  users.push({login:login,hash:hash,role:role,nome:nome});
   authSaveUsers(users);
   document.getElementById("cfg-new-login").value="";
   document.getElementById("cfg-new-pass").value="";
+  if(document.getElementById("cfg-new-nome")) document.getElementById("cfg-new-nome").value="";
   cfgRenderList();
 }
 
@@ -4683,6 +4706,19 @@ async function comLoad() {
     if (res.error) throw res.error;
     var data = res.data || [];
 
+    // Filtro automático para usuários restritos
+    var _session = authCurrentUser();
+    var _restricted = _session && !_session.master && _session.role==='restricted';
+    if(_restricted && _session.nome) {
+      var _nome = _session.nome.toLowerCase();
+      data = data.filter(function(r){
+        var tipo = comGetTipo(r);
+        if(tipo==='corretor') return true; // vê todas as comissões de corretores
+        // Gerência: vê apenas a própria
+        return (r.pessoa_nome||'').toLowerCase().includes(_nome);
+      });
+    }
+
     // Client-side filters
     var fTipo = document.getElementById('com-f-tipo').value;
     var fNome = (document.getElementById('com-f-nome').value || '').toLowerCase().trim();
@@ -4854,10 +4890,25 @@ function comExportPDF() {
     <div class="cfg-body">
       <div class="cfg-section">
         <h4>Adicionar novo usu&aacute;rio</h4>
-        <div class="cfg-form-row">
+        <div class="cfg-form-row" style="grid-template-columns:1fr 1fr">
           <input type="text" id="cfg-new-login" placeholder="Login">
-          <input type="password" id="cfg-new-pass" placeholder="Senha">
-          <button class="cfg-add-btn" onclick="cfgAddUser()">Adicionar</button>
+          <input type="password" id="cfg-new-pass" placeholder="Senha (min. 6 caracteres)">
+        </div>
+        <div class="cfg-form-row" style="grid-template-columns:1fr 1fr;margin-top:10px">
+          <div>
+            <label style="font-size:11px;font-weight:700;text-transform:uppercase;letter-spacing:.06em;color:#5f6368;display:block;margin-bottom:5px">N&#237;vel de Acesso</label>
+            <select id="cfg-new-role" class="cfg-form-row input" style="border:1.5px solid #e8eaed;border-radius:9px;padding:9px 12px;font-size:13px;font-family:DM Sans,sans-serif;width:100%;background:#fff">
+              <option value="admin">&#127775; Administrador (acesso total)</option>
+              <option value="restricted">&#128274; Restrito (SC + Comiss&#245;es)</option>
+            </select>
+          </div>
+          <div id="cfg-nome-wrap">
+            <label style="font-size:11px;font-weight:700;text-transform:uppercase;letter-spacing:.06em;color:#5f6368;display:block;margin-bottom:5px">Nome real <span style="font-weight:400;color:#9ca3af">(para filtro de comiss&#245;es)</span></label>
+            <input type="text" id="cfg-new-nome" placeholder="Ex: Ariel, Rodrigo, Erick..." style="border:1.5px solid #e8eaed;border-radius:9px;padding:9px 12px;font-size:13px;font-family:DM Sans,sans-serif;width:100%;box-sizing:border-box">
+          </div>
+        </div>
+        <div style="margin-top:12px">
+          <button class="cfg-add-btn" onclick="cfgAddUser()">Adicionar Usu&#225;rio</button>
         </div>
         <div class="cfg-form-err" id="cfg-form-err"></div>
       </div>
