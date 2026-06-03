@@ -693,8 +693,12 @@ input[type="checkbox"]{width:14px;height:14px;accent-color:var(--green-accent);c
 .bulk-btn.danger:hover{background:rgba(239,68,68,.35)}
 
 /* ── CHECKBOX COLUMN ── */
-.fin-table .col-chk{width:36px!important;min-width:36px!important;max-width:36px!important;text-align:center;padding:0 8px}
-.fin-table .col-chk input{width:16px;height:16px;cursor:pointer;accent-color:var(--brand);display:block;margin:0 auto}
+.fin-table .col-chk{width:36px!important;min-width:36px!important;max-width:36px!important;text-align:center;padding:8px}
+.fin-table .col-chk input[type=checkbox]{width:16px;height:16px;cursor:pointer;accent-color:var(--brand);display:block;margin:0 auto;flex-shrink:0}
+/* ── TABLE COLUMN WIDTHS ── */
+.fin-table td,.fin-table th{white-space:nowrap;overflow:hidden;text-overflow:ellipsis;max-width:220px}
+.fin-table td.col-actions,.fin-table th.col-actions{white-space:nowrap;overflow:visible;max-width:none}
+.fin-table td strong{display:block;overflow:hidden;text-overflow:ellipsis;max-width:200px}
 
 /* ── BULK MODALS ── */
 #bulk-pay-modal,#bulk-edit-modal{position:fixed;inset:0;z-index:9100;background:rgba(26,29,46,.65);backdrop-filter:blur(6px);display:none;align-items:center;justify-content:center}
@@ -1197,6 +1201,17 @@ input[type="checkbox"]{width:14px;height:14px;accent-color:var(--green-accent);c
       <div class="tbl-scroll-top" id="cp-scroll-top"><div class="tbl-scroll-top-inner" id="cp-scroll-spacer"></div></div>
       <div class="fin-table-wrap" id="cp-table-wrap" style="overflow-x:auto">
         <table class="fin-table">
+          <colgroup>
+            <col style="width:36px">
+            <col style="width:180px">
+            <col style="width:160px">
+            <col style="width:120px">
+            <col style="width:110px">
+            <col style="width:100px">
+            <col style="width:220px">
+            <col style="width:100px">
+            <col style="width:120px">
+          </colgroup>
           <thead><tr>
             <th class="col-chk"><input type="checkbox" class="fin-chk" id="cp-chk-all" onchange="cpToggleAll(this)" title="Selecionar todos"></th>
             <th>Fornecedor</th>
@@ -2523,20 +2538,7 @@ function cpRender(){
     return;
   }
   // Update scroll spacer width
-  setTimeout(function(){
-    var wrap=document.getElementById('cp-table-wrap');
-    var spacer=document.getElementById('cp-scroll-spacer');
-    var top=document.getElementById('cp-scroll-top');
-    if(wrap&&spacer&&top){
-      spacer.style.width=wrap.scrollWidth+'px';
-      top.removeEventListener('scroll',top._syncFn||null);
-      wrap.removeEventListener('scroll',wrap._syncFn||null);
-      top._syncFn=function(){wrap.scrollLeft=top.scrollLeft;};
-      wrap._syncFn=function(){top.scrollLeft=wrap.scrollLeft;};
-      top.addEventListener('scroll',top._syncFn);
-      wrap.addEventListener('scroll',wrap._syncFn);
-    }
-  },100);
+  setTimeout(cpInitScroll,200);
 
   tbody.innerHTML = rows.map(function(r){
     var parc = (r.total_parcelas>1) ? ' <small style="color:var(--text-dim)">('+r.parcela_atual+'/'+r.total_parcelas+')</small>' : '';
@@ -4366,6 +4368,19 @@ document.addEventListener('DOMContentLoaded', function(){
    BULK SELECTION — Contas a Pagar
 ==================================================== */
 if(typeof cpSelected==='undefined') var cpSelected = new Set();
+
+function cpInitScroll(){
+  var wrap=document.getElementById('cp-table-wrap');
+  var spacer=document.getElementById('cp-scroll-spacer');
+  var top=document.getElementById('cp-scroll-top');
+  if(!wrap||!spacer||!top) return;
+  spacer.style.width=wrap.scrollWidth+'px';
+  if(!top._scrollReady){
+    top._scrollReady=true;
+    top.addEventListener('scroll',function(){wrap.scrollLeft=top.scrollLeft;});
+    wrap.addEventListener('scroll',function(){top.scrollLeft=wrap.scrollLeft;});
+  }
+}
 
 function cpToggleAll(chk) {
   cpSelected.clear();
