@@ -743,6 +743,12 @@ input[type="checkbox"]{width:14px;height:14px;accent-color:var(--green-accent);c
 /* Row hover cursor */
 .fin-table tbody tr{cursor:pointer}
 .fin-table tbody tr:hover{background:var(--gray-50)}
+
+/* ── ABA COMISSÕES ── */
+.com-type-badge{display:inline-block;padding:2px 9px;border-radius:20px;font-size:11px;font-weight:700}
+.com-type-corretor{background:#dbeafe;color:#1e40af}
+.com-type-gerencia{background:#ede9fe;color:#6d28d9}
+.com-export-bar{display:flex;gap:10px;align-items:center;margin-bottom:16px;flex-wrap:wrap}
 </style>
 <style>
 .recibo-wrap{font-family:'DM Sans',Arial,sans-serif;max-width:680px;margin:40px auto;padding:40px;border:2px solid #1a1d2e;border-radius:4px}
@@ -834,6 +840,7 @@ input[type="checkbox"]{width:14px;height:14px;accent-color:var(--green-accent);c
     <button class="nav-tab" onclick="goTab('cp')" id="tab-cp">💸 Contas a Pagar</button>
     <button class="nav-tab" onclick="goTab('cr')" id="tab-cr">💰 Contas a Receber</button>
     <button class="nav-tab" onclick="goTab('saldo')" id="tab-saldo">🏦 Saldo</button>
+    <button class="nav-tab" onclick="goTab('comissoes')" id="tab-comissoes">🏆 Comissões</button>
   </div>
 </nav>
 
@@ -1345,6 +1352,114 @@ input[type="checkbox"]{width:14px;height:14px;accent-color:var(--green-accent);c
   ═══════════════════════════════════ -->
   <!-- /page-saldo -->
 
+  <!-- ═══ COMISSÕES ═══ -->
+  <div id="page-comissoes" style="display:none">
+    <div class="fin-page-hdr" style="margin-bottom:20px">
+      <div>
+        <h2 class="fin-page-title">🏆 Comissões</h2>
+        <p style="font-size:13px;color:var(--text-muted);margin-top:4px">Comissões de corretores e gerência — pagas e a pagar</p>
+      </div>
+    </div>
+
+    <!-- KPIs -->
+    <div class="fin-kpi-grid" style="margin-bottom:20px">
+      <div class="fin-kpi-card" style="border-left:3px solid var(--brand)">
+        <div class="fin-kpi-label">Total a Pagar</div>
+        <div class="fin-kpi-value" id="com-k-pendente">R$ 0,00</div>
+        <div class="fin-kpi-sub" id="com-k-pendente-n">0 comissões</div>
+      </div>
+      <div class="fin-kpi-card" style="border-left:3px solid #059669">
+        <div class="fin-kpi-label">Total Pago</div>
+        <div class="fin-kpi-value" style="color:#059669" id="com-k-pago">R$ 0,00</div>
+        <div class="fin-kpi-sub" id="com-k-pago-n">0 comissões</div>
+      </div>
+      <div class="fin-kpi-card" style="border-left:3px solid #2563eb">
+        <div class="fin-kpi-label">Corretores</div>
+        <div class="fin-kpi-value" id="com-k-cor">R$ 0,00</div>
+        <div class="fin-kpi-sub" id="com-k-cor-n">0 lançamentos</div>
+      </div>
+      <div class="fin-kpi-card" style="border-left:3px solid #7c3aed">
+        <div class="fin-kpi-label">Gerência</div>
+        <div class="fin-kpi-value" id="com-k-ger">R$ 0,00</div>
+        <div class="fin-kpi-sub" id="com-k-ger-n">0 lançamentos</div>
+      </div>
+    </div>
+
+    <!-- Filtros -->
+    <div class="rel-filters-card" style="margin-bottom:16px">
+      <div class="rel-filters-grid">
+        <div class="rel-filter-grp">
+          <label>Tipo</label>
+          <select id="com-f-tipo">
+            <option value="">Todos</option>
+            <option value="corretor">Corretor</option>
+            <option value="gerencia">Gerência</option>
+          </select>
+        </div>
+        <div class="rel-filter-grp">
+          <label>Status</label>
+          <select id="com-f-status">
+            <option value="">Todos</option>
+            <option value="pendente">Pendente</option>
+            <option value="pago">Pago</option>
+            <option value="vencido">Vencido</option>
+            <option value="cancelado">Cancelado</option>
+          </select>
+        </div>
+        <div class="rel-filter-grp">
+          <label>Per&#237;odo — De</label>
+          <input type="date" id="com-f-de">
+        </div>
+        <div class="rel-filter-grp">
+          <label>Per&#237;odo — At&#233;</label>
+          <input type="date" id="com-f-ate">
+        </div>
+        <div class="rel-filter-grp" style="grid-column:span 2">
+          <label>Nome (Corretor / Gerente)</label>
+          <input type="text" id="com-f-nome" placeholder="Digite o nome...">
+        </div>
+        <div class="rel-filter-grp" style="grid-column:span 2">
+          <label>Descri&#231;&#227;o / Empreendimento</label>
+          <input type="text" id="com-f-desc" placeholder="Empreendimento, observação...">
+        </div>
+      </div>
+      <div style="display:flex;gap:10px;margin-top:14px;flex-wrap:wrap">
+        <button class="rel-btn rel-btn-primary" onclick="comLoad()">🔍 Filtrar</button>
+        <button class="rel-btn rel-btn-excel" id="com-btn-csv" onclick="comExportCSV()" style="display:none">📊 Exportar Excel</button>
+        <button class="rel-btn rel-btn-pdf" id="com-btn-pdf" onclick="comExportPDF()" style="display:none">🖨️ Exportar PDF</button>
+        <button class="rel-btn" style="background:var(--gray-200);color:var(--text)" onclick="comClearFilters()">✕ Limpar filtros</button>
+        <span id="com-loading" style="font-size:13px;color:var(--text-muted);display:none;align-self:center">Carregando...</span>
+      </div>
+    </div>
+
+    <!-- Tabela -->
+    <div class="fin-table-wrap" id="com-table-wrap">
+      <div class="rel-summary-bar">
+        <span id="com-resumo">0 registros</span>
+        <strong id="com-total">Total: R$ 0,00</strong>
+      </div>
+      <div style="overflow-x:auto">
+        <table class="fin-table" style="width:100%">
+          <thead>
+            <tr>
+              <th>Tipo</th>
+              <th>Nome</th>
+              <th style="min-width:200px">Descri&#231;&#227;o</th>
+              <th style="text-align:right">Valor</th>
+              <th>Vencimento</th>
+              <th>Data Pgto</th>
+              <th>Status</th>
+              <th>A&#231;&#245;es</th>
+            </tr>
+          </thead>
+          <tbody id="com-tbody">
+            <tr><td colspan="8" style="text-align:center;padding:40px;color:var(--text-muted)">Use os filtros acima e clique em Filtrar</td></tr>
+          </tbody>
+        </table>
+      </div>
+    </div>
+  </div><!-- /page-comissoes -->
+
 </main>
 
 <!-- MODAL SC -->
@@ -1398,7 +1513,7 @@ window.addEventListener('DOMContentLoaded',()=>{
   loadData();
 });
 
-const PAGES=['overview','fc','sc','relatorios','cp','cr','saldo'];
+const PAGES=['overview','fc','sc','relatorios','cp','cr','saldo','comissoes'];
 function goTab(id){
   PAGES.forEach(p=>{
     document.getElementById('page-'+p).style.display=p===id?'':'none';
@@ -1410,6 +1525,7 @@ function goTab(id){
   if(id==='cp') cpLoad();
   if(id==='cr') crLoad();
   if(id==='saldo') saldoLoad();
+  if(id==='comissoes') comLoad();
 }
 
 // ═══════════════════════════════════════════════════════
@@ -4530,6 +4646,202 @@ function cpDetailEdit() {
 function cpDetailPagar() {
   cpDetailClose();
   if(cpDetailId) cpMarkPago(cpDetailId, null);
+}
+
+
+/* ====================================================
+   MÓDULO COMISSÕES
+==================================================== */
+var comData = [];
+
+function comGetTipo(r) {
+  var cat = (r.categoria_nome || '').toLowerCase();
+  if (cat.includes('gerenc') || cat.includes('gerên')) return 'gerencia';
+  return 'corretor';
+}
+
+async function comLoad() {
+  if (!sb) { toast('\u26a0\ufe0f', 'Supabase não conectado', 'warn'); return; }
+  var loadEl = document.getElementById('com-loading');
+  if (loadEl) loadEl.style.display = 'inline';
+  try {
+    var q = sb.from('contas_pagar')
+      .select('*')
+      .or('categoria_nome.ilike.%Comissão%,categoria_nome.ilike.%comissao%,categoria_nome.ilike.%Comissao%');
+
+    var status = document.getElementById('com-f-status').value;
+    var de     = document.getElementById('com-f-de').value;
+    var ate    = document.getElementById('com-f-ate').value;
+
+    if (status) q = q.eq('status', status);
+    if (de)     q = q.gte('vencimento', de);
+    if (ate)    q = q.lte('vencimento', ate);
+
+    q = q.order('vencimento', { ascending: false });
+
+    var res = await q;
+    if (res.error) throw res.error;
+    var data = res.data || [];
+
+    // Client-side filters
+    var fTipo = document.getElementById('com-f-tipo').value;
+    var fNome = (document.getElementById('com-f-nome').value || '').toLowerCase().trim();
+    var fDesc = (document.getElementById('com-f-desc').value || '').toLowerCase().trim();
+
+    if (fTipo) data = data.filter(function(r) { return comGetTipo(r) === fTipo; });
+    if (fNome) data = data.filter(function(r) { return (r.pessoa_nome || '').toLowerCase().includes(fNome); });
+    if (fDesc) data = data.filter(function(r) {
+      return (r.descricao || '').toLowerCase().includes(fDesc) || (r.observacoes || '').toLowerCase().includes(fDesc);
+    });
+
+    comData = data;
+    comRender();
+
+    var hasData = data.length > 0;
+    document.getElementById('com-btn-csv').style.display = hasData ? 'inline-flex' : 'none';
+    document.getElementById('com-btn-pdf').style.display = hasData ? 'inline-flex' : 'none';
+
+  } catch(e) {
+    toast('\u274c', 'Erro ao carregar: ' + e.message, 'error');
+  } finally {
+    if (loadEl) loadEl.style.display = 'none';
+  }
+}
+
+function comRender() {
+  var data = comData;
+
+  // KPIs
+  var pendente = data.filter(function(r){ return r.status==='pendente'||r.status==='vencido'; });
+  var pago     = data.filter(function(r){ return r.status==='pago'; });
+  var cor      = data.filter(function(r){ return comGetTipo(r)==='corretor'; });
+  var ger      = data.filter(function(r){ return comGetTipo(r)==='gerencia'; });
+  var sum = function(arr){ return arr.reduce(function(s,r){ return s+(parseFloat(r.valor)||0); }, 0); };
+
+  document.getElementById('com-k-pendente').textContent   = fmtBRL(sum(pendente));
+  document.getElementById('com-k-pendente-n').textContent = pendente.length + ' comissões';
+  document.getElementById('com-k-pago').textContent       = fmtBRL(sum(pago));
+  document.getElementById('com-k-pago-n').textContent     = pago.length + ' comissões';
+  document.getElementById('com-k-cor').textContent        = fmtBRL(sum(cor));
+  document.getElementById('com-k-cor-n').textContent      = cor.length + ' lançamentos';
+  document.getElementById('com-k-ger').textContent        = fmtBRL(sum(ger));
+  document.getElementById('com-k-ger-n').textContent      = ger.length + ' lançamentos';
+
+  var total = sum(data);
+  document.getElementById('com-resumo').textContent = data.length + ' registro(s)';
+  document.getElementById('com-total').textContent  = 'Total: ' + fmtBRL(total);
+
+  // Tabela
+  var tbody = document.getElementById('com-tbody');
+  if (!data.length) {
+    tbody.innerHTML = '<tr><td colspan="8" style="text-align:center;padding:40px;color:var(--text-muted)">Nenhuma comissão encontrada com os filtros selecionados.</td></tr>';
+    return;
+  }
+
+  tbody.innerHTML = data.map(function(r) {
+    var tipo = comGetTipo(r);
+    var tipoBadge = tipo === 'gerencia'
+      ? '<span class="com-type-badge com-type-gerencia">Gerência</span>'
+      : '<span class="com-type-badge com-type-corretor">Corretor</span>';
+    var dpColor = r.data_pagamento ? '#059669' : '#d1d5db';
+    var dpText  = r.data_pagamento ? fmtDateBR(r.data_pagamento) : '—';
+    return '<tr data-rid="' + r.id + '" onclick="cpDetailOpen(this.dataset.rid)" style="cursor:pointer">'
+      + '<td>' + tipoBadge + '</td>'
+      + '<td style="white-space:nowrap;max-width:180px;overflow:hidden;text-overflow:ellipsis" title="'+(r.pessoa_nome||'')+'">' + (r.pessoa_nome || '—') + '</td>'
+      + '<td style="max-width:220px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap" title="'+(r.descricao||'')+'">' + (r.descricao || '—') + '</td>'
+      + '<td style="text-align:right;white-space:nowrap;font-family:DM Mono,monospace">' + fmtBRL(r.valor) + '</td>'
+      + '<td style="white-space:nowrap;font-family:DM Mono,monospace">' + fmtDateBR(r.vencimento) + '</td>'
+      + '<td style="color:' + dpColor + ';white-space:nowrap;font-family:DM Mono,monospace">' + dpText + '</td>'
+      + '<td>' + statusBadge(r.status) + '</td>'
+      + '<td style="white-space:nowrap" onclick="event.stopPropagation()">'
+        + (r.status==='pendente'||r.status==='vencido' ? '<button class="btn-tbl success" onclick="cpMarkPago(\''+r.id+'\',event)">&#10003; Pago</button> ' : '')
+        + '<button class="btn-tbl primary" onclick="cpOpenEdit(\''+r.id+'\')">&#9998;</button>'
+      + '</td>'
+    + '</tr>';
+  }).join('');
+}
+
+function comClearFilters() {
+  ['com-f-tipo','com-f-status','com-f-de','com-f-ate','com-f-nome','com-f-desc'].forEach(function(id) {
+    var el = document.getElementById(id);
+    if (el) el.value = '';
+  });
+}
+
+/* ── Export CSV ── */
+function comExportCSV() {
+  if (!comData.length) { toast('\u26a0\ufe0f', 'Sem dados para exportar', 'warn'); return; }
+  var BOM = '\uFEFF';
+  var header = 'Tipo;Nome;Descrição;Valor;Vencimento;Data Pagamento;Status;Observações';
+  var rows = comData.map(function(r) {
+    return [
+      comGetTipo(r) === 'gerencia' ? 'Gerência' : 'Corretor',
+      r.pessoa_nome || '',
+      r.descricao || '',
+      (parseFloat(r.valor)||0).toFixed(2).replace('.', ','),
+      r.vencimento || '',
+      r.data_pagamento || '',
+      r.status || '',
+      (r.observacoes || '').replace(/\n/g, ' ')
+    ].map(function(v) { return '"' + String(v).replace(/"/g, '""') + '"'; }).join(';');
+  });
+  var csv = BOM + header + '\n' + rows.join('\n');
+  var blob = new Blob([csv], { type: 'text/csv;charset=utf-8;' });
+  var url = URL.createObjectURL(blob);
+  var a = document.createElement('a');
+  a.href = url;
+  a.download = 'Comissoes_' + new Date().toISOString().slice(0,10) + '.csv';
+  document.body.appendChild(a);
+  a.click();
+  document.body.removeChild(a);
+  URL.revokeObjectURL(url);
+  toast('\u2705', 'Excel gerado!', 'success');
+}
+
+/* ── Export PDF ── */
+function comExportPDF() {
+  if (!comData.length) { toast('\u26a0\ufe0f', 'Sem dados para exportar', 'warn'); return; }
+  var hoje  = new Date().toLocaleDateString('pt-BR');
+  var total = comData.reduce(function(s,r){ return s+(parseFloat(r.valor)||0); }, 0);
+
+  var rows = comData.map(function(r) {
+    var tipo = comGetTipo(r) === 'gerencia' ? 'Gerência' : 'Corretor';
+    var dp   = r.data_pagamento ? fmtDateBR(r.data_pagamento) : '—';
+    return '<tr>'
+      + '<td>' + tipo + '</td>'
+      + '<td>' + (r.pessoa_nome || '—') + '</td>'
+      + '<td>' + (r.descricao || '—') + '</td>'
+      + '<td style="text-align:right">' + fmtBRL(r.valor) + '</td>'
+      + '<td>' + fmtDateBR(r.vencimento) + '</td>'
+      + '<td style="color:' + (r.data_pagamento?'#059669':'#9ca3af') + '">' + dp + '</td>'
+      + '<td>' + (r.status || '—') + '</td>'
+    + '</tr>';
+  }).join('');
+
+  var win = window.open('', '_blank', 'width=1100,height=800');
+  win.document.write('<!DOCTYPE html><html><head><meta charset="UTF-8"><title>Comissões</title><style>'
+    + 'body{font-family:Arial,sans-serif;font-size:12px;margin:0;padding:24px;color:#1a1d2e}'
+    + '.hdr{display:flex;justify-content:space-between;align-items:flex-start;border-bottom:3px solid #F47920;padding-bottom:14px;margin-bottom:18px}'
+    + '.co{font-size:18px;font-weight:800;color:#1a1d2e}.co span{display:block;font-size:10px;color:#6b7280;font-weight:400;letter-spacing:.1em;text-transform:uppercase}'
+    + 'h1{font-size:16px;margin:0 0 4px}p.sub{font-size:11px;color:#6b7280;margin:0}'
+    + 'table{width:100%;border-collapse:collapse}'
+    + 'thead th{background:#1a1d2e;color:#fff;padding:8px 10px;font-size:11px;text-align:left;text-transform:uppercase;letter-spacing:.04em}'
+    + 'tbody td{padding:7px 10px;border-bottom:1px solid #e5e7eb;font-size:12px}'
+    + 'tbody tr:nth-child(even){background:#f9fafb}'
+    + '.total-row td{font-weight:800;border-top:2px solid #1a1d2e;background:#fff8f0}'
+    + '.footer{margin-top:20px;font-size:10px;color:#9ca3af;text-align:center}'
+    + '@media print{@page{margin:15mm}}'
+    + '</style></head><body>'
+    + '<div class="hdr"><div class="co">DIFERENCIAL <span>IMÓVEIS</span></div>'
+    + '<div><h1>Relatório de Comissões</h1><p class="sub">Gerado em ' + hoje + ' &nbsp;|&nbsp; ' + comData.length + ' registro(s)</p></div></div>'
+    + '<table><thead><tr><th>Tipo</th><th>Nome</th><th>Descrição</th><th style="text-align:right">Valor</th><th>Vencimento</th><th>Data Pgto</th><th>Status</th></tr></thead>'
+    + '<tbody>' + rows
+    + '<tr class="total-row"><td colspan="3" style="text-align:right">TOTAL</td><td style="text-align:right">' + fmtBRL(total) + '</td><td colspan="3"></td></tr>'
+    + '</tbody></table>'
+    + '<div class="footer">Diferencial Imóveis &mdash; Sistema Financeiro &mdash; ' + hoje + '</div>'
+    + '</body></html>');
+  win.document.close();
+  setTimeout(function() { win.print(); }, 600);
 }
 
 </script>
