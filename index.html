@@ -1225,31 +1225,23 @@ input[type="checkbox"]{width:14px;height:14px;accent-color:var(--green-accent);c
       <div class="tbl-scroll-top" id="cp-scroll-top"><div class="tbl-scroll-top-inner" id="cp-scroll-spacer"></div></div>
       <div class="fin-table-wrap" id="cp-table-wrap" style="overflow-x:auto">
         <table class="fin-table">
-          <colgroup>
-            <col style="width:36px">
-            <col style="width:170px">
-            <col style="width:140px">
-            <col style="width:110px">
-            <col style="width:100px">
-            <col style="width:100px">
-            <col style="width:100px">
-            <col style="width:190px">
-            <col style="width:120px">
-            <col style="width:90px">
-          </colgroup>
-          <thead><tr>
-            <th style="width:36px;text-align:center;padding:8px"><input type="checkbox" id="cp-chk-all" onchange="cpToggleAll(this)" title="Selecionar todos" style="width:15px;height:15px;cursor:pointer;accent-color:#F47920;vertical-align:middle"></th>
-            <th>Fornecedor</th>
-            <th>Categoria</th>
-            <th style="text-align:right">Valor</th>
-            <th>Vencimento</th>
-            <th>Data Pgto</th>
-            <th>Status</th>
-            <th>Descri&#231;&#227;o</th>
-            <th class="col-actions">A&#231;&#245;es</th>
-            <th>Projeto</th>
-          </tr></thead>
+          <table class="fin-table" style="width:100%;border-collapse:collapse">
+          <thead>
+            <tr>
+              <th style="width:40px;text-align:center"><input type="checkbox" id="cp-chk-all" onchange="cpToggleAll(this)" style="width:15px;height:15px;cursor:pointer;accent-color:#F47920" title="Selecionar todos"></th>
+              <th style="min-width:160px">Fornecedor</th>
+              <th style="min-width:130px">Categoria</th>
+              <th style="width:110px;text-align:right">Valor</th>
+              <th style="width:100px">Vencimento</th>
+              <th style="width:100px">Data Pgto</th>
+              <th style="width:100px">Status</th>
+              <th style="min-width:180px">Descri&#231;&#227;o</th>
+              <th style="width:130px">A&#231;&#245;es</th>
+              <th style="width:90px">Projeto</th>
+            </tr>
+          </thead>
           <tbody id="cp-tbody"></tbody>
+        </table>
         </table>
       </div>
     </div>
@@ -2567,23 +2559,28 @@ function cpRender(){
   setTimeout(cpInitScroll,200);
 
   tbody.innerHTML = rows.map(function(r){
-    var parc = (r.total_parcelas>1) ? ' <small style="color:var(--text-dim)">('+r.parcela_atual+'/'+r.total_parcelas+')</small>' : '';
-    var sel = (typeof cpSelected!=='undefined' && cpSelected.has(r.id));
-    return '<tr style="'+(sel?'background:rgba(244,121,32,.08)':'')+'cursor:pointer" onclick="cpRowClick(event,\''+r.id+'\')">'
-      +'<td style="width:36px;text-align:center;padding:8px" onclick="event.stopPropagation()"><input type="checkbox" class="cp-row-chk"'+(sel?' checked':'')+' onchange="cpToggleRow(\''+r.id+'\',this)" style="width:15px;height:15px;cursor:pointer;accent-color:#F47920;vertical-align:middle"></td>'
-      +'<td style="overflow:hidden;text-overflow:ellipsis;white-space:nowrap" title="'+(r.pessoa_nome||'')+'">'+(r.pessoa_nome||'<span style="color:#9ca3af">—</span>')+'</td>'
-      +'<td style="overflow:hidden;text-overflow:ellipsis;white-space:nowrap">'+(r.categoria_nome||'<span style="color:#9ca3af">—</span>')+'</td>'
-      +'<td style="text-align:right;font-family:\'DM Mono\',monospace;white-space:nowrap">'+fmtBRL(r.valor)+'</td>'
-      +'<td style="font-family:\'DM Mono\',monospace;white-space:nowrap">'+fmtDateBR(r.vencimento)+'</td>'
-      +'<td style="font-family:\'DM Mono\',monospace;white-space:nowrap;color:'+(r.data_pagamento?'#059669':'#d1d5db')+'">'+fmtDateBR(r.data_pagamento)+'</td>'
-      +'<td>'+statusBadge(r.status)+'</td>'
-      +'<td style="overflow:hidden;text-overflow:ellipsis;white-space:nowrap" title="'+(r.descricao||'')+'">'+(r.descricao||'—')+parc+'</td>'
-      +'<td class="col-actions" style="white-space:nowrap">'
-        +(r.status==='pendente'||r.status==='vencido' ? '<button class="btn-tbl success" onclick="cpMarkPago(\''+r.id+'\',event)">&#10003; Pago</button> ' : '')
-        +'<button class="btn-tbl primary" onclick="cpOpenEdit(\''+r.id+'\')" title="Editar">&#9998;</button> '
-        +'<button class="btn-tbl danger" onclick="cpDelete(\''+r.id+'\')" title="Cancelar">&#10005;</button>'
-      +'</td>'
-      +'<td style="white-space:nowrap">'+projBadge(r.projeto_nome)+'</td>'
+    var parc = (r.total_parcelas>1) ? ' ('+r.parcela_atual+'/'+r.total_parcelas+')' : '';
+    var sel  = (typeof cpSelected!=='undefined') && cpSelected.has(r.id);
+    var bg   = sel ? 'style="background:rgba(244,121,32,.07)"' : '';
+    var dp   = r.data_pagamento ? '<span style="color:#059669;font-family:DM Mono,monospace">'+fmtDateBR(r.data_pagamento)+'</span>' : '<span style="color:#d1d5db">—</span>';
+    var acoes = '<td style="white-space:nowrap" onclick="event.stopPropagation()">'
+      +(r.status==='pendente'||r.status==='vencido' ? '<button class="btn-tbl success" onclick="cpMarkPago(\''+r.id+'\',event)">&#10003; Pago</button> ' : '')
+      +'<button class="btn-tbl primary" onclick="cpOpenEdit(\''+r.id+'\')">&#9998;</button> '
+      +'<button class="btn-tbl danger" onclick="cpDelete(\''+r.id+'\')">&#10005;</button>'
+      +'</td>';
+    return '<tr '+bg+' onclick="cpRowClick(event,\''+r.id+'\');" style="cursor:pointer">'
+      + '<td style="width:40px;text-align:center" onclick="event.stopPropagation()">'
+      +   '<input type="checkbox" class="cp-row-chk"'+(sel?' checked':'')+' onchange="cpToggleRow(\''+r.id+'\',this)" style="width:15px;height:15px;cursor:pointer;accent-color:#F47920">'
+      + '</td>'
+      + '<td style="max-width:180px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap" title="'+(r.pessoa_nome||'')+'">'+(r.pessoa_nome||'—')+'</td>'
+      + '<td style="max-width:150px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap">'+(r.categoria_nome||'—')+'</td>'
+      + '<td style="text-align:right;white-space:nowrap;font-family:DM Mono,monospace">'+fmtBRL(r.valor)+'</td>'
+      + '<td style="white-space:nowrap;font-family:DM Mono,monospace">'+fmtDateBR(r.vencimento)+'</td>'
+      + '<td>'+dp+'</td>'
+      + '<td>'+statusBadge(r.status)+'</td>'
+      + '<td style="max-width:200px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap" title="'+(r.descricao||'')+'">'+(r.descricao||'—')+parc+'</td>'
+      + acoes
+      + '<td>'+projBadge(r.projeto_nome)+'</td>'
     +'</tr>';
   }).join('');
 }
