@@ -2405,7 +2405,11 @@ function authApplySession(session){
   document.getElementById("auth-logout-btn").style.display="flex";
   document.getElementById("auth-user-label").textContent=session.login;
   document.getElementById("auth-avatar").textContent=session.login.charAt(0).toUpperCase();
-  var isRestricted = !session.master && session.role==="restricted";
+  // Lê sempre o registro atual (não depende da sessão antiga)
+  var _liveUser = authGetUsers().find(function(u){
+    return u.login.toLowerCase()===session.login.toLowerCase();
+  });
+  var isRestricted = !session.master && _liveUser && _liveUser.role==="restricted";
 
   if(session.master) document.getElementById("cfg-open-btn").style.display="flex";
 
@@ -4706,30 +4710,32 @@ async function comLoad() {
     if (res.error) throw res.error;
     var data = res.data || [];
 
-    // Filtro automático para usuários restritos
+    // Filtro automático: lê sempre da lista de usuários (não depende da sessão antiga)
     var _session = authCurrentUser();
-    var _restricted = _session && !_session.master && _session.role==='restricted';
-    if(_restricted && _session.nome) {
-      var _myNome = _session.nome.trim().toLowerCase();
-
-      // Blacklist dinâmica: nomes de TODOS os usuários internos cadastrados
-      var _allUsers = authGetUsers();
-      var _blacklist = _allUsers
-        .filter(function(u){ return u.nome && u.nome.trim(); })
-        .map(function(u){ return u.nome.trim().toLowerCase(); });
-
-      data = data.filter(function(r){
-        var pnome = (r.pessoa_nome || '').toLowerCase();
-
-        // Sempre mostra as próprias comissões
-        if(pnome.includes(_myNome)) return true;
-
-        // Esconde comissões de outros internos (blacklist)
-        var isInternal = _blacklist.some(function(n){
-          return n && pnome.includes(n);
-        });
-        return !isInternal;
+    if(_session && !_session.master) {
+      // Busca registro atual do usuário no localStorage
+      var _userRec = authGetUsers().find(function(u){
+        return u.login.toLowerCase() === _session.login.toLowerCase();
       });
+      var _isRestricted = _userRec && _userRec.role === 'restricted';
+      var _myNome = (_userRec && _userRec.nome) ? _userRec.nome.trim().toLowerCase() : '';
+
+      if(_isRestricted && _myNome) {
+        // Blacklist = nomes de TODOS os usuários internos cadastrados
+        var _allUsers = authGetUsers();
+        var _blacklist = _allUsers
+          .filter(function(u){ return u.nome && u.nome.trim(); })
+          .map(function(u){ return u.nome.trim().toLowerCase(); });
+
+        data = data.filter(function(r){
+          var pnome = (r.pessoa_nome || '').toLowerCase();
+          // Sempre mostra as próprias comissões
+          if(pnome.includes(_myNome)) return true;
+          // Esconde comissões de outros internos (qualquer nome na blacklist)
+          var isInternal = _blacklist.some(function(n){ return n && pnome.includes(n); });
+          return !isInternal;
+        });
+      }
     }
 
     // Client-side filters
