@@ -4532,9 +4532,13 @@ async function bulkEditConfirm() {
   }
 }
 
-/* Close modals on backdrop click */
-document.getElementById('bulk-pay-modal').addEventListener('click', function(e){ if(e.target===this) bulkPayClose(); });
-document.getElementById('bulk-edit-modal').addEventListener('click', function(e){ if(e.target===this) bulkEditClose(); });
+/* Close modals on backdrop click — runs after DOM fully loaded */
+document.addEventListener('DOMContentLoaded', function(){
+  var bpm = document.getElementById('bulk-pay-modal');
+  var bem = document.getElementById('bulk-edit-modal');
+  if(bpm) bpm.addEventListener('click', function(e){ if(e.target===this) bulkPayClose(); });
+  if(bem) bem.addEventListener('click', function(e){ if(e.target===this) bulkEditClose(); });
+});
 
 async function cpCancelSelected(){
   if(!cpSelected.size) return;
