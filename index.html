@@ -2332,6 +2332,20 @@ function toast(icon,msg,type){
 var MASTER_LOGIN="Amabily";
 var MASTER_HASH="4c609781674c35b2bc9b623038571c3d6d748dbad14e18d72dc42773d5a0f640";
 
+/* ── CONFIGURAÇÃO DE PERMISSÕES ─────────────────────────────
+   Logins com acesso restrito (só SC + Comissões).
+   Para adicionar mais usuários restritos, inclua o login em minúsculas.
+   Os nomes são usados para filtrar comissões de gerência.
+   Os nomes internos são usados como blacklist (ocultar de outros gerentes).
+──────────────────────────────────────────────────────────── */
+var PERM_RESTRICTED = {
+  'ariel':   'Ariel',
+  'rodrigo': 'Rodrigo',
+  'erick':   'Erick'
+};
+// Todos os nomes internos (gerentes + admins) — aparecem nas comissões
+var PERM_INTERNAL_NAMES = ['guilherme','lauriete','ariel','rodrigo','erick'];
+
 function sha256(str){
   /* SHA-256 puro JS — funciona em HTTP e HTTPS */
   function rot(n,k){return(n>>>k)|(n<<(32-k));}
@@ -2405,11 +2419,13 @@ function authApplySession(session){
   document.getElementById("auth-logout-btn").style.display="flex";
   document.getElementById("auth-user-label").textContent=session.login;
   document.getElementById("auth-avatar").textContent=session.login.charAt(0).toUpperCase();
-  // Lê sempre o registro atual (não depende da sessão antiga)
-  var _liveUser = authGetUsers().find(function(u){
-    return u.login.toLowerCase()===session.login.toLowerCase();
-  });
-  var isRestricted = !session.master && _liveUser && _liveUser.role==="restricted";
+  // Verifica restrição: config hardcoded OU localStorage role
+  var _loginLc = session.login.toLowerCase();
+  var _liveUser = authGetUsers().find(function(u){ return u.login.toLowerCase()===_loginLc; });
+  var isRestricted = !session.master && (
+    (_loginLc in PERM_RESTRICTED) ||
+    (_liveUser && _liveUser.role==="restricted")
+  );
 
   if(session.master) document.getElementById("cfg-open-btn").style.display="flex";
 
@@ -4710,31 +4726,35 @@ async function comLoad() {
     if (res.error) throw res.error;
     var data = res.data || [];
 
-    // Filtro automático: lê sempre da lista de usuários (não depende da sessão antiga)
+    // Filtro automático baseado na configuração PERM_RESTRICTED
     var _session = authCurrentUser();
     if(_session && !_session.master) {
-      // Busca registro atual do usuário no localStorage
-      var _userRec = authGetUsers().find(function(u){
-        return u.login.toLowerCase() === _session.login.toLowerCase();
-      });
-      var _isRestricted = _userRec && _userRec.role === 'restricted';
-      var _myNome = (_userRec && _userRec.nome) ? _userRec.nome.trim().toLowerCase() : '';
+      var _loginLc = _session.login.toLowerCase();
+      // Verifica restrição via config hardcoded OU localStorage
+      var _userRec = authGetUsers().find(function(u){ return u.login.toLowerCase()===_loginLc; });
+      var _isRestricted = (_loginLc in PERM_RESTRICTED) || (_userRec && _userRec.role==='restricted');
 
-      if(_isRestricted && _myNome) {
-        // Blacklist = nomes de TODOS os usuários internos cadastrados
-        var _allUsers = authGetUsers();
-        var _blacklist = _allUsers
-          .filter(function(u){ return u.nome && u.nome.trim(); })
-          .map(function(u){ return u.nome.trim().toLowerCase(); });
+      if(_isRestricted) {
+        // Nome do próprio usuário para mostrar suas comissões
+        var _myNome = (PERM_RESTRICTED[_loginLc] || (_userRec&&_userRec.nome) || '').toLowerCase();
 
-        data = data.filter(function(r){
-          var pnome = (r.pessoa_nome || '').toLowerCase();
-          // Sempre mostra as próprias comissões
-          if(pnome.includes(_myNome)) return true;
-          // Esconde comissões de outros internos (qualquer nome na blacklist)
-          var isInternal = _blacklist.some(function(n){ return n && pnome.includes(n); });
-          return !isInternal;
+        // Blacklist: config hardcoded + nomes de usuários com nome preenchido no localStorage
+        var _blacklist = PERM_INTERNAL_NAMES.slice(); // cópia do array hardcoded
+        authGetUsers().forEach(function(u){
+          if(u.nome && u.nome.trim()){
+            var n = u.nome.trim().toLowerCase();
+            if(_blacklist.indexOf(n) < 0) _blacklist.push(n);
+          }
         });
+
+        if(_myNome) {
+          data = data.filter(function(r){
+            var pnome = (r.pessoa_nome || '').toLowerCase();
+            if(pnome.includes(_myNome)) return true; // sempre mostra as próprias
+            var isInternal = _blacklist.some(function(n){ return n && pnome.includes(n); });
+            return !isInternal; // mostra somente externos
+          });
+        }
       }
     }
 
