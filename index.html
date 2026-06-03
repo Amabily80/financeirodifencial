@@ -3704,65 +3704,6 @@ async function cpLoad(){
   }
 }
 
-function cpRender(){
-  var search = (document.getElementById('cp-f-search')?.value||'').toLowerCase();
-  var rows = FS.cpRows.filter(function(r){
-    if(!search) return true;
-    return (r.descricao||'').toLowerCase().includes(search)
-      || (r.pessoa_nome||'').toLowerCase().includes(search)
-      || (r.categoria_nome||'').toLowerCase().includes(search);
-  });
-
-  // KPIs
-  var hoje = new Date(); hoje.setHours(0,0,0,0);
-  var em7 = new Date(hoje); em7.setDate(em7.getDate()+7);
-  var mesAtual = hoje.getMonth(), anoAtual = hoje.getFullYear();
-  var totalPendente=0, pagoMes=0, vencidas=0, vence7=0;
-  FS.cpRows.forEach(function(r){
-    if(r.status==='pendente'||r.status==='vencido') totalPendente += parseFloat(r.valor)||0;
-    if(r.status==='pago'){
-      var dp = r.data_pagamento ? new Date(r.data_pagamento+'T00:00:00') : null;
-      if(dp && dp.getMonth()===mesAtual && dp.getFullYear()===anoAtual) pagoMes += parseFloat(r.valor_pago||r.valor)||0;
-    }
-    if(r.status==='vencido') vencidas++;
-    if((r.status==='pendente')){
-      var dv = r.vencimento ? new Date(r.vencimento+'T00:00:00') : null;
-      if(dv && dv>=hoje && dv<=em7) vence7++;
-    }
-  });
-  document.getElementById('cp-k1').textContent = fmtBRL(totalPendente);
-  document.getElementById('cp-k2').textContent = fmtBRL(pagoMes);
-  document.getElementById('cp-k3').textContent = vencidas + ' conta(s)';
-  document.getElementById('cp-k4').textContent = vence7 + ' conta(s)';
-
-  // Tabela
-  var count = document.getElementById('cp-count');
-  if(count) count.textContent = rows.length + ' registro(s)';
-  var tbody = document.getElementById('cp-tbody');
-  if(!tbody) return;
-  if(!rows.length){
-    tbody.innerHTML = '<tr><td colspan="8"><div class="fin-empty"><div class="icon">💸</div><p>Nenhuma conta encontrada.</p></div></td></tr>';
-    return;
-  }
-  tbody.innerHTML = rows.map(function(r){
-    var parc = (r.total_parcelas>1) ? ' <small style="color:var(--text-dim)">('+r.parcela_atual+'/'+r.total_parcelas+')</small>' : '';
-    return '<tr>'
-      +'<td><strong>'+(r.descricao||'—')+'</strong>'+parc+'</td>'
-      +'<td>'+(r.pessoa_nome||'<span class="muted">—</span>')+'</td>'
-      +'<td>'+(r.categoria_nome||'<span class="muted">—</span>')+'</td>'
-      +'<td>'+projBadge(r.projeto_nome)+'</td>'
-      +'<td style="text-align:right;font-family:\'DM Mono\',monospace">'+fmtBRL(r.valor)+'</td>'
-      +'<td style="font-family:\'DM Mono\',monospace">'+fmtDateBR(r.vencimento)+'</td>'
-      +'<td>'+statusBadge(r.status)+'</td>'
-      +'<td class="col-actions">'
-        +(r.status==='pendente'||r.status==='vencido' ? '<button class="btn-tbl success" onclick="cpMarkPago(\''+r.id+'\',event)">✓ Pago</button> ' : '')
-        +'<button class="btn-tbl primary" onclick="cpOpenEdit(\''+r.id+'\')">✏️</button> '
-        +'<button class="btn-tbl danger" onclick="cpDelete(\''+r.id+'\')">🗑️</button>'
-      +'</td>'
-    +'</tr>';
-  }).join('');
-}
-
 function cpOpenNew(){
   FS.mode='cp'; FS.editId=null;
   finModalOpen('Nova Conta a Pagar','Preencha os dados do lançamento');
@@ -3887,63 +3828,6 @@ async function crLoad(){
   }catch(e){
     toast('❌','Erro ao carregar Contas a Receber: '+e.message,'error');
   }
-}
-
-function crRender(){
-  var search = (document.getElementById('cr-f-search')?.value||'').toLowerCase();
-  var rows = FS.crRows.filter(function(r){
-    if(!search) return true;
-    return (r.descricao||'').toLowerCase().includes(search)
-      || (r.pessoa_nome||'').toLowerCase().includes(search)
-      || (r.categoria_nome||'').toLowerCase().includes(search);
-  });
-
-  var hoje = new Date(); hoje.setHours(0,0,0,0);
-  var em7 = new Date(hoje); em7.setDate(em7.getDate()+7);
-  var mesAtual = hoje.getMonth(), anoAtual = hoje.getFullYear();
-  var totalPendente=0, recMes=0, atrasadas=0, vence7=0;
-  FS.crRows.forEach(function(r){
-    if(r.status==='pendente'||r.status==='atrasado') totalPendente += parseFloat(r.valor)||0;
-    if(r.status==='recebido'){
-      var dp = r.data_recebimento ? new Date(r.data_recebimento+'T00:00:00') : null;
-      if(dp && dp.getMonth()===mesAtual && dp.getFullYear()===anoAtual) recMes += parseFloat(r.valor_recebido||r.valor)||0;
-    }
-    if(r.status==='atrasado') atrasadas++;
-    if(r.status==='pendente'){
-      var dv = r.vencimento ? new Date(r.vencimento+'T00:00:00') : null;
-      if(dv && dv>=hoje && dv<=em7) vence7++;
-    }
-  });
-  document.getElementById('cr-k1').textContent = fmtBRL(totalPendente);
-  document.getElementById('cr-k2').textContent = fmtBRL(recMes);
-  document.getElementById('cr-k3').textContent = atrasadas + ' conta(s)';
-  document.getElementById('cr-k4').textContent = vence7 + ' conta(s)';
-
-  var count = document.getElementById('cr-count');
-  if(count) count.textContent = rows.length + ' registro(s)';
-  var tbody = document.getElementById('cr-tbody');
-  if(!tbody) return;
-  if(!rows.length){
-    tbody.innerHTML = '<tr><td colspan="8"><div class="fin-empty"><div class="icon">💰</div><p>Nenhuma conta encontrada.</p></div></td></tr>';
-    return;
-  }
-  tbody.innerHTML = rows.map(function(r){
-    var parc = (r.total_parcelas>1) ? ' <small style="color:var(--text-dim)">('+r.parcela_atual+'/'+r.total_parcelas+')</small>' : '';
-    return '<tr>'
-      +'<td><strong>'+(r.descricao||'—')+'</strong>'+parc+'</td>'
-      +'<td>'+(r.pessoa_nome||'<span class="muted">—</span>')+'</td>'
-      +'<td>'+(r.categoria_nome||'<span class="muted">—</span>')+'</td>'
-      +'<td>'+projBadge(r.projeto_nome)+'</td>'
-      +'<td style="text-align:right;font-family:\'DM Mono\',monospace">'+fmtBRL(r.valor)+'</td>'
-      +'<td style="font-family:\'DM Mono\',monospace">'+fmtDateBR(r.vencimento)+'</td>'
-      +'<td>'+statusBadge(r.status)+'</td>'
-      +'<td class="col-actions">'
-        +(r.status==='pendente'||r.status==='atrasado' ? '<button class="btn-tbl success" onclick="crMarkRecebido(\''+r.id+'\',event)">✓ Rec.</button> ' : '')
-        +'<button class="btn-tbl primary" onclick="crOpenEdit(\''+r.id+'\')">✏️</button> '
-        +'<button class="btn-tbl danger" onclick="crDelete(\''+r.id+'\')">🗑️</button>'
-      +'</td>'
-    +'</tr>';
-  }).join('');
 }
 
 function crOpenNew(){
