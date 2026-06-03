@@ -2431,14 +2431,13 @@ function authApplySession(session){
 
   if(isRestricted){
     // Ocultar abas financeiras
-    ["overview","fc","relatorios","cp","cr","saldo"].forEach(function(t){
+    ["overview","fc","sc","relatorios","cp","cr","saldo"].forEach(function(t){
       var el=document.getElementById("tab-"+t); if(el) el.style.display="none";
     });
     var cfgBtn=document.getElementById("cfg-open-btn");
     if(cfgBtn) cfgBtn.style.display="none";
     document.querySelectorAll(".cad-open-btn").forEach(function(el){el.style.display="none";});
-    // Redirecionar para SC
-    setTimeout(function(){ if(typeof goTab==="function") goTab("sc"); },100);
+    setTimeout(function(){ if(typeof goTab==="function") goTab("comissoes"); },100);
   } else {
     // Acesso total — mostrar todas as abas
     ["overview","fc","relatorios","cp","cr","saldo"].forEach(function(t){
