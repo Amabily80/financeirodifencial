@@ -674,7 +674,10 @@ input[type="checkbox"]{width:14px;height:14px;accent-color:var(--green-accent);c
 
 
 /* ── SCROLL TOP MIRROR ── */
-.tbl-scroll-top{overflow-x:auto;height:12px;margin-bottom:2px}
+.tbl-scroll-top{overflow-x:auto;height:14px;margin-bottom:4px;cursor:ew-resize}
+.tbl-scroll-top::-webkit-scrollbar{height:8px}
+.tbl-scroll-top::-webkit-scrollbar-thumb{background:var(--gray-400);border-radius:4px}
+.tbl-scroll-top::-webkit-scrollbar-track{background:var(--gray-100);border-radius:4px}
 .tbl-scroll-top-inner{height:1px}
 
 /* ── BULK SELECTION BAR ── */
@@ -690,8 +693,8 @@ input[type="checkbox"]{width:14px;height:14px;accent-color:var(--green-accent);c
 .bulk-btn.danger:hover{background:rgba(239,68,68,.35)}
 
 /* ── CHECKBOX COLUMN ── */
-.fin-table .col-chk{width:36px;text-align:center;padding:0 8px}
-.fin-chk{width:16px;height:16px;cursor:pointer;accent-color:var(--brand)}
+.fin-table .col-chk{width:36px!important;min-width:36px!important;max-width:36px!important;text-align:center;padding:0 8px}
+.fin-table .col-chk input{width:16px;height:16px;cursor:pointer;accent-color:var(--brand);display:block;margin:0 auto}
 
 /* ── BULK MODALS ── */
 #bulk-pay-modal,#bulk-edit-modal{position:fixed;inset:0;z-index:9100;background:rgba(26,29,46,.65);backdrop-filter:blur(6px);display:none;align-items:center;justify-content:center}
@@ -2525,15 +2528,19 @@ function cpRender(){
     var spacer=document.getElementById('cp-scroll-spacer');
     var top=document.getElementById('cp-scroll-top');
     if(wrap&&spacer&&top){
-      spacer.style.width=(wrap.scrollWidth)+'px';
-      top.onscroll=function(){wrap.scrollLeft=top.scrollLeft;};
-      wrap.onscroll=function(){top.scrollLeft=wrap.scrollLeft;};
+      spacer.style.width=wrap.scrollWidth+'px';
+      top.removeEventListener('scroll',top._syncFn||null);
+      wrap.removeEventListener('scroll',wrap._syncFn||null);
+      top._syncFn=function(){wrap.scrollLeft=top.scrollLeft;};
+      wrap._syncFn=function(){top.scrollLeft=wrap.scrollLeft;};
+      top.addEventListener('scroll',top._syncFn);
+      wrap.addEventListener('scroll',wrap._syncFn);
     }
   },100);
 
   tbody.innerHTML = rows.map(function(r){
     var parc = (r.total_parcelas>1) ? ' <small style="color:var(--text-dim)">('+r.parcela_atual+'/'+r.total_parcelas+')</small>' : '';
-    var chkd = cpSelected.has(r.id) ? ' checked' : '';
+    var chkd = (typeof cpSelected!=='undefined' && cpSelected.has(r.id)) ? ' checked' : '';
     return '<tr>'
       +'<td class="col-chk"><input type="checkbox" class="fin-chk cp-row-chk"'+chkd+' onchange="cpToggleRow(\''+r.id+'\',this)"></td>'
       +'<td><strong>'+(r.pessoa_nome||'<span class="muted">—</span>')+'</strong></td>'
@@ -4358,7 +4365,7 @@ document.addEventListener('DOMContentLoaded', function(){
 /* ====================================================
    BULK SELECTION — Contas a Pagar
 ==================================================== */
-var cpSelected = new Set();
+if(typeof cpSelected==='undefined') var cpSelected = new Set();
 
 function cpToggleAll(chk) {
   cpSelected.clear();
