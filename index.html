@@ -672,6 +672,46 @@ input[type="checkbox"]{width:14px;height:14px;accent-color:var(--green-accent);c
 @media(max-width:1100px){.fin-kpi-grid{grid-template-columns:repeat(2,1fr)}}
 @media(max-width:600px){.fin-kpi-grid{grid-template-columns:1fr}#cad-panel{width:100vw}}
 
+
+/* ── SCROLL TOP MIRROR ── */
+.tbl-scroll-top{overflow-x:auto;height:12px;margin-bottom:2px}
+.tbl-scroll-top-inner{height:1px}
+
+/* ── BULK SELECTION BAR ── */
+.bulk-bar{display:none;align-items:center;gap:10px;background:linear-gradient(135deg,#1a1d2e,#252840);border-radius:10px;padding:10px 18px;margin-bottom:12px;flex-wrap:wrap}
+.bulk-bar.visible{display:flex}
+.bulk-bar-count{color:#fff;font-size:13px;font-weight:600;flex:1}
+.bulk-bar-count span{background:var(--brand);border-radius:20px;padding:2px 10px;margin-right:6px;font-size:12px}
+.bulk-btn{border:1px solid rgba(255,255,255,.25);border-radius:8px;background:rgba(255,255,255,.1);color:#fff;font-family:'DM Sans',sans-serif;font-size:12px;font-weight:600;padding:7px 14px;cursor:pointer;transition:all .2s}
+.bulk-btn:hover{background:rgba(255,255,255,.22)}
+.bulk-btn.success{background:rgba(16,185,129,.25);border-color:rgba(16,185,129,.5);color:#6ee7b7}
+.bulk-btn.success:hover{background:rgba(16,185,129,.4)}
+.bulk-btn.danger{background:rgba(239,68,68,.2);border-color:rgba(239,68,68,.4);color:#fca5a5}
+.bulk-btn.danger:hover{background:rgba(239,68,68,.35)}
+
+/* ── CHECKBOX COLUMN ── */
+.fin-table .col-chk{width:36px;text-align:center;padding:0 8px}
+.fin-chk{width:16px;height:16px;cursor:pointer;accent-color:var(--brand)}
+
+/* ── BULK MODALS ── */
+#bulk-pay-modal,#bulk-edit-modal{position:fixed;inset:0;z-index:9100;background:rgba(26,29,46,.65);backdrop-filter:blur(6px);display:none;align-items:center;justify-content:center}
+.bulk-modal-box{background:#fff;border-radius:18px;width:100%;max-width:500px;box-shadow:0 24px 80px rgba(0,0,0,.3);overflow:hidden}
+.bulk-modal-hdr{background:linear-gradient(135deg,#1a1d2e,#252840);padding:20px 26px;display:flex;align-items:center;justify-content:space-between}
+.bulk-modal-hdr h3{color:#fff;font-size:15px;font-weight:600;margin:0}
+.bulk-modal-close{background:rgba(255,255,255,.1);border:1px solid rgba(255,255,255,.2);border-radius:8px;color:#fff;width:28px;height:28px;cursor:pointer;font-size:14px;display:flex;align-items:center;justify-content:center}
+.bulk-modal-body{padding:24px}
+.bulk-option{display:flex;align-items:center;gap:12px;padding:12px 16px;border-radius:10px;border:1.5px solid var(--border2);margin-bottom:10px;cursor:pointer;transition:all .2s;background:#fff}
+.bulk-option:hover{border-color:var(--brand);background:rgba(244,121,32,.04)}
+.bulk-option.selected{border-color:var(--brand);background:rgba(244,121,32,.07)}
+.bulk-option-radio{width:18px;height:18px;accent-color:var(--brand);flex-shrink:0}
+.bulk-option-label{font-size:13px;font-weight:600;color:var(--navy)}
+.bulk-option-sub{font-size:11px;color:var(--text-muted);margin-top:2px}
+.bulk-date-field{display:none;margin-top:8px}
+.bulk-modal-footer{padding:0 24px 22px;display:flex;gap:10px;justify-content:flex-end}
+.bulk-form-grp{display:flex;flex-direction:column;gap:5px;margin-bottom:14px}
+.bulk-form-grp label{font-size:11px;font-weight:700;text-transform:uppercase;letter-spacing:.06em;color:var(--text-muted)}
+.bulk-form-grp select,.bulk-form-grp input{border:1.5px solid var(--border2);border-radius:9px;padding:9px 12px;font-size:13px;font-family:'DM Sans',sans-serif;color:var(--navy);background:#fff;outline:none}
+.bulk-form-grp select:focus,.bulk-form-grp input:focus{border-color:var(--brand)}
 </style>
 <style>
 .recibo-wrap{font-family:'DM Sans',Arial,sans-serif;max-width:680px;margin:40px auto;padding:40px;border:2px solid #1a1d2e;border-radius:4px}
@@ -1142,17 +1182,28 @@ input[type="checkbox"]{width:14px;height:14px;accent-color:var(--green-accent);c
         <div class="fin-table-title">Lançamentos</div>
         <div class="fin-table-count" id="cp-count"></div>
       </div>
-      <div class="fin-table-wrap">
+      <!-- Bulk bar -->
+      <div class="bulk-bar" id="cp-bulk-bar">
+        <span class="bulk-bar-count" id="cp-bulk-count"></span>
+        <button class="bulk-btn success" onclick="bulkPayOpen()">&#9889; Pagar Agora</button>
+        <button class="bulk-btn" onclick="bulkEditOpen()">&#9999; Alterar Selecionadas</button>
+        <button class="bulk-btn danger" onclick="cpCancelSelected()">&#10005; Cancelar Selecionadas</button>
+        <button class="bulk-btn" onclick="cpClearSelection()">Limpar sele&#231;&#227;o</button>
+      </div>
+      <!-- Top scroll mirror -->
+      <div class="tbl-scroll-top" id="cp-scroll-top"><div class="tbl-scroll-top-inner" id="cp-scroll-spacer"></div></div>
+      <div class="fin-table-wrap" id="cp-table-wrap" style="overflow-x:auto">
         <table class="fin-table">
           <thead><tr>
-            <th>Descrição</th>
+            <th class="col-chk"><input type="checkbox" class="fin-chk" id="cp-chk-all" onchange="cpToggleAll(this)" title="Selecionar todos"></th>
             <th>Fornecedor</th>
             <th>Categoria</th>
-            <th>Projeto</th>
             <th style="text-align:right">Valor</th>
             <th>Vencimento</th>
             <th>Status</th>
-            <th class="col-actions">Ações</th>
+            <th>Descri&#231;&#227;o</th>
+            <th>Projeto</th>
+            <th class="col-actions">A&#231;&#245;es</th>
           </tr></thead>
           <tbody id="cp-tbody"></tbody>
         </table>
@@ -2468,20 +2519,34 @@ function cpRender(){
     tbody.innerHTML = '<tr><td colspan="8"><div class="fin-empty"><div class="icon">💸</div><p>Nenhuma conta encontrada.</p></div></td></tr>';
     return;
   }
+  // Update scroll spacer width
+  setTimeout(function(){
+    var wrap=document.getElementById('cp-table-wrap');
+    var spacer=document.getElementById('cp-scroll-spacer');
+    var top=document.getElementById('cp-scroll-top');
+    if(wrap&&spacer&&top){
+      spacer.style.width=(wrap.scrollWidth)+'px';
+      top.onscroll=function(){wrap.scrollLeft=top.scrollLeft;};
+      wrap.onscroll=function(){top.scrollLeft=wrap.scrollLeft;};
+    }
+  },100);
+
   tbody.innerHTML = rows.map(function(r){
     var parc = (r.total_parcelas>1) ? ' <small style="color:var(--text-dim)">('+r.parcela_atual+'/'+r.total_parcelas+')</small>' : '';
+    var chkd = cpSelected.has(r.id) ? ' checked' : '';
     return '<tr>'
-      +'<td><strong>'+(r.descricao||'—')+'</strong>'+parc+'</td>'
-      +'<td>'+(r.pessoa_nome||'<span class="muted">—</span>')+'</td>'
+      +'<td class="col-chk"><input type="checkbox" class="fin-chk cp-row-chk"'+chkd+' onchange="cpToggleRow(\''+r.id+'\',this)"></td>'
+      +'<td><strong>'+(r.pessoa_nome||'<span class="muted">—</span>')+'</strong></td>'
       +'<td>'+(r.categoria_nome||'<span class="muted">—</span>')+'</td>'
-      +'<td>'+projBadge(r.projeto_nome)+'</td>'
       +'<td style="text-align:right;font-family:\'DM Mono\',monospace">'+fmtBRL(r.valor)+'</td>'
       +'<td style="font-family:\'DM Mono\',monospace">'+fmtDateBR(r.vencimento)+'</td>'
       +'<td>'+statusBadge(r.status)+'</td>'
+      +'<td>'+(r.descricao||'—')+parc+'</td>'
+      +'<td>'+projBadge(r.projeto_nome)+'</td>'
       +'<td class="col-actions">'
-        +(r.status==='pendente'||r.status==='vencido' ? '<button class="btn-tbl success" onclick="cpMarkPago(\''+r.id+'\',event)">✓ Pago</button> ' : '')
-        +'<button class="btn-tbl primary" onclick="cpOpenEdit(\''+r.id+'\')">✏️</button> '
-        +'<button class="btn-tbl danger" onclick="cpDelete(\''+r.id+'\')">🗑️</button>'
+        +(r.status==='pendente'||r.status==='vencido' ? '<button class="btn-tbl success" onclick="cpMarkPago(\''+r.id+'\',event)">&#10003; Pago</button> ' : '')
+        +'<button class="btn-tbl primary" onclick="cpOpenEdit(\''+r.id+'\')" title="Editar">&#9998;</button> '
+        +'<button class="btn-tbl danger" onclick="cpDelete(\''+r.id+'\')" title="Cancelar">&#10005;</button>'
       +'</td>'
     +'</tr>';
   }).join('');
@@ -4289,6 +4354,173 @@ document.addEventListener('DOMContentLoaded', function(){
   if(fm) fm.addEventListener('click', function(e){ if(e.target===fm) finModalClose(); });
 });
 
+
+/* ====================================================
+   BULK SELECTION — Contas a Pagar
+==================================================== */
+var cpSelected = new Set();
+
+function cpToggleAll(chk) {
+  cpSelected.clear();
+  if (chk.checked) {
+    FS.cpRows.forEach(function(r) { cpSelected.add(r.id); });
+  }
+  document.querySelectorAll('.cp-row-chk').forEach(function(c) { c.checked = chk.checked; });
+  cpUpdateBulkBar();
+}
+
+function cpToggleRow(id, chk) {
+  if (chk.checked) cpSelected.add(id);
+  else cpSelected.delete(id);
+  var all = document.getElementById('cp-chk-all');
+  if (all) all.checked = cpSelected.size === FS.cpRows.length && FS.cpRows.length > 0;
+  cpUpdateBulkBar();
+}
+
+function cpUpdateBulkBar() {
+  var bar = document.getElementById('cp-bulk-bar');
+  var cnt = document.getElementById('cp-bulk-count');
+  if (!bar) return;
+  if (cpSelected.size > 0) {
+    bar.classList.add('visible');
+    cnt.innerHTML = '<span>' + cpSelected.size + '</span> conta(s) selecionada(s)';
+  } else {
+    bar.classList.remove('visible');
+  }
+}
+
+function cpClearSelection() {
+  cpSelected.clear();
+  document.querySelectorAll('.cp-row-chk').forEach(function(c) { c.checked = false; });
+  var all = document.getElementById('cp-chk-all');
+  if (all) all.checked = false;
+  cpUpdateBulkBar();
+}
+
+/* ── BULK PAY ── */
+function bulkPayOpen() {
+  if (!cpSelected.size) return;
+  var hoje = new Date().toLocaleDateString('pt-BR');
+  document.getElementById('bulk-pay-hoje-lbl').textContent = 'Data de hoje (' + hoje + ')';
+  document.getElementById('bulk-pay-data').value = new Date().toISOString().slice(0,10);
+  // Fill banco dropdown
+  var sel = document.getElementById('bulk-pay-banco');
+  sel.innerHTML = '<option value="">Nenhuma (manter atual)</option>';
+  (FS.refs.bancarias||[]).forEach(function(b) {
+    sel.innerHTML += '<option value="' + b.id + '">' + b.nome + '</option>';
+  });
+  document.getElementById('bulk-pay-modal').style.display = 'flex';
+}
+function bulkPayClose() { document.getElementById('bulk-pay-modal').style.display = 'none'; }
+
+function bulkPaySelect(div, tipo) {
+  document.querySelectorAll('.bulk-option').forEach(function(d) { d.classList.remove('selected'); });
+  div.classList.add('selected');
+  div.querySelector('input[type=radio]').checked = true;
+  document.getElementById('bulk-date-wrap').style.display = tipo === 'especifica' ? 'block' : 'none';
+}
+
+async function bulkPayConfirm() {
+  var tipo = document.querySelector('input[name="bulk-pay-tipo"]:checked').value;
+  var bancoId = document.getElementById('bulk-pay-banco').value || null;
+  var today = new Date().toISOString().slice(0,10);
+  var especifica = document.getElementById('bulk-pay-data').value;
+  var user = authCurrentUser() ? authCurrentUser().login : '';
+  var ids = Array.from(cpSelected);
+
+  try {
+    for (var i = 0; i < ids.length; i++) {
+      var id = ids[i];
+      var rec = FS.cpRows.find(function(r) { return r.id === id; });
+      var dataPgto = tipo === 'previsao' ? (rec && rec.vencimento ? rec.vencimento : today)
+                   : tipo === 'hoje'     ? today
+                   :                       especifica;
+      var upd = { status: 'pago', data_pagamento: dataPgto, alterado_por: user };
+      if (bancoId) upd.conta_bancaria_id = bancoId;
+      var res = await sb.from('contas_pagar').update(upd).eq('id', id);
+      if (res.error) throw res.error;
+    }
+    toast('\u2705', ids.length + ' conta(s) marcada(s) como paga(s)!', 'success');
+    bulkPayClose();
+    cpClearSelection();
+    cpLoad();
+  } catch(e) {
+    toast('\u274c', 'Erro: ' + e.message, 'error');
+  }
+}
+
+/* ── BULK EDIT ── */
+function bulkEditOpen() {
+  if (!cpSelected.size) return;
+  var catSel = document.getElementById('bulk-edit-cat');
+  var projSel = document.getElementById('bulk-edit-proj');
+  var bancoSel = document.getElementById('bulk-edit-banco');
+  catSel.innerHTML = '<option value="">N\u00e3o alterar</option>';
+  (FS.refs.cats||[]).forEach(function(c) { catSel.innerHTML += '<option value="' + c.id + '">' + c.nome + '</option>'; });
+  projSel.innerHTML = '<option value="">N\u00e3o alterar</option>';
+  (FS.refs.projetos||[]).forEach(function(p) { projSel.innerHTML += '<option value="' + p.id + '">' + p.nome + '</option>'; });
+  bancoSel.innerHTML = '<option value="">N\u00e3o alterar</option>';
+  (FS.refs.bancarias||[]).forEach(function(b) { bancoSel.innerHTML += '<option value="' + b.id + '">' + b.nome + '</option>'; });
+  document.getElementById('bulk-edit-obs').value = '';
+  document.getElementById('bulk-edit-modal').style.display = 'flex';
+}
+function bulkEditClose() { document.getElementById('bulk-edit-modal').style.display = 'none'; }
+
+async function bulkEditConfirm() {
+  var catId   = document.getElementById('bulk-edit-cat').value;
+  var projId  = document.getElementById('bulk-edit-proj').value;
+  var bancoId = document.getElementById('bulk-edit-banco').value;
+  var obs     = document.getElementById('bulk-edit-obs').value.trim();
+  var user    = authCurrentUser() ? authCurrentUser().login : '';
+  var ids     = Array.from(cpSelected);
+  var upd     = { alterado_por: user };
+
+  if (catId)   { upd.categoria_id = catId;   upd.categoria_nome = (FS.refs.cats.find(function(c){return c.id===catId;})||{}).nome || ''; }
+  if (projId)  { upd.projeto_id = projId;    upd.projeto_nome = (FS.refs.projetos.find(function(p){return p.id===projId;})||{}).nome || ''; }
+  if (bancoId) { upd.conta_bancaria_id = bancoId; }
+  if (!catId && !projId && !bancoId && !obs) { toast('\u26a0\ufe0f','Nenhum campo selecionado.','warn'); return; }
+
+  try {
+    if (obs) {
+      // Append obs individually
+      for (var i = 0; i < ids.length; i++) {
+        var rec = FS.cpRows.find(function(r){return r.id===ids[i];});
+        var newObs = (rec && rec.observacoes ? rec.observacoes + ' | ' : '') + obs;
+        var u2 = Object.assign({}, upd, {observacoes: newObs});
+        var r2 = await sb.from('contas_pagar').update(u2).eq('id', ids[i]);
+        if (r2.error) throw r2.error;
+      }
+    } else {
+      var res = await sb.from('contas_pagar').update(upd).in('id', ids);
+      if (res.error) throw res.error;
+    }
+    toast('\u2705', ids.length + ' conta(s) alterada(s)!', 'success');
+    bulkEditClose();
+    cpClearSelection();
+    cpLoad();
+  } catch(e) {
+    toast('\u274c', 'Erro: ' + e.message, 'error');
+  }
+}
+
+/* Close modals on backdrop click */
+document.getElementById('bulk-pay-modal').addEventListener('click', function(e){ if(e.target===this) bulkPayClose(); });
+document.getElementById('bulk-edit-modal').addEventListener('click', function(e){ if(e.target===this) bulkEditClose(); });
+
+async function cpCancelSelected(){
+  if(!cpSelected.size) return;
+  if(!confirm('Cancelar '+cpSelected.size+' conta(s) selecionada(s)? Elas ficaram salvas no histórico.')) return;
+  var ids = Array.from(cpSelected);
+  var user = authCurrentUser() ? authCurrentUser().login : '';
+  try {
+    var res = await sb.from('contas_pagar').update({status:'cancelado',alterado_por:user}).in('id',ids);
+    if(res.error) throw res.error;
+    toast('\u2705', ids.length+' conta(s) cancelada(s).','success');
+    cpClearSelection();
+    cpLoad();
+  } catch(e){ toast('\u274c','Erro: '+e.message,'error'); }
+}
+
 </script>
 <div id="cfg-modal">
   <div class="cfg-box">
@@ -4634,6 +4866,77 @@ document.addEventListener('DOMContentLoaded', function(){
     </div>
   </div>
 </div><!-- /fin-modal -->
+
+
+<!-- Bulk Payment Modal -->
+<div id="bulk-pay-modal">
+  <div class="bulk-modal-box">
+    <div class="bulk-modal-hdr">
+      <h3>&#9889; Registrar Pagamento</h3>
+      <button class="bulk-modal-close" onclick="bulkPayClose()">&#10005;</button>
+    </div>
+    <div class="bulk-modal-body">
+      <p style="font-size:13px;color:var(--text-muted);margin-bottom:16px">Selecione como registrar o pagamento das contas selecionadas:</p>
+      <div class="bulk-option selected" onclick="bulkPaySelect(this,'previsao')">
+        <input type="radio" class="bulk-option-radio" name="bulk-pay-tipo" value="previsao" checked>
+        <div><div class="bulk-option-label">Data de previs&#227;o de cada conta</div><div class="bulk-option-sub">Cada conta ser&#225; paga na sua data de vencimento</div></div>
+      </div>
+      <div class="bulk-option" onclick="bulkPaySelect(this,'hoje')">
+        <input type="radio" class="bulk-option-radio" name="bulk-pay-tipo" value="hoje">
+        <div><div class="bulk-option-label" id="bulk-pay-hoje-lbl">Data de hoje</div><div class="bulk-option-sub">Todas as contas ser&#227;o pagas com a data atual</div></div>
+      </div>
+      <div class="bulk-option" onclick="bulkPaySelect(this,'especifica')">
+        <input type="radio" class="bulk-option-radio" name="bulk-pay-tipo" value="especifica">
+        <div style="flex:1"><div class="bulk-option-label">Data espec&#237;fica</div>
+          <div class="bulk-date-field" id="bulk-date-wrap">
+            <input type="date" id="bulk-pay-data" class="fin-form-input" style="margin-top:8px;width:100%">
+          </div>
+        </div>
+      </div>
+      <div style="margin-top:14px" class="bulk-form-grp">
+        <label>Conta Banc&#225;ria</label>
+        <select id="bulk-pay-banco"><option value="">Selecione (opcional)</option></select>
+      </div>
+    </div>
+    <div class="bulk-modal-footer">
+      <button class="fin-btn-cancel" onclick="bulkPayClose()">Cancelar</button>
+      <button class="fin-btn-save" onclick="bulkPayConfirm()">&#9889; Pagar Agora</button>
+    </div>
+  </div>
+</div>
+
+<!-- Bulk Edit Modal -->
+<div id="bulk-edit-modal">
+  <div class="bulk-modal-box">
+    <div class="bulk-modal-hdr">
+      <h3>&#9999; Alterar Contas Selecionadas</h3>
+      <button class="bulk-modal-close" onclick="bulkEditClose()">&#10005;</button>
+    </div>
+    <div class="bulk-modal-body">
+      <p style="font-size:13px;color:var(--text-muted);margin-bottom:16px">Deixe em branco os campos que n&#227;o deseja alterar:</p>
+      <div class="bulk-form-grp">
+        <label>Categoria</label>
+        <select id="bulk-edit-cat"><option value="">N&#227;o alterar</option></select>
+      </div>
+      <div class="bulk-form-grp">
+        <label>Projeto</label>
+        <select id="bulk-edit-proj"><option value="">N&#227;o alterar</option></select>
+      </div>
+      <div class="bulk-form-grp">
+        <label>Conta Banc&#225;ria</label>
+        <select id="bulk-edit-banco"><option value="">N&#227;o alterar</option></select>
+      </div>
+      <div class="bulk-form-grp">
+        <label>Observa&#231;&#227;o (acrescentar)</label>
+        <input type="text" id="bulk-edit-obs" placeholder="Texto a acrescentar nas observa&#231;&#245;es">
+      </div>
+    </div>
+    <div class="bulk-modal-footer">
+      <button class="fin-btn-cancel" onclick="bulkEditClose()">Cancelar</button>
+      <button class="fin-btn-save" onclick="bulkEditConfirm()">Salvar Altera&#231;&#245;es</button>
+    </div>
+  </div>
+</div>
 
 </body>
 </html>
