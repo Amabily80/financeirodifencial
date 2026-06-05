@@ -3491,7 +3491,7 @@ async function relLoad(){
     if(banco)  q = q.eq('conta_bancaria_id', banco);
     if(vmin)   q = q.gte('valor', parseFloat(vmin));
     if(vmax)   q = q.lte('valor', parseFloat(vmax));
-    q = q.order(cfg.dateField, {ascending:true});
+    q = q.order('pessoa_nome', {ascending:true}).order(cfg.dateField, {ascending:true});
 
     var res = await q;
     if(res.error) throw res.error;
