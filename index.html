@@ -4641,19 +4641,38 @@ async function bulkPayConfirm() {
 /* ── BULK EDIT ── */
 async function bulkEditOpen() {
   if (!cpSelected.size) return;
-  // Recarrega refs para garantir categorias atualizadas
-  if(typeof loadRefs==='function') await loadRefs();
-  var catSel = document.getElementById('bulk-edit-cat');
+  var catSel  = document.getElementById('bulk-edit-cat');
   var projSel = document.getElementById('bulk-edit-proj');
-  var bancoSel = document.getElementById('bulk-edit-banco');
-  catSel.innerHTML = '<option value="">N\u00e3o alterar</option>';
-  (FS.refs.cats||[]).forEach(function(c) { catSel.innerHTML += '<option value="' + c.id + '">' + c.nome + '</option>'; });
+  var bancoSel= document.getElementById('bulk-edit-banco');
+
+  catSel.innerHTML  = '<option value="">N\u00e3o alterar</option><option value="" disabled>Carregando...</option>';
   projSel.innerHTML = '<option value="">N\u00e3o alterar</option>';
-  (FS.refs.projetos||[]).forEach(function(p) { projSel.innerHTML += '<option value="' + p.id + '">' + p.nome + '</option>'; });
-  bancoSel.innerHTML = '<option value="">N\u00e3o alterar</option>';
-  (FS.refs.bancarias||[]).forEach(function(b) { bancoSel.innerHTML += '<option value="' + b.id + '">' + b.nome + '</option>'; });
+  bancoSel.innerHTML= '<option value="">N\u00e3o alterar</option>';
   document.getElementById('bulk-edit-obs').value = '';
   document.getElementById('bulk-edit-modal').style.display = 'flex';
+
+  try {
+    // Busca direto do Supabase para garantir dados atualizados
+    var resCat  = await sb.from('categorias').select('id,nome').eq('ativo',true).order('nome');
+    var resProj = await sb.from('projetos').select('id,nome').eq('ativo',true).order('nome');
+    var resBanc = await sb.from('contas_bancarias').select('id,nome').eq('ativo',true).order('nome');
+
+    catSel.innerHTML = '<option value="">N\u00e3o alterar</option>';
+    (resCat.data||[]).forEach(function(c){ catSel.innerHTML += '<option value="'+c.id+'">'+c.nome+'</option>'; });
+
+    projSel.innerHTML = '<option value="">N\u00e3o alterar</option>';
+    (resProj.data||[]).forEach(function(p){ projSel.innerHTML += '<option value="'+p.id+'">'+p.nome+'</option>'; });
+
+    bancoSel.innerHTML = '<option value="">N\u00e3o alterar</option>';
+    (resBanc.data||[]).forEach(function(b){ bancoSel.innerHTML += '<option value="'+b.id+'">'+b.nome+'</option>'; });
+
+    // Atualiza refs locais tamb\u00e9m
+    if(resCat.data)  FS.refs.cats      = resCat.data;
+    if(resProj.data) FS.refs.projetos  = resProj.data;
+    if(resBanc.data) FS.refs.bancarias = resBanc.data;
+  } catch(e) {
+    toast('\u274c','Erro ao carregar op\u00e7\u00f5es: '+e.message,'error');
+  }
 }
 function bulkEditClose() { document.getElementById('bulk-edit-modal').style.display = 'none'; }
 
