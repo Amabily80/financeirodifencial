@@ -3740,7 +3740,9 @@ function numExtenso(n){
   return result.charAt(0).toUpperCase()+result.slice(1);
 }
 
-function relGoTab(){
+async function relGoTab(){
+  // Recarrega dados de referência para garantir categorias atualizadas
+  if(typeof loadRefs === 'function') await loadRefs();
   relFillDropdowns();
 }
 
