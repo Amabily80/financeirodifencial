@@ -4639,8 +4639,10 @@ async function bulkPayConfirm() {
 }
 
 /* ── BULK EDIT ── */
-function bulkEditOpen() {
+async function bulkEditOpen() {
   if (!cpSelected.size) return;
+  // Recarrega refs para garantir categorias atualizadas
+  if(typeof loadRefs==='function') await loadRefs();
   var catSel = document.getElementById('bulk-edit-cat');
   var projSel = document.getElementById('bulk-edit-proj');
   var bancoSel = document.getElementById('bulk-edit-banco');
