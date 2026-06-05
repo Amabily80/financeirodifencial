@@ -2660,8 +2660,16 @@ async function cpLoad(){
     var fDe     = document.getElementById('cp-f-de')?.value;
     var fAte    = document.getElementById('cp-f-ate')?.value;
     if(fStatus) q = q.eq('status', fStatus);
-    if(fProj)   q = q.eq('projeto_id', fProj);
-    if(fCat)    q = q.eq('categoria_id', fCat);
+    if(fProj){
+      var _pNome=(FS.refs.projetos.find(function(p){return p.id===fProj;})||{}).nome||'';
+      if(_pNome) q=q.or('projeto_id.eq.'+fProj+',projeto_nome.eq.'+_pNome);
+      else q=q.eq('projeto_id',fProj);
+    }
+    if(fCat){
+      var _cNome=(FS.refs.cats.find(function(c){return c.id===fCat;})||{}).nome||'';
+      if(_cNome) q=q.or('categoria_id.eq.'+fCat+',categoria_nome.eq.'+_cNome);
+      else q=q.eq('categoria_id',fCat);
+    }
     if(fDe)     q = q.gte('vencimento', fDe);
     if(fAte)    q = q.lte('vencimento', fAte);
     var {data, error} = await q;
@@ -2763,8 +2771,23 @@ async function cpOpenEdit(id){
   fillContaDropdown();
   document.getElementById('fm-descricao').value = r.descricao||'';
   document.getElementById('fm-pessoa').value    = r.pessoa_id||'';
-  document.getElementById('fm-categoria').value = r.categoria_id||'';
-  document.getElementById('fm-projeto').value   = r.projeto_id||'';
+  // Pré-seleciona por ID; se ausente, tenta pelo nome
+  var _catEl=document.getElementById('fm-categoria');
+  var _projEl=document.getElementById('fm-projeto');
+  if(_catEl){
+    _catEl.value=r.categoria_id||'';
+    if(!_catEl.value&&r.categoria_nome){
+      var _cFound=(FS.refs.cats||[]).find(function(c){return c.nome===r.categoria_nome;});
+      if(_cFound)_catEl.value=_cFound.id;
+    }
+  }
+  if(_projEl){
+    _projEl.value=r.projeto_id||'';
+    if(!_projEl.value&&r.projeto_nome){
+      var _pFound=(FS.refs.projetos||[]).find(function(p){return p.nome===r.projeto_nome;});
+      if(_pFound)_projEl.value=_pFound.id;
+    }
+  }
   document.getElementById('fm-conta').value     = r.conta_bancaria_id||'';
   document.getElementById('fm-valor').value     = r.valor||'';
   document.getElementById('fm-vencimento').value= r.vencimento||'';
@@ -2857,8 +2880,16 @@ async function crLoad(){
     var fDe     = document.getElementById('cr-f-de')?.value;
     var fAte    = document.getElementById('cr-f-ate')?.value;
     if(fStatus) q = q.eq('status', fStatus);
-    if(fProj)   q = q.eq('projeto_id', fProj);
-    if(fCat)    q = q.eq('categoria_id', fCat);
+    if(fProj){
+      var _pNome=(FS.refs.projetos.find(function(p){return p.id===fProj;})||{}).nome||'';
+      if(_pNome) q=q.or('projeto_id.eq.'+fProj+',projeto_nome.eq.'+_pNome);
+      else q=q.eq('projeto_id',fProj);
+    }
+    if(fCat){
+      var _cNome=(FS.refs.cats.find(function(c){return c.id===fCat;})||{}).nome||'';
+      if(_cNome) q=q.or('categoria_id.eq.'+fCat+',categoria_nome.eq.'+_cNome);
+      else q=q.eq('categoria_id',fCat);
+    }
     if(fDe)     q = q.gte('vencimento', fDe);
     if(fAte)    q = q.lte('vencimento', fAte);
     var {data, error} = await q;
@@ -2947,8 +2978,23 @@ async function crOpenEdit(id){
   fillContaDropdown();
   document.getElementById('fm-descricao').value = r.descricao||'';
   document.getElementById('fm-pessoa').value    = r.pessoa_id||'';
-  document.getElementById('fm-categoria').value = r.categoria_id||'';
-  document.getElementById('fm-projeto').value   = r.projeto_id||'';
+  // Pré-seleciona por ID; se ausente, tenta pelo nome
+  var _catEl=document.getElementById('fm-categoria');
+  var _projEl=document.getElementById('fm-projeto');
+  if(_catEl){
+    _catEl.value=r.categoria_id||'';
+    if(!_catEl.value&&r.categoria_nome){
+      var _cFound=(FS.refs.cats||[]).find(function(c){return c.nome===r.categoria_nome;});
+      if(_cFound)_catEl.value=_cFound.id;
+    }
+  }
+  if(_projEl){
+    _projEl.value=r.projeto_id||'';
+    if(!_projEl.value&&r.projeto_nome){
+      var _pFound=(FS.refs.projetos||[]).find(function(p){return p.nome===r.projeto_nome;});
+      if(_pFound)_projEl.value=_pFound.id;
+    }
+  }
   document.getElementById('fm-conta').value     = r.conta_bancaria_id||'';
   document.getElementById('fm-valor').value     = r.valor||'';
   document.getElementById('fm-vencimento').value= r.vencimento||'';
@@ -3849,8 +3895,16 @@ async function cpLoad(){
     var fDe     = document.getElementById('cp-f-de')?.value;
     var fAte    = document.getElementById('cp-f-ate')?.value;
     if(fStatus) q = q.eq('status', fStatus);
-    if(fProj)   q = q.eq('projeto_id', fProj);
-    if(fCat)    q = q.eq('categoria_id', fCat);
+    if(fProj){
+      var _pNome=(FS.refs.projetos.find(function(p){return p.id===fProj;})||{}).nome||'';
+      if(_pNome) q=q.or('projeto_id.eq.'+fProj+',projeto_nome.eq.'+_pNome);
+      else q=q.eq('projeto_id',fProj);
+    }
+    if(fCat){
+      var _cNome=(FS.refs.cats.find(function(c){return c.id===fCat;})||{}).nome||'';
+      if(_cNome) q=q.or('categoria_id.eq.'+fCat+',categoria_nome.eq.'+_cNome);
+      else q=q.eq('categoria_id',fCat);
+    }
     if(fDe)     q = q.gte('vencimento', fDe);
     if(fAte)    q = q.lte('vencimento', fAte);
     var {data, error} = await q;
@@ -3882,8 +3936,23 @@ async function cpOpenEdit(id){
   fillContaDropdown();
   document.getElementById('fm-descricao').value = r.descricao||'';
   document.getElementById('fm-pessoa').value    = r.pessoa_id||'';
-  document.getElementById('fm-categoria').value = r.categoria_id||'';
-  document.getElementById('fm-projeto').value   = r.projeto_id||'';
+  // Pré-seleciona por ID; se ausente, tenta pelo nome
+  var _catEl=document.getElementById('fm-categoria');
+  var _projEl=document.getElementById('fm-projeto');
+  if(_catEl){
+    _catEl.value=r.categoria_id||'';
+    if(!_catEl.value&&r.categoria_nome){
+      var _cFound=(FS.refs.cats||[]).find(function(c){return c.nome===r.categoria_nome;});
+      if(_cFound)_catEl.value=_cFound.id;
+    }
+  }
+  if(_projEl){
+    _projEl.value=r.projeto_id||'';
+    if(!_projEl.value&&r.projeto_nome){
+      var _pFound=(FS.refs.projetos||[]).find(function(p){return p.nome===r.projeto_nome;});
+      if(_pFound)_projEl.value=_pFound.id;
+    }
+  }
   document.getElementById('fm-conta').value     = r.conta_bancaria_id||'';
   document.getElementById('fm-valor').value     = r.valor||'';
   document.getElementById('fm-vencimento').value= r.vencimento||'';
@@ -3975,8 +4044,16 @@ async function crLoad(){
     var fDe     = document.getElementById('cr-f-de')?.value;
     var fAte    = document.getElementById('cr-f-ate')?.value;
     if(fStatus) q = q.eq('status', fStatus);
-    if(fProj)   q = q.eq('projeto_id', fProj);
-    if(fCat)    q = q.eq('categoria_id', fCat);
+    if(fProj){
+      var _pNome=(FS.refs.projetos.find(function(p){return p.id===fProj;})||{}).nome||'';
+      if(_pNome) q=q.or('projeto_id.eq.'+fProj+',projeto_nome.eq.'+_pNome);
+      else q=q.eq('projeto_id',fProj);
+    }
+    if(fCat){
+      var _cNome=(FS.refs.cats.find(function(c){return c.id===fCat;})||{}).nome||'';
+      if(_cNome) q=q.or('categoria_id.eq.'+fCat+',categoria_nome.eq.'+_cNome);
+      else q=q.eq('categoria_id',fCat);
+    }
     if(fDe)     q = q.gte('vencimento', fDe);
     if(fAte)    q = q.lte('vencimento', fAte);
     var {data, error} = await q;
@@ -4008,8 +4085,23 @@ async function crOpenEdit(id){
   fillContaDropdown();
   document.getElementById('fm-descricao').value = r.descricao||'';
   document.getElementById('fm-pessoa').value    = r.pessoa_id||'';
-  document.getElementById('fm-categoria').value = r.categoria_id||'';
-  document.getElementById('fm-projeto').value   = r.projeto_id||'';
+  // Pré-seleciona por ID; se ausente, tenta pelo nome
+  var _catEl=document.getElementById('fm-categoria');
+  var _projEl=document.getElementById('fm-projeto');
+  if(_catEl){
+    _catEl.value=r.categoria_id||'';
+    if(!_catEl.value&&r.categoria_nome){
+      var _cFound=(FS.refs.cats||[]).find(function(c){return c.nome===r.categoria_nome;});
+      if(_cFound)_catEl.value=_cFound.id;
+    }
+  }
+  if(_projEl){
+    _projEl.value=r.projeto_id||'';
+    if(!_projEl.value&&r.projeto_nome){
+      var _pFound=(FS.refs.projetos||[]).find(function(p){return p.nome===r.projeto_nome;});
+      if(_pFound)_projEl.value=_pFound.id;
+    }
+  }
   document.getElementById('fm-conta').value     = r.conta_bancaria_id||'';
   document.getElementById('fm-valor').value     = r.valor||'';
   document.getElementById('fm-vencimento').value= r.vencimento||'';
