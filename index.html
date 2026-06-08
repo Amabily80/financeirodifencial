@@ -297,7 +297,7 @@ input[type="checkbox"]{width:14px;height:14px;accent-color:var(--green-accent);c
 .cfg-form-row input:focus{border-color:#F47920}
 .cfg-add-btn{background:linear-gradient(135deg,#F47920,#C85E10);border:none;border-radius:9px;color:#fff;font-family:'DM Sans',sans-serif;font-size:13px;font-weight:600;padding:10px 18px;cursor:pointer;white-space:nowrap}
 .cfg-form-err{font-size:12px;color:#c0392b;min-height:16px;margin-top:8px;font-weight:500}
-.cfg-user-list-wrap{display:flex;flex-direction:column;gap:8px}
+.cfg-user-list-wrap{display:flex;flex-direction:column;gap:8px;max-height:260px;overflow-y:auto;padding-right:4px}
 .cfg-user-row{display:flex;align-items:center;justify-content:space-between;background:#f8f9fa;border:1px solid #e8eaed;border-radius:10px;padding:11px 16px}
 .cfg-user-row-name{font-size:13px;font-weight:600;color:#1a1d2e}
 .cfg-user-row-badge{font-size:10px;background:#f1f3f4;border:1px solid #dadce0;color:#5f6368;border-radius:6px;padding:2px 7px;margin-left:8px}
@@ -1226,6 +1226,7 @@ input[type="checkbox"]{width:14px;height:14px;accent-color:var(--green-accent);c
         <button class="bulk-btn success" onclick="bulkPayOpen()">&#9889; Pagar Agora</button>
         <button class="bulk-btn" onclick="bulkEditOpen()">&#9999; Alterar Selecionadas</button>
         <button class="bulk-btn danger" onclick="cpCancelSelected()">&#10005; Cancelar Selecionadas</button>
+        <button class="bulk-btn" style="background:rgba(244,121,32,.25);border-color:rgba(244,121,32,.5);color:#F5913C" onclick="cpBulkRecibo()">&#x1F4C4; Recibo(s)</button>
         <button class="bulk-btn" onclick="cpClearSelection()">Limpar sele&#231;&#227;o</button>
       </div>
       <!-- Top scroll mirror -->
@@ -1305,18 +1306,31 @@ input[type="checkbox"]{width:14px;height:14px;accent-color:var(--green-accent);c
         <div class="fin-table-title">Lançamentos</div>
         <div class="fin-table-count" id="cr-count"></div>
       </div>
-      <div class="fin-table-wrap">
-        <table class="fin-table">
-          <thead><tr>
-            <th>Descrição</th>
-            <th>Cliente</th>
-            <th>Categoria</th>
-            <th>Projeto</th>
-            <th style="text-align:right">Valor</th>
-            <th>Vencimento</th>
-            <th>Status</th>
-            <th class="col-actions">Ações</th>
-          </tr></thead>
+      <!-- Bulk bar -->
+      <div class="bulk-bar" id="cr-bulk-bar">
+        <span class="bulk-bar-count" id="cr-bulk-count"></span>
+        <button class="bulk-btn success" onclick="crBulkReceiveOpen()">&#10003; Receber Agora</button>
+        <button class="bulk-btn danger" onclick="crCancelSelected()">&#10005; Cancelar Selecionadas</button>
+        <button class="bulk-btn" onclick="crClearSelection()">Limpar sele&#231;&#227;o</button>
+      </div>
+      <!-- Top scroll mirror -->
+      <div class="tbl-scroll-top" id="cr-scroll-top"><div class="tbl-scroll-top-inner" id="cr-scroll-spacer"></div></div>
+      <div class="fin-table-wrap" id="cr-table-wrap" style="overflow-x:auto">
+        <table class="fin-table" style="width:100%;border-collapse:collapse">
+          <thead>
+            <tr>
+              <th style="width:40px;text-align:center"><input type="checkbox" id="cr-chk-all" onchange="crToggleAll(this)" style="width:15px;height:15px;cursor:pointer;accent-color:#F47920" title="Selecionar todos"></th>
+              <th style="min-width:160px">Cliente</th>
+              <th style="min-width:130px">Categoria</th>
+              <th style="width:110px;text-align:right">Valor</th>
+              <th style="width:100px">Vencimento</th>
+              <th style="width:110px">Data Receb.</th>
+              <th style="width:100px">Status</th>
+              <th style="min-width:180px">Descri&#231;&#227;o</th>
+              <th style="width:130px">A&#231;&#245;es</th>
+              <th style="width:90px">Projeto</th>
+            </tr>
+          </thead>
           <tbody id="cr-tbody"></tbody>
         </table>
       </div>
@@ -2426,6 +2440,7 @@ function authApplySession(session){
     (_loginLc in PERM_RESTRICTED) ||
     (_liveUser && _liveUser.role==="restricted")
   );
+  var isOperador = !session.master && (_liveUser && _liveUser.role==="operador");
 
   if(session.master) document.getElementById("cfg-open-btn").style.display="flex";
 
@@ -2438,6 +2453,18 @@ function authApplySession(session){
     if(cfgBtn) cfgBtn.style.display="none";
     document.querySelectorAll(".cad-open-btn").forEach(function(el){el.style.display="none";});
     setTimeout(function(){ if(typeof goTab==="function") goTab("comissoes"); },100);
+  } else if(isOperador){
+    // Operador: apenas Relatórios, Contas a Pagar, Contas a Receber
+    ["overview","fc","sc","saldo","comissoes"].forEach(function(t){
+      var el=document.getElementById("tab-"+t); if(el) el.style.display="none";
+    });
+    ["relatorios","cp","cr"].forEach(function(t){
+      var el=document.getElementById("tab-"+t); if(el) el.style.removeProperty("display");
+    });
+    var cfgBtn=document.getElementById("cfg-open-btn");
+    if(cfgBtn) cfgBtn.style.display="none";
+    document.querySelectorAll(".cad-open-btn").forEach(function(el){el.style.display="flex";});
+    setTimeout(function(){ if(typeof goTab==="function") goTab("relatorios"); },100);
   } else {
     // Acesso total — mostrar todas as abas
     ["overview","fc","relatorios","cp","cr","saldo"].forEach(function(t){
@@ -2469,9 +2496,15 @@ function cfgRenderList(){
   div.innerHTML=users.map(function(u,i){
     var roleLbl = u.role==='restricted'
       ? '<span class="cfg-user-row-badge" style="background:#ede9fe;color:#6d28d9">Restrito</span>'
+      : u.role==='operador'
+      ? '<span class="cfg-user-row-badge" style="background:#dbeafe;color:#1e40af">Operador</span>'
       : '<span class="cfg-user-row-badge" style="background:#d1fae5;color:#065f46">Admin</span>';
     var nomeLbl = (u.nome && u.role==='restricted') ? '<br><span style="font-size:11px;color:#6b7280">comissões: '+u.nome+'</span>' : '';
-    return '<div class="cfg-user-row"><div><span class="cfg-user-row-name">'+u.login+'</span> '+roleLbl+nomeLbl+'</div><button class="cfg-user-row-del" onclick="cfgRemoveUser('+i+')">Remover</button></div>';
+    return '<div class="cfg-user-row"><div style="flex:1"><span class="cfg-user-row-name">'+u.login+'</span> '+roleLbl+nomeLbl+'</div>'
+      +'<div style="display:flex;gap:6px">'
+      +'<button class="cfg-user-row-del" style="color:var(--brand);border-color:rgba(244,121,32,.4)" onclick="cfgEditUser('+i+')">&#9998; Editar</button>'
+      +'<button class="cfg-user-row-del" onclick="cfgRemoveUser('+i+')">Remover</button>'
+      +'</div></div>';
   }).join('');
 }
 
@@ -2501,6 +2534,60 @@ function cfgRemoveUser(idx){
   var users=authGetUsers();
   users.splice(idx,1);
   authSaveUsers(users);
+  cfgRenderList();
+}
+
+var _cfgEditIdx = null;
+function cfgEditUser(idx){
+  var users=authGetUsers();
+  var u=users[idx]; if(!u) return;
+  _cfgEditIdx=idx;
+  var loginEl=document.getElementById("cfg-new-login");
+  var passEl=document.getElementById("cfg-new-pass");
+  var roleEl=document.getElementById("cfg-new-role");
+  var nomeEl=document.getElementById("cfg-new-nome");
+  var errEl=document.getElementById("cfg-form-err");
+  if(loginEl) loginEl.value=u.login;
+  if(passEl) passEl.value='';
+  if(roleEl) roleEl.value=u.role||'admin';
+  if(nomeEl) nomeEl.value=u.nome||'';
+  if(errEl) errEl.textContent='';
+  var addBtn=document.querySelector('.cfg-add-btn');
+  if(addBtn){
+    addBtn.textContent='Atualizar';
+    addBtn.onclick=function(){ cfgUpdateUser(); };
+  }
+  var h=document.querySelector('.cfg-section h4');
+  if(h) h.innerHTML='Editar Usu&aacute;rio <button onclick="cfgCancelEditUser()" style="font-size:10px;margin-left:8px;background:#f1f3f4;border:1px solid #dadce0;border-radius:4px;padding:2px 7px;cursor:pointer;color:#5f6368">Cancelar</button>';
+}
+function cfgCancelEditUser(){
+  _cfgEditIdx=null;
+  ['cfg-new-login','cfg-new-pass'].forEach(function(id){var el=document.getElementById(id);if(el)el.value='';});
+  var addBtn=document.querySelector('.cfg-add-btn'); if(addBtn){addBtn.textContent='Adicionar';addBtn.onclick=function(){cfgAddUser();};}
+  var h=document.querySelector('.cfg-section h4'); if(h) h.textContent='Novo Usuário';
+}
+async function cfgUpdateUser(){
+  if(_cfgEditIdx===null) return;
+  var users=authGetUsers();
+  var u=users[_cfgEditIdx]; if(!u) return;
+  var login=(document.getElementById("cfg-new-login")||{}).value||''; login=login.trim();
+  var pass=(document.getElementById("cfg-new-pass")||{}).value||'';
+  var role=(document.getElementById("cfg-new-role")||{}).value||u.role||'admin';
+  var nome=(document.getElementById("cfg-new-nome")||{}).value||''; nome=nome.trim();
+  var errEl=document.getElementById("cfg-form-err"); errEl.textContent='';
+  if(!login){errEl.textContent='Informe o login.';return;}
+  if(login.toLowerCase()===MASTER_LOGIN.toLowerCase()){errEl.textContent='Nome reservado.';return;}
+  var dup=users.find(function(x,i){return i!==_cfgEditIdx&&x.login.toLowerCase()===login.toLowerCase();});
+  if(dup){errEl.textContent='Login já existe em outro usuário.';return;}
+  u.login=login; u.role=role; u.nome=nome;
+  if(pass){
+    if(pass.length<6){errEl.textContent='Senha deve ter pelo menos 6 caracteres.';return;}
+    u.hash=await sha256(pass);
+  }
+  users[_cfgEditIdx]=u;
+  authSaveUsers(users);
+  toast('✅','Usuário atualizado!','success');
+  cfgCancelEditUser();
   cfgRenderList();
 }
 
@@ -2910,6 +2997,7 @@ function crRender(){
       || (r.categoria_nome||'').toLowerCase().includes(search);
   });
 
+  // KPIs
   var hoje = new Date(); hoje.setHours(0,0,0,0);
   var em7 = new Date(hoje); em7.setDate(em7.getDate()+7);
   var mesAtual = hoje.getMonth(), anoAtual = hoje.getFullYear();
@@ -2931,29 +3019,40 @@ function crRender(){
   document.getElementById('cr-k3').textContent = atrasadas + ' conta(s)';
   document.getElementById('cr-k4').textContent = vence7 + ' conta(s)';
 
+  // Tabela
   var count = document.getElementById('cr-count');
   if(count) count.textContent = rows.length + ' registro(s)';
   var tbody = document.getElementById('cr-tbody');
   if(!tbody) return;
   if(!rows.length){
-    tbody.innerHTML = '<tr><td colspan="8"><div class="fin-empty"><div class="icon">💰</div><p>Nenhuma conta encontrada.</p></div></td></tr>';
+    tbody.innerHTML = '<tr><td colspan="10"><div class="fin-empty"><div class="icon">💰</div><p>Nenhuma conta encontrada.</p></div></td></tr>';
     return;
   }
+  setTimeout(crInitScroll, 200);
+
   tbody.innerHTML = rows.map(function(r){
-    var parc = (r.total_parcelas>1) ? ' <small style="color:var(--text-dim)">('+r.parcela_atual+'/'+r.total_parcelas+')</small>' : '';
-    return '<tr>'
-      +'<td><strong>'+(r.descricao||'—')+'</strong>'+parc+'</td>'
-      +'<td>'+(r.pessoa_nome||'<span class="muted">—</span>')+'</td>'
-      +'<td>'+(r.categoria_nome||'<span class="muted">—</span>')+'</td>'
-      +'<td>'+projBadge(r.projeto_nome)+'</td>'
-      +'<td style="text-align:right;font-family:\'DM Mono\',monospace">'+fmtBRL(r.valor)+'</td>'
-      +'<td style="font-family:\'DM Mono\',monospace">'+fmtDateBR(r.vencimento)+'</td>'
-      +'<td>'+statusBadge(r.status)+'</td>'
-      +'<td class="col-actions">'
-        +(r.status==='pendente'||r.status==='atrasado' ? '<button class="btn-tbl success" onclick="crMarkRecebido(\''+r.id+'\',event)">✓ Rec.</button> ' : '')
-        +'<button class="btn-tbl primary" onclick="crOpenEdit(\''+r.id+'\')">✏️</button> '
-        +'<button class="btn-tbl danger" onclick="crDelete(\''+r.id+'\')">🗑️</button>'
-      +'</td>'
+    var parc = (r.total_parcelas>1) ? ' ('+r.parcela_atual+'/'+r.total_parcelas+')' : '';
+    var sel  = (typeof crSelected!=='undefined') && crSelected.has(r.id);
+    var bg   = sel ? 'style="background:rgba(244,121,32,.07)"' : '';
+    var dr   = r.data_recebimento ? '<span style="color:#059669;font-family:DM Mono,monospace">'+fmtDateBR(r.data_recebimento)+'</span>' : '<span style="color:#d1d5db">—</span>';
+    var acoes = '<td style="white-space:nowrap" onclick="event.stopPropagation()">'
+      +(r.status==='pendente'||r.status==='atrasado' ? '<button class="btn-tbl success" onclick="crMarkRecebido(\''+r.id+'\',event)">&#10003; Rec.</button> ' : '')
+      +'<button class="btn-tbl primary" onclick="crOpenEdit(\''+r.id+'\')">&#9998;</button> '
+      +'<button class="btn-tbl danger" onclick="crDelete(\''+r.id+'\')">&#10005;</button>'
+      +'</td>';
+    return '<tr '+bg+' style="cursor:pointer">'
+      + '<td style="width:40px;text-align:center" onclick="event.stopPropagation()">'
+      +   '<input type="checkbox" class="cr-row-chk"'+(sel?' checked':'')+' onchange="crToggleRow(\''+r.id+'\',this)" style="width:15px;height:15px;cursor:pointer;accent-color:#F47920">'
+      + '</td>'
+      + '<td style="max-width:180px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap" title="'+(r.pessoa_nome||'')+'">'+(r.pessoa_nome||'—')+'</td>'
+      + '<td style="max-width:150px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap">'+(r.categoria_nome||'—')+'</td>'
+      + '<td style="text-align:right;white-space:nowrap;font-family:DM Mono,monospace">'+fmtBRL(r.valor)+'</td>'
+      + '<td style="white-space:nowrap;font-family:DM Mono,monospace">'+fmtDateBR(r.vencimento)+'</td>'
+      + '<td>'+dr+'</td>'
+      + '<td>'+statusBadge(r.status)+'</td>'
+      + '<td style="max-width:200px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap" title="'+(r.descricao||'')+'">'+(r.descricao||'—')+parc+'</td>'
+      + acoes
+      + '<td>'+projBadge(r.projeto_nome)+'</td>'
     +'</tr>';
   }).join('');
 }
@@ -3225,7 +3324,7 @@ async function finModalSave(){
     conta_bancaria_id: contaId||null,
     valor: valor,
     vencimento: vencimento,
-    nota_fiscal: nota||null,
+    ...(FS.mode==='cp'?{nota_fiscal:nota||null}:{}),
     observacoes: obs||null,
     status: 'pendente',
     parcela_atual: parseInt(document.getElementById('fm-parcela-atual').value)||1,
@@ -3311,9 +3410,12 @@ function cadRenderPessoas(){
   if(!FS.refs.pessoas.length){ list.innerHTML='<div style="font-size:12px;color:var(--text-dim);padding:8px">Nenhuma pessoa cadastrada.</div>'; return; }
   list.innerHTML = FS.refs.pessoas.map(function(p){
     return '<div class="cad-list-item">'
-      +'<div><div class="cad-list-item-name">'+p.nome+'</div>'
+      +'<div style="flex:1"><div class="cad-list-item-name">'+p.nome+'</div>'
       +'<div class="cad-list-item-sub">'+p.tipo+(p.cpf_cnpj?' · '+p.cpf_cnpj:'')+(p.email?' · '+p.email:'')+'</div></div>'
-      +'<button class="cad-list-item-del" onclick="cadDeletePessoa(\''+p.id+'\')">🗑️</button>'
+      +'<div style="display:flex;gap:4px">'
+      +'<button class="cad-list-item-del" style="color:var(--brand);border-color:rgba(244,121,32,.3)" onclick="cadEditPessoa(\''+p.id+'\')">&#9998;</button>'
+      +'<button class="cad-list-item-del" onclick="cadDeletePessoa(\''+p.id+'\')">&#x1F5D1;</button>'
+      +'</div>'
     +'</div>';
   }).join('');
 }
@@ -3347,9 +3449,12 @@ function cadRenderCategorias(){
   if(!FS.refs.categorias.length){ list.innerHTML='<div style="font-size:12px;color:var(--text-dim);padding:8px">Nenhuma categoria cadastrada.</div>'; return; }
   list.innerHTML = FS.refs.categorias.map(function(c){
     return '<div class="cad-list-item">'
-      +'<div><div class="cad-list-item-name">'+c.nome+'</div>'
+      +'<div style="flex:1"><div class="cad-list-item-name">'+c.nome+'</div>'
       +'<div class="cad-list-item-sub">'+c.tipo+'</div></div>'
-      +'<button class="cad-list-item-del" onclick="cadDeleteCategoria(\''+c.id+'\')">🗑️</button>'
+      +'<div style="display:flex;gap:4px">'
+      +'<button class="cad-list-item-del" style="color:var(--brand);border-color:rgba(244,121,32,.3)" onclick="cadEditCategoria(\''+c.id+'\')">&#9998;</button>'
+      +'<button class="cad-list-item-del" onclick="cadDeleteCategoria(\''+c.id+'\')">&#x1F5D1;</button>'
+      +'</div>'
     +'</div>';
   }).join('');
 }
@@ -3364,11 +3469,14 @@ async function cadSaveBancaria(){
     saldo_inicial: parseFloat(document.getElementById('cad-b-saldo').value)||0,
     ativo: true
   };
+  var dataSaldo = document.getElementById('cad-b-datasaldo') ? document.getElementById('cad-b-datasaldo').value||null : null;
+  if(dataSaldo) data.data_saldo_inicial = dataSaldo;
   try{
     var {error} = await sb.from('contas_bancarias').insert([data]);
     if(error) throw error;
     toast('✅','Conta bancária criada!','success');
     ['cad-b-nome','cad-b-banco','cad-b-saldo'].forEach(function(id){document.getElementById(id).value='';});
+    var ds=document.getElementById('cad-b-datasaldo'); if(ds) ds.value='';
     await loadRefs();
   }catch(e){ toast('❌','Erro: '+e.message,'error'); }
 }
@@ -3387,10 +3495,14 @@ function cadRenderBancarias(){
   var list = document.getElementById('cad-bancarias-list'); if(!list) return;
   if(!FS.refs.bancarias.length){ list.innerHTML='<div style="font-size:12px;color:var(--text-dim);padding:8px">Nenhuma conta cadastrada.</div>'; return; }
   list.innerHTML = FS.refs.bancarias.map(function(b){
+    var dataSaldo = b.data_saldo_inicial ? ' · em '+fmtDateBR(b.data_saldo_inicial) : '';
     return '<div class="cad-list-item">'
-      +'<div><div class="cad-list-item-name">'+b.nome+'</div>'
-      +'<div class="cad-list-item-sub">'+(b.banco||'—')+' · Saldo inicial: '+fmtBRL(b.saldo_inicial||0)+'</div></div>'
-      +'<button class="cad-list-item-del" onclick="cadDeleteBancaria(\''+b.id+'\')">🗑️</button>'
+      +'<div style="flex:1"><div class="cad-list-item-name">'+b.nome+'</div>'
+      +'<div class="cad-list-item-sub">'+(b.banco||'—')+' · Saldo inicial: '+fmtBRL(b.saldo_inicial||0)+dataSaldo+'</div></div>'
+      +'<div style="display:flex;gap:4px">'
+      +'<button class="cad-list-item-del" style="color:var(--brand);border-color:rgba(244,121,32,.3)" onclick="cadEditBancaria(\''+b.id+'\')">&#9998;</button>'
+      +'<button class="cad-list-item-del" onclick="cadDeleteBancaria(\''+b.id+'\')">&#x1F5D1;</button>'
+      +'</div>'
     +'</div>';
   }).join('');
 }
@@ -3651,64 +3763,116 @@ function relExportPDF(){
 }
 
 /* ── GERAR RECIBO ── */
+function _reciboCSS(){
+  return '*{margin:0;padding:0;box-sizing:border-box}'
+  +'body{font-family:Arial,sans-serif;background:#f3f4f6;padding:32px 16px}'
+  +'.wrap{background:#fff;border:1px solid #ccc;padding:36px 40px;max-width:720px;margin:0 auto 40px}'
+  +'.top-hdr{display:flex;justify-content:space-between;align-items:flex-start;border-bottom:2px solid #F47920;padding-bottom:16px;margin-bottom:20px}'
+  +'.co-left{font-size:20px;font-weight:800;color:#1a1d2e}'
+  +'.co-right{text-align:right;font-size:11px;color:#374151;line-height:1.7}'
+  +'.co-right strong{font-size:13px;font-weight:800;color:#1a1d2e;display:block}'
+  +'.rec-title{text-align:center;font-size:20px;font-weight:700;color:#1a1d2e;margin-bottom:18px;letter-spacing:.5px}'
+  +'.body-text{font-size:13px;line-height:1.85;color:#374151;margin-bottom:16px}'
+  +'.ref-table{width:100%;border-collapse:collapse;margin:14px 0}'
+  +'.ref-table th{background:#1a1d2e;color:#fff;padding:7px 10px;font-size:11px;text-align:left;font-weight:600;border:1px solid #1a1d2e}'
+  +'.ref-table td{border:1px solid #dadce0;padding:8px 10px;font-size:12px}'
+  +'.field-row{margin:8px 0;font-size:13px;color:#374151}'
+  +'.field-lbl{font-weight:700;color:#1a1d2e;font-size:11px;text-transform:uppercase;letter-spacing:.05em}'
+  +'.pay-title{font-size:12px;font-weight:700;color:#fff;background:#1a1d2e;padding:7px 10px;margin:18px 0 0}'
+  +'.pay-table{width:100%;border-collapse:collapse;margin-bottom:20px}'
+  +'.pay-table th{background:#4b5563;color:#fff;padding:6px 10px;font-size:10px;text-align:left;font-weight:600;border:1px solid #4b5563}'
+  +'.pay-table td{border:1px solid #dadce0;padding:7px 10px;font-size:12px}'
+  +'.pay-table .tot td{font-weight:700;background:#f9fafb;border-top:2px solid #1a1d2e}'
+  +'.footer-text{margin-top:24px;font-size:13px;color:#374151;line-height:1.9}'
+  +'.sig-area{display:flex;gap:48px;margin-top:44px}'
+  +'.sig-line{border-top:1px solid #1a1d2e;padding-top:5px;font-size:12px;color:#374151;min-width:200px}'
+  +'.btn-print{display:block;margin:28px auto 0;background:#F47920;color:#fff;border:none;border-radius:8px;padding:11px 28px;font-size:13px;font-weight:700;cursor:pointer;font-family:Arial}'
+  +'@media print{.btn-print{display:none!important}body{background:#fff;padding:0}.wrap{border:none;margin:0;padding:28px}}';
+}
+function _reciboHTML(r){
+  var pessoa   = r.pessoas || {};
+  var nomeFor  = r.pessoa_nome || pessoa.nome || '—';
+  var cnpjFor  = pessoa.cpf_cnpj || '';
+  var valor    = parseFloat(r.valor_pago || r.valor) || 0;
+  var valorExt = numExtenso(valor);
+  var dataPgto = fmtDateBR(r.data_pagamento || new Date().toISOString().slice(0,10));
+  var hoje     = new Date().toLocaleDateString('pt-BR',{day:'2-digit',month:'long',year:'numeric'});
+  var parc     = (r.total_parcelas>1) ? String(r.parcela_atual).padStart(3,'0')+'/'+String(r.total_parcelas).padStart(3,'0') : '001/001';
+  return '<div class="wrap">'
+    +'<div class="top-hdr">'
+    +'<div class="co-left">&#127968; Diferencial Im&oacute;veis</div>'
+    +'<div class="co-right"><strong>DIFERENCIAL IMOVEIS LTDA</strong>'
+    +'CNPJ 14.208.078/0001-71<br>'
+    +'AVENIDA REPUBLICA ARGENTINA, 1464 - LOJA 01 - AGUA VERDE<br>'
+    +'Curitiba - PR - CEP 80620-010<br>'
+    +'Telefone: (41) 99979-7166</div>'
+    +'</div>'
+    +'<div class="rec-title">Recibo de Pagamento</div>'
+    +'<div class="body-text">A empresa <strong>'+nomeFor+'</strong>'
+    +(cnpjFor?' CNPJ <strong>'+cnpjFor+'</strong>':'')
+    +' declara ter recebido de <strong>DIFERENCIAL IMOVEIS LTDA</strong>'
+    +' CNPJ <strong>14.208.078/0001-71</strong>'
+    +' o valor de <strong>'+fmtBRL(valor)+'</strong>'
+    +' ('+valorExt+') referente a:</div>'
+    +'<table class="ref-table"><thead><tr>'
+    +'<th>Nota Fiscal</th><th>Pedido</th><th>Documento</th><th>Parcela</th>'
+    +'</tr></thead><tbody><tr>'
+    +'<td>'+(r.nota_fiscal||'')+'</td><td></td><td></td><td>'+parc+'</td>'
+    +'</tr></tbody></table>'
+    +(r.categoria_nome?'<div class="field-row"><div class="field-lbl">Categoria</div>'+r.categoria_nome+'</div>':'')
+    +(r.observacoes?'<div class="field-row"><div class="field-lbl">Observa&ccedil;&atilde;o</div>'+r.observacoes+'</div>':'')
+    +'<div class="pay-title">Rela&ccedil;&atilde;o de Pagamentos Reconhecidos</div>'
+    +'<table class="pay-table"><thead><tr>'
+    +'<th>Data</th><th>Valor Para (R$)</th><th>Desconto (R$)</th><th>Juros (R$)</th><th>Multa (R$)</th><th>Observa&ccedil;&atilde;o</th>'
+    +'</tr></thead><tbody>'
+    +'<tr><td>'+dataPgto+'</td><td>'+fmtBRL(valor)+'</td><td>0,00</td><td>0,00</td><td>0,00</td><td></td></tr>'
+    +'<tr class="tot"><td>Totais (1)</td><td>'+fmtBRL(valor)+'</td><td>0,00</td><td>0,00</td><td>0,00</td><td></td></tr>'
+    +'</tbody></table>'
+    +'<div class="footer-text"><p>Por ser verdade, firmo o presente.</p><p>Curitiba (PR), '+hoje+'.</p></div>'
+    +'<div class="sig-area"><div class="sig-line">Nome Leg&iacute;vel</div><div class="sig-line">Assinatura</div></div>'
+    +'</div>';
+}
 async function gerarRecibo(id){
   try {
     var res = await sb.from('contas_pagar').select('*, pessoas(nome,cpf_cnpj)').eq('id',id).single();
     if(res.error) throw res.error;
-    var r = res.data;
-    var pessoa = r.pessoas || {};
-    var nomeFor = r.pessoa_nome || pessoa.nome || '—';
-    var cnpj    = pessoa.cpf_cnpj || '—';
-    var valor   = parseFloat(r.valor_pago || r.valor) || 0;
-    var valorExt= numExtenso(valor);
-    var dataPgto= fmtDateBR(r.data_pagamento || new Date().toISOString().slice(0,10));
-    var hoje    = new Date().toLocaleDateString('pt-BR',{day:'2-digit',month:'long',year:'numeric'});
-    var numRecibo= id.slice(-8).toUpperCase();
-
-    var win = window.open('','_blank','width=820,height:700');
-    win.document.write('<!DOCTYPE html><html><head><meta charset="UTF-8"><title>Recibo</title><style>'
-      +'*{margin:0;padding:0;box-sizing:border-box}'
-      +'body{font-family:"Arial",sans-serif;background:#f3f4f6;display:flex;justify-content:center;padding:40px 20px}'
-      +'.wrap{background:#fff;border:2px solid #1a1d2e;border-radius:4px;padding:40px;width:680px;max-width:100%}'
-      +'.hdr{text-align:center;border-bottom:3px solid #F47920;padding-bottom:20px;margin-bottom:24px}'
-      +'.co-name{font-size:22px;font-weight:800;color:#1a1d2e;letter-spacing:-.3px}'
-      +'.co-sub{font-size:10px;color:#6b7280;text-transform:uppercase;letter-spacing:.2em;margin-top:2px}'
-      +'.title{font-size:36px;font-weight:800;color:#F47920;letter-spacing:3px;margin-top:16px}'
-      +'.num{font-size:11px;color:#6b7280;margin-top:6px}'
-      +'.body{margin-bottom:28px;line-height:1.9;font-size:14px;color:#374151}'
-      +'.body strong{color:#1a1d2e}'
-      +'.valor-box{display:inline-block;background:#f0f9ff;border:1px solid #bae6fd;border-radius:8px;padding:10px 20px;margin:12px 0;font-size:22px;font-weight:800;color:#1a1d2e}'
-      +'.footer{border-top:1px solid #e5e7eb;padding-top:20px;margin-top:20px}'
-      +'.data{font-size:11px;color:#6b7280;margin-bottom:40px}'
-      +'.assinatura{border-top:1px solid #1a1d2e;width:280px;padding-top:6px;font-size:12px;color:#374151}'
-      +'.btn-print{display:block;margin:32px auto 0;background:#F47920;color:#fff;border:none;border-radius:8px;padding:12px 32px;font-size:14px;font-weight:700;cursor:pointer;font-family:Arial}'
-      +'@media print{.btn-print{display:none}body{background:#fff;padding:0}.wrap{border:none}}'
-      +'</style></head><body><div class="wrap">'
-      +'<div class="hdr"><div class="co-name">DIFERENCIAL IMÓVEIS</div>'
-      +'<div class="co-sub">Soluções em Imóveis</div>'
-      +'<div class="title">RECIBO</div>'
-      +'<div class="num">Nº '+numRecibo+'</div></div>'
-      +'<div class="body">'
-      +'<p>Eu, <strong>'+nomeFor+'</strong>'+(cnpj&&cnpj!=='—'?', inscrito(a) no CPF/CNPJ <strong>'+cnpj+'</strong>':'')
-      +', declaro ter recebido de <strong>DIFERENCIAL IMÓVEIS</strong></p>'
-      +'<p style="margin-top:8px">a importância de:</p>'
-      +'<div class="valor-box">'+fmtBRL(valor)+'</div>'
-      +'<p style="font-size:12px;color:#6b7280;margin-top:4px">('+valorExt+')</p>'
-      +'<p style="margin-top:12px">referente a: <strong>'+(r.descricao||'—')+'</strong></p>'
-      +(r.categoria_nome?'<p>categoria: <strong>'+r.categoria_nome+'</strong></p>':'')
-      +(r.observacoes?'<p>observação: '+r.observacoes+'</p>':'')
-      +'<p style="margin-top:12px">Pagamento efetuado em: <strong>'+dataPgto+'</strong></p>'
-      +'</div>'
-      +'<div class="footer">'
-      +'<div class="data">'+hoje+'</div>'
-      +'<div class="assinatura">'+nomeFor+'<br><span style="font-size:10px;color:#6b7280">'+(cnpj!=='—'?cnpj:'Assinatura / Carimbo')+'</span></div>'
-      +'</div>'
-      +'<button class="btn-print" onclick="window.print()">🖨️ Imprimir / Salvar PDF</button>'
-      +'</div></body></html>');
+    var win = window.open('','_blank','width=820,height=700');
+    win.document.write('<!DOCTYPE html><html><head><meta charset="UTF-8"><title>Recibo</title><style>'+_reciboCSS()+'</style></head><body>'
+      +_reciboHTML(res.data)
+      +'<button class="btn-print" onclick="window.print()">&#x1F5A8;&#xFE0F; Imprimir / Salvar PDF</button>'
+      +'</body></html>');
     win.document.close();
   } catch(e){
     toast('❌','Erro ao gerar recibo: '+e.message,'error');
   }
+}
+
+/* ── GERAR RECIBOS EM LOTE ── */
+async function cpBulkRecibo(){
+  if(!cpSelected.size) return;
+  var ids = Array.from(cpSelected);
+  var pagas = ids.filter(function(id){
+    var r = FS.cpRows.find(function(x){return x.id===id;});
+    return r && r.status==='pago';
+  });
+  if(!pagas.length){ toast('⚠️','Selecione contas com status PAGO para gerar recibos.','warn'); return; }
+  if(pagas.length !== ids.length){
+    if(!confirm('Apenas '+pagas.length+' conta(s) selecionada(s) estão pagas. Gerar recibos somente para elas?')) return;
+  }
+  try{
+    var res = await sb.from('contas_pagar').select('*, pessoas(nome,cpf_cnpj)').in('id', pagas);
+    if(res.error) throw res.error;
+    var registros = res.data || [];
+    var html = registros.map(function(r){ return _reciboHTML(r); }).join('\n');
+    var win = window.open('','_blank','width=820,height=700');
+    win.document.write('<!DOCTYPE html><html><head><meta charset="UTF-8"><title>Recibos</title><style>'
+      +_reciboCSS()
+      +'.btn-print{position:sticky;top:10px;z-index:100}'
+      +'</style></head><body>'
+      +'<button class="btn-print" onclick="window.print()">&#x1F5A8;&#xFE0F; Imprimir Todos / Salvar PDF</button>'
+      +html+'</body></html>');
+    win.document.close();
+  }catch(e){ toast('❌','Erro ao gerar recibos: '+e.message,'error'); }
 }
 
 /* ── NÚMERO POR EXTENSO ── */
@@ -4333,7 +4497,7 @@ async function finModalSave(){
     conta_bancaria_id: contaId||null,
     valor: valor,
     vencimento: vencimento,
-    nota_fiscal: nota||null,
+    ...(FS.mode==='cp'?{nota_fiscal:nota||null}:{}),
     observacoes: obs||null,
     status: 'pendente',
     parcela_atual: parseInt(document.getElementById('fm-parcela-atual').value)||1,
@@ -4419,9 +4583,12 @@ function cadRenderPessoas(){
   if(!FS.refs.pessoas.length){ list.innerHTML='<div style="font-size:12px;color:var(--text-dim);padding:8px">Nenhuma pessoa cadastrada.</div>'; return; }
   list.innerHTML = FS.refs.pessoas.map(function(p){
     return '<div class="cad-list-item">'
-      +'<div><div class="cad-list-item-name">'+p.nome+'</div>'
+      +'<div style="flex:1"><div class="cad-list-item-name">'+p.nome+'</div>'
       +'<div class="cad-list-item-sub">'+p.tipo+(p.cpf_cnpj?' · '+p.cpf_cnpj:'')+(p.email?' · '+p.email:'')+'</div></div>'
-      +'<button class="cad-list-item-del" onclick="cadDeletePessoa(\''+p.id+'\')">🗑️</button>'
+      +'<div style="display:flex;gap:4px">'
+      +'<button class="cad-list-item-del" style="color:var(--brand);border-color:rgba(244,121,32,.3)" onclick="cadEditPessoa(\''+p.id+'\')">&#9998;</button>'
+      +'<button class="cad-list-item-del" onclick="cadDeletePessoa(\''+p.id+'\')">&#x1F5D1;</button>'
+      +'</div>'
     +'</div>';
   }).join('');
 }
@@ -4455,9 +4622,12 @@ function cadRenderCategorias(){
   if(!FS.refs.categorias.length){ list.innerHTML='<div style="font-size:12px;color:var(--text-dim);padding:8px">Nenhuma categoria cadastrada.</div>'; return; }
   list.innerHTML = FS.refs.categorias.map(function(c){
     return '<div class="cad-list-item">'
-      +'<div><div class="cad-list-item-name">'+c.nome+'</div>'
+      +'<div style="flex:1"><div class="cad-list-item-name">'+c.nome+'</div>'
       +'<div class="cad-list-item-sub">'+c.tipo+'</div></div>'
-      +'<button class="cad-list-item-del" onclick="cadDeleteCategoria(\''+c.id+'\')">🗑️</button>'
+      +'<div style="display:flex;gap:4px">'
+      +'<button class="cad-list-item-del" style="color:var(--brand);border-color:rgba(244,121,32,.3)" onclick="cadEditCategoria(\''+c.id+'\')">&#9998;</button>'
+      +'<button class="cad-list-item-del" onclick="cadDeleteCategoria(\''+c.id+'\')">&#x1F5D1;</button>'
+      +'</div>'
     +'</div>';
   }).join('');
 }
@@ -4472,11 +4642,14 @@ async function cadSaveBancaria(){
     saldo_inicial: parseFloat(document.getElementById('cad-b-saldo').value)||0,
     ativo: true
   };
+  var dataSaldo = document.getElementById('cad-b-datasaldo') ? document.getElementById('cad-b-datasaldo').value||null : null;
+  if(dataSaldo) data.data_saldo_inicial = dataSaldo;
   try{
     var {error} = await sb.from('contas_bancarias').insert([data]);
     if(error) throw error;
     toast('✅','Conta bancária criada!','success');
     ['cad-b-nome','cad-b-banco','cad-b-saldo'].forEach(function(id){document.getElementById(id).value='';});
+    var ds=document.getElementById('cad-b-datasaldo'); if(ds) ds.value='';
     await loadRefs();
   }catch(e){ toast('❌','Erro: '+e.message,'error'); }
 }
@@ -4495,12 +4668,124 @@ function cadRenderBancarias(){
   var list = document.getElementById('cad-bancarias-list'); if(!list) return;
   if(!FS.refs.bancarias.length){ list.innerHTML='<div style="font-size:12px;color:var(--text-dim);padding:8px">Nenhuma conta cadastrada.</div>'; return; }
   list.innerHTML = FS.refs.bancarias.map(function(b){
+    var dataSaldo = b.data_saldo_inicial ? ' · em '+fmtDateBR(b.data_saldo_inicial) : '';
     return '<div class="cad-list-item">'
-      +'<div><div class="cad-list-item-name">'+b.nome+'</div>'
-      +'<div class="cad-list-item-sub">'+(b.banco||'—')+' · Saldo inicial: '+fmtBRL(b.saldo_inicial||0)+'</div></div>'
-      +'<button class="cad-list-item-del" onclick="cadDeleteBancaria(\''+b.id+'\')">🗑️</button>'
+      +'<div style="flex:1"><div class="cad-list-item-name">'+b.nome+'</div>'
+      +'<div class="cad-list-item-sub">'+(b.banco||'—')+' · Saldo inicial: '+fmtBRL(b.saldo_inicial||0)+dataSaldo+'</div></div>'
+      +'<div style="display:flex;gap:4px">'
+      +'<button class="cad-list-item-del" style="color:var(--brand);border-color:rgba(244,121,32,.3)" onclick="cadEditBancaria(\''+b.id+'\')">&#9998;</button>'
+      +'<button class="cad-list-item-del" onclick="cadDeleteBancaria(\''+b.id+'\')">&#x1F5D1;</button>'
+      +'</div>'
     +'</div>';
   }).join('');
+}
+
+// ── EDIÇÃO DE CADASTROS ──
+var _cadEditMode = {type:null, id:null};
+
+function _cadResetPessoa(){
+  var h=document.querySelector('#cadpane-pessoas .cad-inline-form h4');
+  var b=document.querySelector('#cadpane-pessoas .cad-save-btn');
+  if(h) h.textContent='Nova Pessoa';
+  if(b){ b.textContent='Salvar Pessoa'; b.onclick=function(){cadSavePessoa();}; }
+  ['cad-p-nome','cad-p-doc','cad-p-email','cad-p-fone'].forEach(function(id){var el=document.getElementById(id);if(el)el.value='';});
+  _cadEditMode={type:null,id:null};
+}
+function cadEditPessoa(id){
+  var p=(FS.refs.pessoas||[]).find(function(x){return x.id===id;}); if(!p) return;
+  _cadEditMode={type:'pessoa',id:id};
+  document.getElementById('cad-p-nome').value=p.nome||'';
+  document.getElementById('cad-p-tipo').value=p.tipo||'fornecedor';
+  document.getElementById('cad-p-doc').value=p.cpf_cnpj||'';
+  document.getElementById('cad-p-email').value=p.email||'';
+  document.getElementById('cad-p-fone').value=p.telefone||'';
+  var h=document.querySelector('#cadpane-pessoas .cad-inline-form h4');
+  var b=document.querySelector('#cadpane-pessoas .cad-save-btn');
+  if(h) h.innerHTML='Editar Pessoa <button onclick="_cadResetPessoa()" style="font-size:10px;margin-left:8px;background:var(--surface2);border:1px solid var(--border2);border-radius:4px;padding:2px 7px;cursor:pointer;color:var(--text-muted)">Cancelar</button>';
+  if(b){ b.textContent='Atualizar Pessoa'; b.onclick=function(){cadUpdatePessoa();}; }
+  document.querySelector('#cadpane-pessoas .cad-inline-form').scrollIntoView({behavior:'smooth'});
+}
+async function cadUpdatePessoa(){
+  if(!_cadEditMode.id) return;
+  var nome=document.getElementById('cad-p-nome').value.trim();
+  if(!nome){ toast('⚠️','Informe o nome.','warn'); return; }
+  var data={nome:nome,tipo:document.getElementById('cad-p-tipo').value,
+    cpf_cnpj:document.getElementById('cad-p-doc').value.trim()||null,
+    email:document.getElementById('cad-p-email').value.trim()||null,
+    telefone:document.getElementById('cad-p-fone').value.trim()||null};
+  try{
+    var {error}=await sb.from('pessoas').update(data).eq('id',_cadEditMode.id);
+    if(error) throw error;
+    toast('✅','Pessoa atualizada!','success');
+    _cadResetPessoa(); await loadRefs();
+  }catch(e){ toast('❌','Erro: '+e.message,'error'); }
+}
+
+function _cadResetCategoria(){
+  var h=document.querySelector('#cadpane-categorias .cad-inline-form h4');
+  var b=document.querySelector('#cadpane-categorias .cad-save-btn');
+  if(h) h.textContent='Nova Categoria';
+  if(b){ b.textContent='Salvar Categoria'; b.onclick=function(){cadSaveCategoria();}; }
+  var el=document.getElementById('cad-c-nome'); if(el) el.value='';
+  _cadEditMode={type:null,id:null};
+}
+function cadEditCategoria(id){
+  var c=(FS.refs.categorias||[]).find(function(x){return x.id===id;}); if(!c) return;
+  _cadEditMode={type:'categoria',id:id};
+  document.getElementById('cad-c-nome').value=c.nome||'';
+  document.getElementById('cad-c-tipo').value=c.tipo||'pagar';
+  var h=document.querySelector('#cadpane-categorias .cad-inline-form h4');
+  var b=document.querySelector('#cadpane-categorias .cad-save-btn');
+  if(h) h.innerHTML='Editar Categoria <button onclick="_cadResetCategoria()" style="font-size:10px;margin-left:8px;background:var(--surface2);border:1px solid var(--border2);border-radius:4px;padding:2px 7px;cursor:pointer;color:var(--text-muted)">Cancelar</button>';
+  if(b){ b.textContent='Atualizar Categoria'; b.onclick=function(){cadUpdateCategoria();}; }
+  document.querySelector('#cadpane-categorias .cad-inline-form').scrollIntoView({behavior:'smooth'});
+}
+async function cadUpdateCategoria(){
+  if(!_cadEditMode.id) return;
+  var nome=document.getElementById('cad-c-nome').value.trim();
+  if(!nome){ toast('⚠️','Informe o nome.','warn'); return; }
+  try{
+    var {error}=await sb.from('categorias').update({nome:nome,tipo:document.getElementById('cad-c-tipo').value}).eq('id',_cadEditMode.id);
+    if(error) throw error;
+    toast('✅','Categoria atualizada!','success');
+    _cadResetCategoria(); await loadRefs();
+  }catch(e){ toast('❌','Erro: '+e.message,'error'); }
+}
+
+function _cadResetBancaria(){
+  var h=document.querySelector('#cadpane-bancarias .cad-inline-form h4');
+  var b=document.querySelector('#cadpane-bancarias .cad-save-btn');
+  if(h) h.textContent='Nova Conta Bancária';
+  if(b){ b.textContent='Salvar Conta'; b.onclick=function(){cadSaveBancaria();}; }
+  ['cad-b-nome','cad-b-banco','cad-b-saldo','cad-b-datasaldo'].forEach(function(id){var el=document.getElementById(id);if(el)el.value='';});
+  _cadEditMode={type:null,id:null};
+}
+function cadEditBancaria(id){
+  var b2=(FS.refs.bancarias||[]).find(function(x){return x.id===id;}); if(!b2) return;
+  _cadEditMode={type:'bancaria',id:id};
+  document.getElementById('cad-b-nome').value=b2.nome||'';
+  document.getElementById('cad-b-banco').value=b2.banco||'';
+  document.getElementById('cad-b-saldo').value=b2.saldo_inicial||'';
+  var ds=document.getElementById('cad-b-datasaldo'); if(ds) ds.value=b2.data_saldo_inicial||'';
+  var h=document.querySelector('#cadpane-bancarias .cad-inline-form h4');
+  var btn=document.querySelector('#cadpane-bancarias .cad-save-btn');
+  if(h) h.innerHTML='Editar Conta Banc&aacute;ria <button onclick="_cadResetBancaria()" style="font-size:10px;margin-left:8px;background:var(--surface2);border:1px solid var(--border2);border-radius:4px;padding:2px 7px;cursor:pointer;color:var(--text-muted)">Cancelar</button>';
+  if(btn){ btn.textContent='Atualizar Conta'; btn.onclick=function(){cadUpdateBancaria();}; }
+  document.querySelector('#cadpane-bancarias .cad-inline-form').scrollIntoView({behavior:'smooth'});
+}
+async function cadUpdateBancaria(){
+  if(!_cadEditMode.id) return;
+  var nome=document.getElementById('cad-b-nome').value.trim();
+  if(!nome){ toast('⚠️','Informe o nome.','warn'); return; }
+  var data={nome:nome,banco:document.getElementById('cad-b-banco').value.trim()||null,
+    saldo_inicial:parseFloat(document.getElementById('cad-b-saldo').value)||0};
+  var ds=document.getElementById('cad-b-datasaldo'); if(ds&&ds.value) data.data_saldo_inicial=ds.value;
+  try{
+    var {error}=await sb.from('contas_bancarias').update(data).eq('id',_cadEditMode.id);
+    if(error) throw error;
+    toast('✅','Conta bancária atualizada!','success');
+    _cadResetBancaria(); await loadRefs();
+  }catch(e){ toast('❌','Erro: '+e.message,'error'); }
 }
 
 // ══════════════════════════════════════
@@ -4735,6 +5020,83 @@ async function cpCancelSelected(){
   } catch(e){ toast('\u274c','Erro: '+e.message,'error'); }
 }
 
+/* ====================================================
+   BULK SELECTION \u2014 Contas a Receber
+==================================================== */
+if(typeof crSelected==='undefined') var crSelected = new Set();
+
+function crInitScroll(){
+  var wrap=document.getElementById('cr-table-wrap');
+  var spacer=document.getElementById('cr-scroll-spacer');
+  var top=document.getElementById('cr-scroll-top');
+  if(!wrap||!spacer||!top) return;
+  var tbl=wrap.querySelector('table');
+  spacer.style.width=(tbl?tbl.offsetWidth:wrap.scrollWidth)+'px';
+  if(!top._scrollReady){
+    top._scrollReady=true;
+    var syncing=false;
+    top.addEventListener('scroll',function(){ if(!syncing){syncing=true;wrap.scrollLeft=top.scrollLeft;syncing=false;} });
+    wrap.addEventListener('scroll',function(){ if(!syncing){syncing=true;top.scrollLeft=wrap.scrollLeft;syncing=false;} });
+  }
+}
+function crToggleAll(chk){
+  crSelected.clear();
+  if(chk.checked) FS.crRows.forEach(function(r){ crSelected.add(r.id); });
+  document.querySelectorAll('.cr-row-chk').forEach(function(c){ c.checked=chk.checked; });
+  crUpdateBulkBar();
+}
+function crToggleRow(id,chk){
+  if(chk.checked) crSelected.add(id); else crSelected.delete(id);
+  var all=document.getElementById('cr-chk-all');
+  if(all) all.checked=crSelected.size===FS.crRows.length&&FS.crRows.length>0;
+  crUpdateBulkBar();
+}
+function crUpdateBulkBar(){
+  var bar=document.getElementById('cr-bulk-bar');
+  var cnt=document.getElementById('cr-bulk-count');
+  if(!bar) return;
+  if(crSelected.size>0){ bar.classList.add('visible'); cnt.innerHTML='<span>'+crSelected.size+'</span> conta(s) selecionada(s)'; }
+  else bar.classList.remove('visible');
+}
+function crClearSelection(){
+  crSelected.clear();
+  document.querySelectorAll('.cr-row-chk').forEach(function(c){ c.checked=false; });
+  var all=document.getElementById('cr-chk-all'); if(all) all.checked=false;
+  crUpdateBulkBar();
+}
+async function crCancelSelected(){
+  if(!crSelected.size) return;
+  if(!confirm('Cancelar '+crSelected.size+' conta(s) selecionada(s)? Elas ficaram salvas no hist\u00f3rico.')) return;
+  var ids=Array.from(crSelected);
+  var user=authCurrentUser()?authCurrentUser().login:'';
+  try{
+    var res=await sb.from('contas_receber').update({status:'cancelado',alterado_por:user}).in('id',ids);
+    if(res.error) throw res.error;
+    toast('\u2705',ids.length+' conta(s) cancelada(s).','success');
+    crClearSelection(); crLoad();
+  }catch(e){ toast('\u274c','Erro: '+e.message,'error'); }
+}
+function crBulkReceiveOpen(){
+  if(!crSelected.size) return;
+  var hoje=new Date().toISOString().slice(0,10);
+  var dp=prompt('Data de recebimento (AAAA-MM-DD):',hoje);
+  if(dp===null) return;
+  crBulkReceiveConfirm(dp);
+}
+async function crBulkReceiveConfirm(dp){
+  var ids=Array.from(crSelected);
+  var user=authCurrentUser()?authCurrentUser().login:'';
+  try{
+    for(var i=0;i<ids.length;i++){
+      var rec=FS.crRows.find(function(r){ return r.id===ids[i]; });
+      var upd={status:'recebido',data_recebimento:dp,valor_recebido:parseFloat(rec&&rec.valor)||0,alterado_por:user};
+      var res=await sb.from('contas_receber').update(upd).eq('id',ids[i]);
+      if(res.error) throw res.error;
+    }
+    toast('\u2705',ids.length+' conta(s) marcada(s) como recebida(s)!','success');
+    crClearSelection(); crLoad();
+  }catch(e){ toast('\u274c','Erro: '+e.message,'error'); }
+}
 
 function cpRowClick(e, id){
   // Ignore clicks on buttons/checkboxes
@@ -5064,6 +5426,7 @@ function comExportPDF() {
             <label style="font-size:11px;font-weight:700;text-transform:uppercase;letter-spacing:.06em;color:#5f6368;display:block;margin-bottom:5px">N&#237;vel de Acesso</label>
             <select id="cfg-new-role" class="cfg-form-row input" style="border:1.5px solid #e8eaed;border-radius:9px;padding:9px 12px;font-size:13px;font-family:DM Sans,sans-serif;width:100%;background:#fff">
               <option value="admin">&#127775; Administrador (acesso total)</option>
+              <option value="operador">&#128196; Operador (Relatórios + CP + CR)</option>
               <option value="restricted">&#128274; Restrito (SC + Comiss&#245;es)</option>
             </select>
           </div>
@@ -5156,6 +5519,7 @@ function comExportPDF() {
             <div class="cad-field"><label>Banco</label><input type="text" id="cad-b-banco" placeholder="Ex: Itaú, Bradesco..."></div>
             <div class="cad-field"><label>Saldo Inicial (R$)</label><input type="number" id="cad-b-saldo" placeholder="0,00" step="0.01"></div>
           </div>
+          <div class="cad-field"><label>Data do Saldo Inicial</label><input type="date" id="cad-b-datasaldo"></div>
         </div>
         <button class="cad-save-btn" onclick="cadSaveBancaria()">Salvar Conta</button>
       </div>
@@ -5317,6 +5681,7 @@ function comExportPDF() {
             <div class="cad-field"><label>Banco</label><input type="text" id="cad-b-banco" placeholder="Ex: Itaú, Bradesco..."></div>
             <div class="cad-field"><label>Saldo Inicial (R$)</label><input type="number" id="cad-b-saldo" placeholder="0,00" step="0.01"></div>
           </div>
+          <div class="cad-field"><label>Data do Saldo Inicial</label><input type="date" id="cad-b-datasaldo"></div>
         </div>
         <button class="cad-save-btn" onclick="cadSaveBancaria()">Salvar Conta</button>
       </div>
