@@ -2399,8 +2399,7 @@ function sha256(str){
   }
   return H.map(function(n){return('00000000'+(n>>>0).toString(16)).slice(-8);}).join('');
 }
-function authGetUsers(){try{return JSON.parse(localStorage.getItem("df_users")||"[]");}catch(e){return[];}}
-function authSaveUsers(u){localStorage.setItem("df_users",JSON.stringify(u));}
+async function authGetUsersDB(){var r=await sb.from('usuarios').select('*').order('created_at');if(r.error)throw r.error;return r.data||[];}
 function authCurrentUser(){try{return JSON.parse(sessionStorage.getItem("df_session")||"null");}catch(e){return null;}}
 
 async function authDoLogin(){
@@ -2415,8 +2414,9 @@ async function authDoLogin(){
     if(user.toLowerCase()===MASTER_LOGIN.toLowerCase()&&hash===MASTER_HASH){
       session={login:MASTER_LOGIN,master:true};
     } else {
-      var found=authGetUsers().find(function(u){return u.login.toLowerCase()===user.toLowerCase()&&u.hash===hash;});
-      if(found) session={login:found.login,master:false,role:found.role||'admin',nome:found.nome||''};
+      var r=await sb.from('usuarios').select('*').ilike('login',user).maybeSingle();
+      var found=r.data;
+      if(found&&found.senha_hash===hash) session={login:found.login,master:false,role:found.role||'admin',nome:found.nome||'',id:found.id};
     }
     if(!session){errEl.textContent="Usuário ou senha incorretos.";return;}
     sessionStorage.setItem("df_session",JSON.stringify(session));
@@ -2433,14 +2433,12 @@ function authApplySession(session){
   document.getElementById("auth-logout-btn").style.display="flex";
   document.getElementById("auth-user-label").textContent=session.login;
   document.getElementById("auth-avatar").textContent=session.login.charAt(0).toUpperCase();
-  // Verifica restrição: config hardcoded OU localStorage role
   var _loginLc = session.login.toLowerCase();
-  var _liveUser = authGetUsers().find(function(u){ return u.login.toLowerCase()===_loginLc; });
   var isRestricted = !session.master && (
     (_loginLc in PERM_RESTRICTED) ||
-    (_liveUser && _liveUser.role==="restricted")
+    session.role==="restricted"
   );
-  var isOperador = !session.master && (_liveUser && _liveUser.role==="operador");
+  var isOperador = !session.master && session.role==="operador";
 
   if(session.master) document.getElementById("cfg-open-btn").style.display="flex";
 
@@ -2489,23 +2487,28 @@ function authInit(){
 function cfgOpen(){document.getElementById("cfg-modal").style.display="flex";cfgRenderList();}
 function cfgClose(){document.getElementById("cfg-modal").style.display="none";}
 
-function cfgRenderList(){
-  var users=authGetUsers();
+async function cfgRenderList(){
   var div=document.getElementById("cfg-user-list-wrap");
-  if(!users.length){div.innerHTML='<p class="cfg-empty-msg">Nenhum usuario cadastrado.</p>';return;}
-  div.innerHTML=users.map(function(u,i){
-    var roleLbl = u.role==='restricted'
-      ? '<span class="cfg-user-row-badge" style="background:#ede9fe;color:#6d28d9">Restrito</span>'
-      : u.role==='operador'
-      ? '<span class="cfg-user-row-badge" style="background:#dbeafe;color:#1e40af">Operador</span>'
-      : '<span class="cfg-user-row-badge" style="background:#d1fae5;color:#065f46">Admin</span>';
-    var nomeLbl = (u.nome && u.role==='restricted') ? '<br><span style="font-size:11px;color:#6b7280">comissões: '+u.nome+'</span>' : '';
-    return '<div class="cfg-user-row"><div style="flex:1"><span class="cfg-user-row-name">'+u.login+'</span> '+roleLbl+nomeLbl+'</div>'
-      +'<div style="display:flex;gap:6px">'
-      +'<button class="cfg-user-row-del" style="color:var(--brand);border-color:rgba(244,121,32,.4)" onclick="cfgEditUser('+i+')">&#9998; Editar</button>'
-      +'<button class="cfg-user-row-del" onclick="cfgRemoveUser('+i+')">Remover</button>'
-      +'</div></div>';
-  }).join('');
+  div.innerHTML='<p style="font-size:12px;color:#888;padding:8px">Carregando...</p>';
+  try {
+    var users=await authGetUsersDB();
+    if(!users.length){div.innerHTML='<p class="cfg-empty-msg">Nenhum usuario cadastrado.</p>';return;}
+    div.innerHTML=users.map(function(u){
+      var roleLbl = u.role==='restricted'
+        ? '<span class="cfg-user-row-badge" style="background:#ede9fe;color:#6d28d9">Restrito</span>'
+        : u.role==='operador'
+        ? '<span class="cfg-user-row-badge" style="background:#dbeafe;color:#1e40af">Operador</span>'
+        : '<span class="cfg-user-row-badge" style="background:#d1fae5;color:#065f46">Admin</span>';
+      var nomeLbl = (u.nome && u.role==='restricted') ? '<br><span style="font-size:11px;color:#6b7280">comissões: '+u.nome+'</span>' : '';
+      return '<div class="cfg-user-row"><div style="flex:1"><span class="cfg-user-row-name">'+u.login+'</span> '+roleLbl+nomeLbl+'</div>'
+        +'<div style="display:flex;gap:6px">'
+        +'<button class="cfg-user-row-del" style="color:var(--brand);border-color:rgba(244,121,32,.4)" onclick="cfgEditUser(\''+u.id+'\')">&#9998; Editar</button>'
+        +'<button class="cfg-user-row-del" onclick="cfgRemoveUser(\''+u.id+'\',\''+u.login.replace(/'/g,"\\'")+'\')">' + 'Remover</button>'
+        +'</div></div>';
+    }).join('');
+  } catch(e) {
+    div.innerHTML='<p style="color:#c0392b;font-size:12px;padding:8px">Erro ao carregar usuários: '+e.message+'</p>';
+  }
 }
 
 async function cfgAddUser(){
@@ -2516,32 +2519,35 @@ async function cfgAddUser(){
   if(!login||!pass){errEl.textContent="Preencha login e senha.";return;}
   if(login.toLowerCase()===MASTER_LOGIN.toLowerCase()){errEl.textContent="Nome de login reservado.";return;}
   if(pass.length<6){errEl.textContent="Senha deve ter pelo menos 6 caracteres.";return;}
-  var users=authGetUsers();
-  if(users.find(function(u){return u.login.toLowerCase()===login.toLowerCase();})){errEl.textContent="Login ja existe.";return;}
-  var hash=await sha256(pass);
+  var hash=sha256(pass);
   var role = document.getElementById("cfg-new-role") ? document.getElementById("cfg-new-role").value : "admin";
   var nome = document.getElementById("cfg-new-nome") ? document.getElementById("cfg-new-nome").value.trim() : "";
-  users.push({login:login,hash:hash,role:role,nome:nome});
-  authSaveUsers(users);
+  var res=await sb.from('usuarios').insert({login:login,senha_hash:hash,role:role,nome:nome||null});
+  if(res.error){
+    if(res.error.code==='23505') errEl.textContent="Login já existe.";
+    else errEl.textContent="Erro ao salvar: "+res.error.message;
+    return;
+  }
   document.getElementById("cfg-new-login").value="";
   document.getElementById("cfg-new-pass").value="";
   if(document.getElementById("cfg-new-nome")) document.getElementById("cfg-new-nome").value="";
+  toast('✅','Usuário criado!','success');
   cfgRenderList();
 }
 
-function cfgRemoveUser(idx){
-  if(!confirm("Remover este usuario?"))return;
-  var users=authGetUsers();
-  users.splice(idx,1);
-  authSaveUsers(users);
+async function cfgRemoveUser(id,login){
+  if(!confirm("Remover o usuário '"+login+"'?"))return;
+  var res=await sb.from('usuarios').delete().eq('id',id);
+  if(res.error){toast('❌','Erro ao remover: '+res.error.message,'error');return;}
+  toast('✅','Usuário removido!','success');
   cfgRenderList();
 }
 
-var _cfgEditIdx = null;
-function cfgEditUser(idx){
-  var users=authGetUsers();
-  var u=users[idx]; if(!u) return;
-  _cfgEditIdx=idx;
+var _cfgEditId = null;
+async function cfgEditUser(id){
+  var users=await authGetUsersDB();
+  var u=users.find(function(x){return x.id===id;}); if(!u) return;
+  _cfgEditId=id;
   var loginEl=document.getElementById("cfg-new-login");
   var passEl=document.getElementById("cfg-new-pass");
   var roleEl=document.getElementById("cfg-new-role");
@@ -2561,31 +2567,31 @@ function cfgEditUser(idx){
   if(h) h.innerHTML='Editar Usu&aacute;rio <button onclick="cfgCancelEditUser()" style="font-size:10px;margin-left:8px;background:#f1f3f4;border:1px solid #dadce0;border-radius:4px;padding:2px 7px;cursor:pointer;color:#5f6368">Cancelar</button>';
 }
 function cfgCancelEditUser(){
-  _cfgEditIdx=null;
+  _cfgEditId=null;
   ['cfg-new-login','cfg-new-pass'].forEach(function(id){var el=document.getElementById(id);if(el)el.value='';});
   var addBtn=document.querySelector('.cfg-add-btn'); if(addBtn){addBtn.textContent='Adicionar';addBtn.onclick=function(){cfgAddUser();};}
   var h=document.querySelector('.cfg-section h4'); if(h) h.textContent='Novo Usuário';
 }
 async function cfgUpdateUser(){
-  if(_cfgEditIdx===null) return;
-  var users=authGetUsers();
-  var u=users[_cfgEditIdx]; if(!u) return;
+  if(!_cfgEditId) return;
   var login=(document.getElementById("cfg-new-login")||{}).value||''; login=login.trim();
   var pass=(document.getElementById("cfg-new-pass")||{}).value||'';
-  var role=(document.getElementById("cfg-new-role")||{}).value||u.role||'admin';
+  var role=(document.getElementById("cfg-new-role")||{}).value||'admin';
   var nome=(document.getElementById("cfg-new-nome")||{}).value||''; nome=nome.trim();
   var errEl=document.getElementById("cfg-form-err"); errEl.textContent='';
   if(!login){errEl.textContent='Informe o login.';return;}
   if(login.toLowerCase()===MASTER_LOGIN.toLowerCase()){errEl.textContent='Nome reservado.';return;}
-  var dup=users.find(function(x,i){return i!==_cfgEditIdx&&x.login.toLowerCase()===login.toLowerCase();});
-  if(dup){errEl.textContent='Login já existe em outro usuário.';return;}
-  u.login=login; u.role=role; u.nome=nome;
+  var upd={login:login,role:role,nome:nome||null};
   if(pass){
     if(pass.length<6){errEl.textContent='Senha deve ter pelo menos 6 caracteres.';return;}
-    u.hash=await sha256(pass);
+    upd.senha_hash=sha256(pass);
   }
-  users[_cfgEditIdx]=u;
-  authSaveUsers(users);
+  var res=await sb.from('usuarios').update(upd).eq('id',_cfgEditId);
+  if(res.error){
+    if(res.error.code==='23505') errEl.textContent='Login já existe em outro usuário.';
+    else errEl.textContent='Erro ao salvar: '+res.error.message;
+    return;
+  }
   toast('✅','Usuário atualizado!','success');
   cfgCancelEditUser();
   cfgRenderList();
@@ -5213,22 +5219,23 @@ async function comLoad() {
     var _session = authCurrentUser();
     if(_session && !_session.master) {
       var _loginLc = _session.login.toLowerCase();
-      // Verifica restrição via config hardcoded OU localStorage
-      var _userRec = authGetUsers().find(function(u){ return u.login.toLowerCase()===_loginLc; });
-      var _isRestricted = (_loginLc in PERM_RESTRICTED) || (_userRec && _userRec.role==='restricted');
+      var _isRestricted = (_loginLc in PERM_RESTRICTED) || _session.role==='restricted';
 
       if(_isRestricted) {
         // Nome do próprio usuário para mostrar suas comissões
-        var _myNome = (PERM_RESTRICTED[_loginLc] || (_userRec&&_userRec.nome) || '').toLowerCase();
+        var _myNome = (PERM_RESTRICTED[_loginLc] || _session.nome || '').toLowerCase();
 
-        // Blacklist: config hardcoded + nomes de usuários com nome preenchido no localStorage
-        var _blacklist = PERM_INTERNAL_NAMES.slice(); // cópia do array hardcoded
-        authGetUsers().forEach(function(u){
-          if(u.nome && u.nome.trim()){
-            var n = u.nome.trim().toLowerCase();
-            if(_blacklist.indexOf(n) < 0) _blacklist.push(n);
-          }
-        });
+        // Blacklist: config hardcoded + nomes de usuários com nome preenchido no Supabase
+        var _blacklist = PERM_INTERNAL_NAMES.slice();
+        try {
+          var _allUsers = await authGetUsersDB();
+          _allUsers.forEach(function(u){
+            if(u.nome && u.nome.trim()){
+              var n = u.nome.trim().toLowerCase();
+              if(_blacklist.indexOf(n) < 0) _blacklist.push(n);
+            }
+          });
+        } catch(e) { /* mantém blacklist hardcoded se falhar */ }
 
         if(_myNome) {
           data = data.filter(function(r){
