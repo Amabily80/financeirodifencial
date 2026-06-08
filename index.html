@@ -2607,11 +2607,13 @@ document.addEventListener("DOMContentLoaded",function(){
 // MÓDULO FINANCEIRO — JAVASCRIPT COMPLETO
 // ══════════════════════════════════════════════════════════════════════════
 
-// ── SUPABASE CLIENT ──
-var sb = (typeof supabase !== 'undefined') ? supabase.createClient(
-  'https://dkrsgzouxlatoqmupguy.supabase.co',
-  'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImRrcnNnem91eGxhdG9xbXVwZ3V5Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODAzODM0NjAsImV4cCI6MjA5NTk1OTQ2MH0.ezewES_rZoS24-RlzEjSLxLvOxudWqANwrdNw-j-y2U'
-) : null;
+// ── SUPABASE CLIENT (reusa instância já criada para evitar múltiplos GoTrueClient) ──
+if (typeof sb === 'undefined' || !sb) {
+  var sb = (typeof supabase !== 'undefined') ? supabase.createClient(
+    'https://dkrsgzouxlatoqmupguy.supabase.co',
+    'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImRrcnNnem91eGxhdG9xbXVwZ3V5Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODAzODM0NjAsImV4cCI6MjA5NTk1OTQ2MH0.ezewES_rZoS24-RlzEjSLxLvOxudWqANwrdNw-j-y2U'
+  ) : null;
+}
 
 // ── ESTADO FINANCEIRO ──
 var FS = {
@@ -3921,11 +3923,13 @@ async function relGoTab(){
 // MÓDULO FINANCEIRO — JAVASCRIPT COMPLETO
 // ══════════════════════════════════════════════════════════════════════════
 
-// ── SUPABASE CLIENT ──
-var sb = (typeof supabase !== 'undefined') ? supabase.createClient(
-  'https://dkrsgzouxlatoqmupguy.supabase.co',
-  'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImRrcnNnem91eGxhdG9xbXVwZ3V5Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODAzODM0NjAsImV4cCI6MjA5NTk1OTQ2MH0.ezewES_rZoS24-RlzEjSLxLvOxudWqANwrdNw-j-y2U'
-) : null;
+// ── SUPABASE CLIENT (reusa instância já criada para evitar múltiplos GoTrueClient) ──
+if (typeof sb === 'undefined' || !sb) {
+  var sb = (typeof supabase !== 'undefined') ? supabase.createClient(
+    'https://dkrsgzouxlatoqmupguy.supabase.co',
+    'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImRrcnNnem91eGxhdG9xbXVwZ3V5Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODAzODM0NjAsImV4cCI6MjA5NTk1OTQ2MH0.ezewES_rZoS24-RlzEjSLxLvOxudWqANwrdNw-j-y2U'
+  ) : null;
+}
 
 // ── ESTADO FINANCEIRO ──
 var FS = {
