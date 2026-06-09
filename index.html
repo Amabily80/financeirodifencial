@@ -2586,13 +2586,14 @@ async function overviewLoad(){
   try {
     // Queries paralelas
     var results = await Promise.all([
-      sb.from('contas_pagar').select('valor,vencimento,data_pagamento,conta_bancaria_id,status,categoria_nome'),
-      sb.from('contas_receber').select('valor,vencimento,data_recebimento,status'),
+      sb.from('contas_pagar').select('valor,vencimento,data_pagamento,conta_bancaria_id,status,categoria_nome,projeto_nome'),
+      sb.from('contas_receber').select('valor,vencimento,data_recebimento,status,projeto_nome'),
       sb.from('solicitacoes_comissao').select('*').gte('data_solicitacao',terFmt).lte('data_solicitacao',segFmt+'T23:59:59'),
       sb.from('contas_bancarias').select('id,nome')
     ]);
-    var cp    = results[0].data||[];
-    var cr    = results[1].data||[];
+    var _isTransf = function(x){ return (x.projeto_nome||'').toLowerCase().includes('transferência entre contas'); };
+    var cp    = (results[0].data||[]).filter(function(x){return !_isTransf(x);});
+    var cr    = (results[1].data||[]).filter(function(x){return !_isTransf(x);});
     var solic = results[2].data||[];
     var bancMap = {};
     (results[3].data||[]).forEach(function(b){bancMap[b.id]=b.nome;});
