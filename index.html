@@ -1653,10 +1653,12 @@ input[type="checkbox"]{width:14px;height:14px;accent-color:var(--green-accent);c
     </div>
 
     <!-- Ações -->
-    <div id="conc-actions" style="display:flex;gap:10px;margin-bottom:20px;flex-wrap:wrap">
+    <div id="conc-actions" style="display:flex;gap:10px;margin-bottom:20px;flex-wrap:wrap;align-items:center">
       <button onclick="conciliacaoNovoLancamento('cp')" style="background:linear-gradient(135deg,#ef4444,#dc2626);border:none;border-radius:8px;padding:9px 16px;color:#fff;font-size:13px;font-family:'DM Sans',sans-serif;font-weight:600;cursor:pointer">+ Lançamento CP</button>
       <button onclick="conciliacaoNovoLancamento('cr')" style="background:linear-gradient(135deg,#059669,#047857);border:none;border-radius:8px;padding:9px 16px;color:#fff;font-size:13px;font-family:'DM Sans',sans-serif;font-weight:600;cursor:pointer">+ Lançamento CR</button>
       <button onclick="conciliacaoFecharMes()" style="background:var(--navy);border:none;border-radius:8px;padding:9px 16px;color:#fff;font-size:13px;font-family:'DM Sans',sans-serif;font-weight:600;cursor:pointer">🔒 Fechar Mês</button>
+      <button onclick="document.getElementById('conc-ofx-input').click()" style="background:linear-gradient(135deg,#2563eb,#1d4ed8);border:none;border-radius:8px;padding:9px 16px;color:#fff;font-size:13px;font-family:'DM Sans',sans-serif;font-weight:600;cursor:pointer">📂 Importar Extrato OFX</button>
+      <input type="file" id="conc-ofx-input" accept=".ofx,.OFX" style="display:none" onchange="conciliacaoHandleOFX(this.files[0]);this.value=''">
     </div>
 
     <!-- ENTRADAS -->
@@ -1672,7 +1674,7 @@ input[type="checkbox"]{width:14px;height:14px;accent-color:var(--green-accent);c
     </div>
 
     <!-- SAÍDAS -->
-    <div style="background:var(--surface);border:1px solid var(--border2);border-radius:12px;overflow:hidden">
+    <div style="background:var(--surface);border:1px solid var(--border2);border-radius:12px;overflow:hidden;margin-bottom:16px">
       <div style="background:#fff5f5;padding:11px 16px;border-bottom:1px solid var(--border)" class="conc-section-hdr">
         <span>📤 SAÍDAS — Contas a Pagar</span>
         <span id="conc-sect-sai" style="font-weight:400;text-transform:none;font-size:12px;color:var(--text-muted)">—</span>
@@ -1681,6 +1683,24 @@ input[type="checkbox"]{width:14px;height:14px;accent-color:var(--green-accent);c
         <span></span><span>Data</span><span>Fornecedor / Descrição</span><span style="text-align:right">Valor</span><span></span>
       </div>
       <div id="conc-body-sai"><div style="padding:20px;text-align:center;font-size:13px;color:var(--text-muted)">Selecione uma conta e período.</div></div>
+    </div>
+
+    <!-- EXTRATO OFX SICOOB -->
+    <div id="conc-extrato-section" style="display:none;background:var(--surface);border:2px solid #2563eb;border-radius:12px;overflow:hidden;margin-bottom:16px">
+      <div style="background:#eff6ff;padding:11px 16px;border-bottom:1px solid #bfdbfe;display:flex;justify-content:space-between;align-items:center">
+        <div>
+          <span style="font-size:11px;font-weight:700;text-transform:uppercase;letter-spacing:.07em;color:#1d4ed8">📄 EXTRATO SICOOB</span>
+          <span id="conc-ofx-info" style="margin-left:10px;font-size:12px;font-weight:400;color:var(--text-muted)"></span>
+        </div>
+        <div style="display:flex;gap:16px;align-items:center;font-size:12px">
+          <span id="conc-ofx-stats"></span>
+          <button onclick="conciliacaoLimparExtrato()" style="background:none;border:1px solid #93c5fd;border-radius:6px;padding:4px 10px;font-size:12px;color:#2563eb;cursor:pointer;font-family:'DM Sans',sans-serif">✕ Limpar</button>
+        </div>
+      </div>
+      <div style="display:grid;grid-template-columns:28px 90px 1fr 120px 120px;gap:8px;padding:8px 14px;background:#f8faff;font-size:10px;font-weight:700;text-transform:uppercase;letter-spacing:.05em;color:var(--text-muted);border-bottom:1px solid #dbeafe">
+        <span></span><span>Data</span><span>Descrição (Banco)</span><span style="text-align:right">Valor</span><span style="text-align:center">Sistema</span>
+      </div>
+      <div id="conc-body-ofx"></div>
     </div>
   </div><!-- /page-conciliacao -->
 
@@ -7011,6 +7031,8 @@ function conciliacaoRender(){
   } else {
     bodySai.innerHTML = '<div style="padding:16px;text-align:center;font-size:13px;color:var(--text-muted)">Nenhuma saída neste período para esta conta.</div>';
   }
+  // Re-renderiza extrato OFX se já importado (para atualizar matches após mudança de período/dados)
+  if(_ofxRows && _ofxRows.length) conciliacaoRenderExtrato();
 }
 
 async function conciliacaoToggle(tabela, id, checked){
@@ -7097,6 +7119,148 @@ function conciliacaoNovoLancamento(tipo){
     var contaEl = document.getElementById('fm-conta');
     if(contaEl && concState.contaId) contaEl.value = concState.contaId;
   }, 80);
+}
+
+// ═══════════════════════════════════════════════════════
+// CONCILIAÇÃO — IMPORTAÇÃO EXTRATO OFX (SICOOB)
+// ═══════════════════════════════════════════════════════
+var _ofxRows = [];   // [{date, amount, memo, trntype}]
+
+function conciliacaoHandleOFX(file){
+  if(!file) return;
+  if(!concState.contaId){
+    toast('⚠️','Selecione a conta bancária e o período antes de importar o extrato.','warn');
+    return;
+  }
+  var reader = new FileReader();
+  reader.onload = function(e){
+    try{
+      _ofxRows = _concParseOFX(e.target.result);
+      if(!_ofxRows.length){ toast('⚠️','Nenhuma transação encontrada no arquivo OFX.','warn'); return; }
+      document.getElementById('conc-ofx-info').textContent = '— '+file.name;
+      conciliacaoRenderExtrato();
+      toast('✅', _ofxRows.length+' transações importadas do extrato.', 'success');
+    }catch(err){
+      toast('❌','Erro ao ler OFX: '+err.message,'error');
+    }
+  };
+  reader.readAsText(file, 'latin1');
+}
+
+function _concParseOFX(text){
+  // Normaliza quebras de linha
+  text = text.replace(/\r\n/g,'\n').replace(/\r/g,'\n');
+  var rows = [];
+  // Tenta XML: <STMTTRN>...</STMTTRN>
+  var xmlBlocks = text.match(/<STMTTRN[\s\S]*?<\/STMTTRN>/gi);
+  if(xmlBlocks && xmlBlocks.length){
+    xmlBlocks.forEach(function(b){ var r=_concOfxBlock(b); if(r) rows.push(r); });
+    return rows;
+  }
+  // SGML (sem fechamento): divide por <STMTTRN>
+  var parts = text.split(/<STMTTRN>/i);
+  for(var i=1; i<parts.length; i++){
+    var r = _concOfxBlock(parts[i]);
+    if(r) rows.push(r);
+  }
+  return rows;
+}
+
+function _concOfxBlock(block){
+  function tag(name){
+    var m = block.match(new RegExp('<'+name+'>([^\\r\\n<]+)','i'));
+    return m ? m[1].trim() : '';
+  }
+  var dtRaw   = tag('DTPOSTED') || tag('DTAVAIL');
+  if(!dtRaw) return null;
+  // YYYYMMDDHHMMSS[-TZ] → pega só YYYYMMDD
+  var dtClean = dtRaw.replace(/[^0-9]/g,'').substring(0,8);
+  if(dtClean.length < 8) return null;
+  var date = dtClean.substring(0,4)+'-'+dtClean.substring(4,6)+'-'+dtClean.substring(6,8);
+  var amtStr  = tag('TRNAMT').replace(',','.');
+  var amount  = parseFloat(amtStr);
+  if(isNaN(amount)) return null;
+  var memo    = tag('MEMO') || tag('NAME') || tag('FITID') || '';
+  var trntype = tag('TRNTYPE').toUpperCase();
+  return { date:date, amount:amount, memo:memo, trntype:trntype };
+}
+
+function _concDaysApart(d1, d2){
+  // d1, d2 = 'YYYY-MM-DD'
+  return Math.abs(new Date(d1+'T12:00:00').getTime() - new Date(d2+'T12:00:00').getTime()) / 86400000;
+}
+
+function _concFindMatch(ofxRow){
+  // Retorna {found: bool, item: row|null, table: 'cr'|'cp'|null}
+  var amt = ofxRow.amount;
+  var TOLS = 1.00;  // tolerância R$1 (cobre multa/juros pequenos)
+  var TOLD = 3;     // tolerância 3 dias
+  if(amt > 0){
+    // Entrada → busca em crRows
+    var found = concState.crRows.find(function(r){
+      var val = parseFloat(r.valor_recebido||r.valor)||0;
+      var date = r.data_recebimento || r.vencimento;
+      if(!date) return false;
+      return Math.abs(val - amt) <= TOLS && _concDaysApart(date, ofxRow.date) <= TOLD;
+    });
+    return found ? {found:true, item:found, table:'cr'} : {found:false, item:null, table:null};
+  } else {
+    // Saída → busca em cpRows
+    var absAmt = Math.abs(amt);
+    var found2 = concState.cpRows.find(function(p){
+      var val = parseFloat(p.valor_pago||p.valor)||0;
+      var date = p.data_pagamento || p.vencimento;
+      if(!date) return false;
+      return Math.abs(val - absAmt) <= TOLS && _concDaysApart(date, ofxRow.date) <= TOLD;
+    });
+    return found2 ? {found:true, item:found2, table:'cp'} : {found:false, item:null, table:null};
+  }
+}
+
+function conciliacaoRenderExtrato(){
+  if(!_ofxRows.length) return;
+  var section = document.getElementById('conc-extrato-section');
+  var body    = document.getElementById('conc-body-ofx');
+  var stats   = document.getElementById('conc-ofx-stats');
+  section.style.display = '';
+
+  var matched=0, unmatched=0;
+  var html = '';
+  _ofxRows.forEach(function(row){
+    var match = _concFindMatch(row);
+    if(match.found) matched++; else unmatched++;
+    var isCredit = row.amount >= 0;
+    var amtFmt   = (isCredit ? '+' : '') + fmtBRL(row.amount);
+    var amtColor = isCredit ? '#059669' : '#dc2626';
+    var dateBR   = fmtDateBR(row.date);
+
+    var statusBadge, rowBg;
+    if(match.found){
+      var desc = match.item ? (match.item.pessoa_nome||match.item.descricao||'') : '';
+      statusBadge = '<span style="font-size:11px;background:#dcfce7;color:#15803d;border-radius:5px;padding:2px 7px;white-space:nowrap">✅ '+(desc?desc.substring(0,22):'OK')+'</span>';
+      rowBg = '';
+    } else {
+      statusBadge = '<span style="font-size:11px;background:#fff7ed;color:#c2410c;border-radius:5px;padding:2px 7px;white-space:nowrap">⚠️ Não encontrado</span>';
+      rowBg = 'background:#fffbf5;';
+    }
+    html += '<div style="display:grid;grid-template-columns:28px 90px 1fr 120px 120px;gap:8px;padding:9px 14px;border-bottom:1px solid #f0f0f0;align-items:center;font-size:13px;'+rowBg+'">'
+      +'<span style="font-size:14px">'+(isCredit?'⬆️':'⬇️')+'</span>'
+      +'<span style="color:var(--text-muted);font-family:DM Mono,monospace;font-size:12px">'+dateBR+'</span>'
+      +'<span style="overflow:hidden;text-overflow:ellipsis;white-space:nowrap;color:var(--navy)" title="'+row.memo+'">'+row.memo+'</span>'
+      +'<span style="text-align:right;font-family:DM Mono,monospace;font-weight:600;color:'+amtColor+'">'+amtFmt+'</span>'
+      +'<span>'+statusBadge+'</span>'
+      +'</div>';
+  });
+  body.innerHTML = html || '<div style="padding:20px;text-align:center;color:var(--text-muted)">Sem transações.</div>';
+
+  stats.innerHTML = '<span style="color:#15803d;font-weight:600">✅ '+matched+' ok</span>'
+    +'<span style="color:#c2410c;font-weight:600;margin-left:10px">⚠️ '+unmatched+' sem par</span>';
+}
+
+function conciliacaoLimparExtrato(){
+  _ofxRows = [];
+  document.getElementById('conc-extrato-section').style.display = 'none';
+  document.getElementById('conc-ofx-info').textContent = '';
 }
 
 // ═══════════════════════════════════════════════════════
