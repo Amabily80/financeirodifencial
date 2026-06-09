@@ -897,7 +897,7 @@ input[type="checkbox"]{width:14px;height:14px;accent-color:var(--green-accent);c
         <div class="ov-card-sub" id="ov-cr-mes-n">0 recebimento(s)</div>
       </div>
       <div class="ov-card" style="border-top-color:#c0392b">
-        <div class="ov-card-lbl">💸 Pago no Mês</div>
+        <div class="ov-card-lbl">💸 Despesas Pagas no Mês</div>
         <div class="ov-card-val" id="ov-cp-pago-mes" style="color:#c0392b">—</div>
         <div class="ov-card-sub" id="ov-cp-pago-mes-n">0 pagamento(s)</div>
       </div>
@@ -2465,13 +2465,14 @@ async function overviewLoad(){
     var cpPagoMes  = cp.filter(function(x){return x.status==='pago'&&x.data_pagamento>=mesIni&&x.data_pagamento<=mesFim;});
     var crRecMes   = cr.filter(function(x){return x.status==='recebido'&&x.data_recebimento>=mesIni&&x.data_recebimento<=mesFim;});
     var comPagoMes = cpPagoMes.filter(isComissao);
-    var recMes = sum(crRecMes), pagMes = sum(cpPagoMes), comPagMes = sum(comPagoMes);
-    var resultado  = recMes - pagMes;
+    var despPagoMes = cpPagoMes.filter(function(x){return !isComissao(x);});
+    var recMes = sum(crRecMes), pagMes = sum(despPagoMes), comPagMes = sum(comPagoMes);
+    var resultado  = recMes - pagMes - comPagMes;
 
     document.getElementById('ov-cr-mes').textContent       = fmtBRL(recMes);
     document.getElementById('ov-cr-mes-n').textContent     = crRecMes.length+' recebimento(s)';
     document.getElementById('ov-cp-pago-mes').textContent  = fmtBRL(pagMes);
-    document.getElementById('ov-cp-pago-mes-n').textContent= cpPagoMes.length+' pagamento(s)';
+    document.getElementById('ov-cp-pago-mes-n').textContent= despPagoMes.length+' pagamento(s) (ex-comissões)';
     document.getElementById('ov-com-pago-mes').textContent = fmtBRL(comPagMes);
     document.getElementById('ov-com-pago-mes-n').textContent = comPagoMes.length+' comissão(ões)';
     var resEl = document.getElementById('ov-resultado');
