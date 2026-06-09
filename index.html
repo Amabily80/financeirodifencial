@@ -514,6 +514,18 @@ input[type="checkbox"]{width:14px;height:14px;accent-color:var(--green-accent);c
 .rel-filter-grp label{font-size:11px;font-weight:700;text-transform:uppercase;letter-spacing:.06em;color:var(--text-muted)}
 .rel-filter-grp input,.rel-filter-grp select{border:1.5px solid var(--border2);border-radius:9px;padding:8px 11px;font-size:13px;font-family:'DM Sans',sans-serif;color:var(--navy);background:#fff;outline:none;transition:border .2s}
 .rel-filter-grp input:focus,.rel-filter-grp select:focus{border-color:var(--brand)}
+/* Multi-select dropdown */
+.rel-multisel{position:relative}
+.rel-ms-btn{width:100%;background:#fff;border:1.5px solid var(--border2);border-radius:9px;padding:8px 28px 8px 11px;font-size:13px;font-family:'DM Sans',sans-serif;color:var(--navy);cursor:pointer;text-align:left;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;position:relative;transition:border .2s;box-sizing:border-box}
+.rel-ms-btn::after{content:'▾';position:absolute;right:10px;top:50%;transform:translateY(-50%);color:var(--text-muted);pointer-events:none;font-size:11px}
+.rel-ms-btn:hover,.rel-ms-btn.open{border-color:var(--brand)}
+.rel-ms-drop{position:absolute;top:calc(100% + 4px);left:0;min-width:100%;background:#fff;border:1.5px solid var(--border2);border-radius:9px;z-index:9999;max-height:240px;overflow-y:auto;box-shadow:0 8px 24px rgba(0,0,0,.14)}
+.rel-ms-actions{display:flex;gap:6px;padding:7px 10px;border-bottom:1px solid var(--border);position:sticky;top:0;background:#fff;z-index:1}
+.rel-ms-action{background:transparent;border:1px solid var(--border2);border-radius:5px;padding:3px 8px;font-size:11px;font-family:'DM Sans',sans-serif;color:var(--text-muted);cursor:pointer;transition:all .15s}
+.rel-ms-action:hover{color:var(--brand);border-color:var(--brand)}
+.rel-ms-item{display:flex;align-items:center;gap:8px;padding:7px 12px;cursor:pointer;font-size:13px;color:var(--navy);transition:background .1s;user-select:none}
+.rel-ms-item:hover{background:#f5f5f8}
+.rel-ms-item input[type=checkbox]{accent-color:var(--brand);width:14px;height:14px;cursor:pointer;flex-shrink:0;margin:0}
 .rel-actions-bar{display:flex;gap:10px;align-items:center;flex-wrap:wrap}
 .rel-btn{border:none;border-radius:9px;font-family:'DM Sans',sans-serif;font-size:13px;font-weight:600;padding:10px 18px;cursor:pointer;transition:opacity .2s}
 .rel-btn:hover{opacity:.88}
@@ -1278,19 +1290,19 @@ input[type="checkbox"]{width:14px;height:14px;accent-color:var(--green-accent);c
       </div>
       <div class="rel-filter-grp">
         <label>Categoria</label>
-        <select id="rel-cat"><option value="">Todas</option></select>
+        <div class="rel-multisel" id="rel-cat-ms"></div>
       </div>
       <div class="rel-filter-grp">
         <label>Projeto</label>
-        <select id="rel-proj"><option value="">Todos</option></select>
+        <div class="rel-multisel" id="rel-proj-ms"></div>
       </div>
       <div class="rel-filter-grp">
         <label>Conta Bancária</label>
-        <select id="rel-banco"><option value="">Todas</option></select>
+        <div class="rel-multisel" id="rel-banco-ms"></div>
       </div>
       <div class="rel-filter-grp">
         <label>Status</label>
-        <select id="rel-status"><option value="">Todos</option></select>
+        <div class="rel-multisel" id="rel-status-ms"></div>
       </div>
       <div class="rel-filter-grp">
         <label>Valor mínimo</label>
@@ -3972,35 +3984,98 @@ function relSetTipo(tipo){
   document.querySelectorAll('.rel-type-card').forEach(function(c){ c.classList.remove('active'); });
   var card = document.getElementById('relcard-'+tipo);
   if(card) card.classList.add('active');
-  // Update status options
-  var sel = document.getElementById('rel-status');
-  if(!sel) return;
-  sel.innerHTML = '<option value="">Todos</option>';
-  if(tipo.startsWith('cp')){
-    ['pendente','pago','vencido','cancelado'].forEach(function(s){
-      sel.innerHTML += '<option value="'+s+'">'+s.charAt(0).toUpperCase()+s.slice(1)+'</option>';
-    });
-  } else {
-    ['pendente','recebido','atrasado','cancelado'].forEach(function(s){
-      sel.innerHTML += '<option value="'+s+'">'+s.charAt(0).toUpperCase()+s.slice(1)+'</option>';
-    });
-  }
+  // Update status multi-select options
+  var statusOpts = tipo.startsWith('cp')
+    ? [{v:'pendente',l:'Pendente'},{v:'pago',l:'Pago'},{v:'vencido',l:'Vencido'},{v:'cancelado',l:'Cancelado'}]
+    : [{v:'pendente',l:'Pendente'},{v:'recebido',l:'Recebido'},{v:'atrasado',l:'Atrasado'},{v:'cancelado',l:'Cancelado'}];
+  if(_relMs['rel-status-ms']) relMsSetOpts('rel-status-ms', statusOpts);
   document.getElementById('rel-results-wrap').style.display='none';
   document.getElementById('rel-btn-csv').style.display='none';
   document.getElementById('rel-btn-pdf').style.display='none';
 }
 
+/* ── Multi-select helpers para filtros de relatórios ── */
+var _relMs = {};
+function relMsInit(id, ph){
+  var c = document.getElementById(id); if(!c) return;
+  _relMs[id] = {ph: ph||'Todos'};
+  c.innerHTML =
+    '<button class="rel-ms-btn" type="button" onclick="relMsToggle(\''+id+'\')">'
+    +'<span id="'+id+'-lbl">'+ph+'</span></button>'
+    +'<div class="rel-ms-drop" id="'+id+'-drop" style="display:none">'
+    +'<div class="rel-ms-actions">'
+    +'<button class="rel-ms-action" type="button" onclick="relMsAll(\''+id+'\',true)">✓ Todos</button>'
+    +'<button class="rel-ms-action" type="button" onclick="relMsAll(\''+id+'\',false)">✕ Nenhum</button>'
+    +'</div><div id="'+id+'-items"></div></div>';
+}
+function relMsSetOpts(id, opts){
+  var st = _relMs[id]; if(!st) return;
+  var items = document.getElementById(id+'-items'); if(!items) return;
+  items.innerHTML = opts.map(function(o){
+    return '<label class="rel-ms-item">'
+      +'<input type="checkbox" value="'+o.v+'" checked onchange="relMsLbl(\''+id+'\')">'
+      +'<span>'+o.l+'</span></label>';
+  }).join('');
+  relMsLbl(id);
+}
+function relMsToggle(id){
+  var drop = document.getElementById(id+'-drop'); if(!drop) return;
+  var isOpen = drop.style.display !== 'none';
+  // fecha todos
+  Object.keys(_relMs).forEach(function(k){
+    var d = document.getElementById(k+'-drop'); if(d) d.style.display='none';
+    var b = document.querySelector('#'+k+' .rel-ms-btn'); if(b) b.classList.remove('open');
+  });
+  if(!isOpen){
+    drop.style.display='block';
+    var btn = document.querySelector('#'+id+' .rel-ms-btn');
+    if(btn) btn.classList.add('open');
+  }
+}
+function relMsAll(id, check){
+  var items = document.getElementById(id+'-items'); if(!items) return;
+  items.querySelectorAll('input').forEach(function(cb){ cb.checked = check; });
+  relMsLbl(id);
+}
+function relMsLbl(id){
+  var st = _relMs[id]; if(!st) return;
+  var items = document.getElementById(id+'-items'); if(!items) return;
+  var all = Array.from(items.querySelectorAll('input'));
+  var chk = all.filter(function(cb){ return cb.checked; });
+  var lbl = document.getElementById(id+'-lbl'); if(!lbl) return;
+  if(!chk.length || chk.length === all.length){ lbl.textContent = st.ph; return; }
+  if(chk.length === 1){ lbl.textContent = chk[0].closest('label').querySelector('span').textContent; return; }
+  lbl.textContent = chk.length + ' selecionados';
+}
+function relMsGet(id){
+  // retorna null = sem filtro; array = filtrar por esses valores
+  var items = document.getElementById(id+'-items'); if(!items) return null;
+  var all = Array.from(items.querySelectorAll('input'));
+  var chk = all.filter(function(cb){ return cb.checked; });
+  if(!chk.length || chk.length === all.length) return null;
+  return chk.map(function(cb){ return cb.value; });
+}
+if(!window._relMsClickBound){
+  window._relMsClickBound = true;
+  document.addEventListener('click', function(e){
+    if(!e.target.closest('.rel-multisel')){
+      Object.keys(_relMs).forEach(function(k){
+        var d = document.getElementById(k+'-drop'); if(d) d.style.display='none';
+        var b = document.querySelector('#'+k+' .rel-ms-btn'); if(b) b.classList.remove('open');
+      });
+    }
+  });
+}
+/* ────────────────────────────────────────────────────── */
+
 function relFillDropdowns(){
-  var catSel = document.getElementById('rel-cat');
-  var projSel = document.getElementById('rel-proj');
-  var bancoSel = document.getElementById('rel-banco');
-  if(!catSel) return;
-  catSel.innerHTML = '<option value="">Todas</option>';
-  (FS.refs.cats||[]).forEach(function(c){ catSel.innerHTML += '<option value="'+c.id+'">'+c.nome+'</option>'; });
-  projSel.innerHTML = '<option value="">Todos</option>';
-  (FS.refs.projetos||[]).forEach(function(p){ projSel.innerHTML += '<option value="'+p.id+'">'+p.nome+'</option>'; });
-  bancoSel.innerHTML = '<option value="">Todas</option>';
-  (FS.refs.bancarias||[]).forEach(function(b){ bancoSel.innerHTML += '<option value="'+b.id+'">'+b.nome+'</option>'; });
+  relMsInit('rel-cat-ms','Todas');
+  relMsInit('rel-proj-ms','Todos');
+  relMsInit('rel-banco-ms','Todas');
+  relMsInit('rel-status-ms','Todos');
+  relMsSetOpts('rel-cat-ms', (FS.refs.cats||[]).map(function(c){ return {v:String(c.id), l:c.nome}; }));
+  relMsSetOpts('rel-proj-ms', (FS.refs.projetos||[]).map(function(p){ return {v:String(p.id), l:p.nome}; }));
+  relMsSetOpts('rel-banco-ms', (FS.refs.bancarias||[]).map(function(b){ return {v:String(b.id), l:b.nome}; }));
   relSetTipo('cp');
 }
 
@@ -4014,19 +4089,19 @@ async function relLoad(){
     var de  = document.getElementById('rel-de').value;
     var ate = document.getElementById('rel-ate').value;
     var busca = (document.getElementById('rel-busca').value||'').trim();
-    var cat   = document.getElementById('rel-cat').value;
-    var proj  = document.getElementById('rel-proj').value;
-    var banco = document.getElementById('rel-banco').value;
-    var status= document.getElementById('rel-status').value;
+    var cat   = relMsGet('rel-cat-ms');
+    var proj  = relMsGet('rel-proj-ms');
+    var banco = relMsGet('rel-banco-ms');
+    var status= relMsGet('rel-status-ms');
     var vmin  = document.getElementById('rel-vmin').value;
     var vmax  = document.getElementById('rel-vmax').value;
 
-    if(de)  q = q.gte(cfg.dateField, de);
-    if(ate) q = q.lte(cfg.dateField, ate);
-    if(status) q = q.eq('status', status);
-    if(cat)    q = q.eq('categoria_id', cat);
-    if(proj)   q = q.eq('projeto_id', proj);
-    if(banco)  q = q.eq('conta_bancaria_id', banco);
+    if(de)     q = q.gte(cfg.dateField, de);
+    if(ate)    q = q.lte(cfg.dateField, ate);
+    if(status) q = q.in('status', status);
+    if(cat)    q = q.in('categoria_id', cat);
+    if(proj)   q = q.in('projeto_id', proj);
+    if(banco)  q = q.in('conta_bancaria_id', banco);
     if(vmin)   q = q.gte('valor', parseFloat(vmin));
     if(vmax)   q = q.lte('valor', parseFloat(vmax));
     q = q.order('pessoa_nome', {ascending:true}).order(cfg.dateField, {ascending:true});
