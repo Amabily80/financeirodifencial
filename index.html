@@ -841,7 +841,7 @@ input[type="checkbox"]{width:14px;height:14px;accent-color:var(--green-accent);c
 <nav>
   <div class="nav-inner">
     <button class="nav-tab" onclick="goTab('overview')" id="tab-overview">
-      <span class="ticon">🏠</span> Visão Geral <span class="nav-chip">em breve</span>
+      <span class="ticon">🏠</span> Visão Geral
     </button>
     <button class="nav-tab active" onclick="goTab('fc')" id="tab-fc">
       <span class="ticon">💰</span> Fluxo de Caixa
@@ -850,7 +850,7 @@ input[type="checkbox"]{width:14px;height:14px;accent-color:var(--green-accent);c
       <span class="ticon">📋</span> Solicitação de Comissão
     </button>
     <button class="nav-tab" onclick="goTab('relatorios')" id="tab-relatorios">
-      <span class="ticon">📊</span> Relatórios <span class="nav-chip">em breve</span>
+      <span class="ticon">📊</span> Relatórios
     </button>
     <button class="nav-tab" onclick="goTab('cp')" id="tab-cp">💸 Contas a Pagar</button>
     <button class="nav-tab" onclick="goTab('cr')" id="tab-cr">💰 Contas a Receber</button>
@@ -867,11 +867,70 @@ input[type="checkbox"]{width:14px;height:14px;accent-color:var(--green-accent);c
        PAGE: VISÃO GERAL
   ═══════════════════════════════════ -->
   <div id="page-overview" style="display:none">
-    <div class="ph-page">
-      <div class="ph-icon">🏠</div>
-      <h2>Visão Geral</h2>
-      <p>Painel consolidado com os principais indicadores financeiros da operação — receitas, comissões, metas e performance.</p>
-      <span class="coming-tag">Em desenvolvimento</span>
+    <div class="fin-page-hdr" style="margin-bottom:24px">
+      <div>
+        <h2 class="fin-page-title">🏠 Visão Geral</h2>
+        <p style="font-size:13px;color:var(--text-muted);margin-top:4px">Painel consolidado · atualizado às <span id="ov-updated">—</span></p>
+      </div>
+      <button class="btn-primary" style="height:34px;font-size:12px;padding:0 14px;background:linear-gradient(135deg,var(--gray-600),var(--gray-700));box-shadow:none" onclick="overviewLoad()">🔄 Atualizar</button>
+    </div>
+
+    <!-- ── SOLICITAÇÕES DA SEMANA ── -->
+    <div style="font-size:11px;font-weight:700;text-transform:uppercase;letter-spacing:.08em;color:var(--text-muted);margin-bottom:10px">📋 Solicitações de Comissão — Esta Semana</div>
+    <div class="kpi-grid" style="margin-bottom:28px">
+      <div class="fin-kpi-card" style="background:var(--card);border:1px solid var(--border);border-radius:14px;padding:18px 22px">
+        <div style="font-size:11px;color:var(--text-muted);font-weight:600;text-transform:uppercase;letter-spacing:.06em;margin-bottom:6px">Total Solicitado</div>
+        <div id="ov-solic-valor" style="font-size:24px;font-weight:800;color:var(--gold);font-family:'DM Mono',monospace">—</div>
+        <div id="ov-solic-count" style="font-size:12px;color:var(--text-muted);margin-top:4px">0 solicitação(ões)</div>
+      </div>
+      <div class="fin-kpi-card" style="background:var(--card);border:1px solid var(--border);border-radius:14px;padding:18px 22px">
+        <div style="font-size:11px;color:var(--text-muted);font-weight:600;text-transform:uppercase;letter-spacing:.06em;margin-bottom:6px">A Vencer em 7 dias (CP)</div>
+        <div id="ov-cp-semana-total" style="font-size:24px;font-weight:800;color:#c0392b;font-family:'DM Mono',monospace">—</div>
+        <div style="font-size:12px;color:var(--text-muted);margin-top:4px">Contas a pagar</div>
+      </div>
+      <div class="fin-kpi-card" style="background:var(--card);border:1px solid var(--border);border-radius:14px;padding:18px 22px">
+        <div style="font-size:11px;color:var(--text-muted);font-weight:600;text-transform:uppercase;letter-spacing:.06em;margin-bottom:6px">No Mês Atual (CP)</div>
+        <div id="ov-cp-mes-total" style="font-size:24px;font-weight:800;color:#e67e22;font-family:'DM Mono',monospace">—</div>
+        <div style="font-size:12px;color:var(--text-muted);margin-top:4px">Contas a pagar</div>
+      </div>
+    </div>
+
+    <!-- ── CONTAS A PAGAR POR CONTA BANCÁRIA ── -->
+    <div style="font-size:11px;font-weight:700;text-transform:uppercase;letter-spacing:.08em;color:var(--text-muted);margin-bottom:10px">🏦 Previsão de Contas a Pagar — Por Conta Bancária</div>
+    <div class="fin-table-card" style="margin-bottom:28px">
+      <div style="overflow-x:auto">
+        <table class="fin-table">
+          <thead><tr>
+            <th>Conta Bancária</th>
+            <th style="text-align:right">Semana (próx. 7 dias)</th>
+            <th style="text-align:right">Mês Atual</th>
+          </tr></thead>
+          <tbody id="ov-cp-tbody">
+            <tr><td colspan="3" style="text-align:center;padding:24px;color:var(--text-muted)">Carregando...</td></tr>
+          </tbody>
+        </table>
+      </div>
+    </div>
+
+    <!-- ── PREVISÃO DE COMISSÕES ── -->
+    <div style="display:flex;align-items:center;gap:12px;margin-bottom:10px;flex-wrap:wrap">
+      <div style="font-size:11px;font-weight:700;text-transform:uppercase;letter-spacing:.08em;color:var(--text-muted)">💰 Previsão de Comissões a Pagar</div>
+      <span id="ov-com-info" style="font-size:11px;color:var(--text-muted)"></span>
+    </div>
+    <div class="fin-table-card" style="margin-bottom:28px">
+      <div style="overflow-x:auto">
+        <table class="fin-table">
+          <thead><tr>
+            <th>Profissional</th>
+            <th>Tipo</th>
+            <th>Cálculo</th>
+            <th style="text-align:right">Comissão Estimada</th>
+          </tr></thead>
+          <tbody id="ov-com-tbody">
+            <tr><td colspan="4" style="text-align:center;padding:24px;color:var(--text-muted)">Carregando...</td></tr>
+          </tbody>
+        </table>
+      </div>
     </div>
   </div>
 
@@ -1574,6 +1633,7 @@ function goTab(id){
     document.getElementById('page-'+p).style.display=p===id?'':'none';
     document.getElementById('tab-'+p).classList.toggle('active',p===id);
   });
+  if(id==='overview') overviewLoad();
   if(id==='fc'&&allRows.length) renderFC();
   if(id==='sc'){
     var _sess=authCurrentUser();
@@ -2301,6 +2361,92 @@ function scOpenModal(){
   document.getElementById('sc-modal').classList.add('open');
 }
 function scCloseModal(){document.getElementById('sc-modal').classList.remove('open');}
+
+// ── VISÃO GERAL ──
+async function overviewLoad(){
+  if(!sb){toast('⚠️','Supabase não conectado','warn');return;}
+  document.getElementById('ov-updated').textContent = new Date().toLocaleTimeString('pt-BR',{hour:'2-digit',minute:'2-digit'});
+  var hoje = new Date();
+  var hojeFmt = hoje.toISOString().split('T')[0];
+  // Semana atual (seg a dom)
+  var dow = hoje.getDay();
+  var seg = new Date(hoje); seg.setDate(hoje.getDate()-(dow===0?6:dow-1));
+  var dom = new Date(seg);  dom.setDate(seg.getDate()+6);
+  var segFmt = seg.toISOString().split('T')[0];
+  var domFmt = dom.toISOString().split('T')[0];
+  // 7 dias à frente
+  var em7 = new Date(hoje); em7.setDate(hoje.getDate()+7);
+  var em7Fmt = em7.toISOString().split('T')[0];
+  // Mês atual
+  var mesIni = hoje.getFullYear()+'-'+String(hoje.getMonth()+1).padStart(2,'0')+'-01';
+  var mesFim = new Date(hoje.getFullYear(),hoje.getMonth()+1,0).toISOString().split('T')[0];
+  try {
+    // 1. Solicitações da semana
+    var r1 = await sb.from('solicitacoes_comissao').select('total_valor,data_solicitacao')
+      .gte('data_solicitacao', segFmt).lte('data_solicitacao', domFmt+'T23:59:59');
+    var solics = r1.data||[];
+    var solTotal = solics.reduce(function(s,x){return s+(parseFloat(x.total_valor)||0);},0);
+    document.getElementById('ov-solic-valor').textContent = fmtBRL(solTotal);
+    document.getElementById('ov-solic-count').textContent = solics.length+' solicitação(ões) esta semana';
+    // 2. Contas a pagar pendentes
+    var r2 = await sb.from('contas_pagar').select('valor,vencimento,conta_bancaria_nome').in('status',['pendente','vencido']);
+    var cp = r2.data||[];
+    var cpSem = cp.filter(function(x){return x.vencimento>=hojeFmt&&x.vencimento<=em7Fmt;});
+    var cpMes = cp.filter(function(x){return x.vencimento>=mesIni&&x.vencimento<=mesFim;});
+    var bySem={}, byMes={};
+    cpSem.forEach(function(x){var c=x.conta_bancaria_nome||'Sem conta';bySem[c]=(bySem[c]||0)+(parseFloat(x.valor)||0);});
+    cpMes.forEach(function(x){var c=x.conta_bancaria_nome||'Sem conta';byMes[c]=(byMes[c]||0)+(parseFloat(x.valor)||0);});
+    var allContas=Array.from(new Set(Object.keys(bySem).concat(Object.keys(byMes)))).sort();
+    var totSem=0,totMes=0;
+    var rows=allContas.map(function(c){
+      var s=bySem[c]||0, m=byMes[c]||0; totSem+=s; totMes+=m;
+      return '<tr><td>'+c+'</td>'
+        +'<td class="mono" style="text-align:right;color:#c0392b">'+fmtBRL(s)+'</td>'
+        +'<td class="mono" style="text-align:right;color:#e67e22">'+fmtBRL(m)+'</td></tr>';
+    });
+    rows.push('<tr style="border-top:2px solid var(--border);font-weight:700">'
+      +'<td>Total</td>'
+      +'<td class="mono" style="text-align:right;color:#c0392b">'+fmtBRL(totSem)+'</td>'
+      +'<td class="mono" style="text-align:right;color:#e67e22">'+fmtBRL(totMes)+'</td></tr>');
+    document.getElementById('ov-cp-tbody').innerHTML = rows.join('');
+    document.getElementById('ov-cp-semana-total').textContent = fmtBRL(totSem);
+    document.getElementById('ov-cp-mes-total').textContent = fmtBRL(totMes);
+  } catch(e) {
+    toast('❌','Erro ao carregar visão geral: '+e.message,'error');
+  }
+  ovRenderComissoes();
+}
+
+function ovRenderComissoes(){
+  var tbody = document.getElementById('ov-com-tbody');
+  var info  = document.getElementById('ov-com-info');
+  if(!tbody) return;
+  if(!allRows||!allRows.length){
+    tbody.innerHTML='<tr><td colspan="4" style="text-align:center;padding:20px;color:var(--text-muted)">'
+      +'Dados de contratos não carregados. '
+      +'<button class="btn-primary" style="margin-left:8px;font-size:11px;height:26px;padding:0 10px" '
+      +'onclick="loadData().then(ovRenderComissoes)">Carregar dados</button></td></tr>';
+    if(info) info.textContent='';
+    return;
+  }
+  var base = allRows.reduce(function(s,r){return s+(parseFloat(r.valor)||0);},0);
+  if(info) info.textContent = allRows.length+' contratos carregados · base: '+fmtBRL(base);
+  var coms=[
+    {nome:'Corretor',   tipo:'Corretor', calc:'2% do contrato',   valor:base*0.02},
+    {nome:'Ariel',      tipo:'Gerência', calc:'5% × 10% × 47%',   valor:base*0.05*0.10*0.47},
+    {nome:'Rodrigo',    tipo:'Gerência', calc:'5% × 10% × 33%',   valor:base*0.05*0.10*0.33},
+    {nome:'Erick',      tipo:'Gerência', calc:'5% × 10% × 20%',   valor:base*0.05*0.10*0.20},
+    {nome:'Guilherme',  tipo:'Gerência', calc:'5% × 12%',          valor:base*0.05*0.12},
+  ];
+  tbody.innerHTML=coms.map(function(c){
+    var badge=c.tipo==='Corretor'
+      ?'<span class="cfg-user-row-badge" style="background:#d1fae5;color:#065f46">Corretor</span>'
+      :'<span class="cfg-user-row-badge" style="background:#dbeafe;color:#1e40af">Gerência</span>';
+    return '<tr><td style="font-weight:600">'+c.nome+'</td><td>'+badge+'</td>'
+      +'<td style="font-size:11px;color:var(--text-muted)">'+c.calc+'</td>'
+      +'<td class="mono" style="text-align:right;font-weight:700;color:var(--gold)">'+fmtBRL(c.valor)+'</td></tr>';
+  }).join('');
+}
 
 // ── SUBMENUS SC ──
 var _scSubCurrent = 'solicitar';
