@@ -4073,7 +4073,7 @@ function relFillDropdowns(){
   relMsInit('rel-proj-ms','Todos');
   relMsInit('rel-banco-ms','Todas');
   relMsInit('rel-status-ms','Todos');
-  relMsSetOpts('rel-cat-ms', (FS.refs.cats||[]).map(function(c){ return {v:String(c.id), l:c.nome}; }));
+  relMsSetOpts('rel-cat-ms', (FS.refs.categorias||[]).map(function(c){ return {v:String(c.id), l:c.nome}; }));
   relMsSetOpts('rel-proj-ms', (FS.refs.projetos||[]).map(function(p){ return {v:String(p.id), l:p.nome}; }));
   relMsSetOpts('rel-banco-ms', (FS.refs.bancarias||[]).map(function(b){ return {v:String(b.id), l:b.nome}; }));
   relSetTipo('cp');
