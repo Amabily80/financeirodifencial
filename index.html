@@ -440,6 +440,26 @@ input[type="checkbox"]{width:14px;height:14px;accent-color:var(--green-accent);c
 .conc-badge-lock{font-size:10px;background:#dcfce7;color:#059669;border-radius:4px;padding:2px 7px;font-weight:600;white-space:nowrap;display:inline-block}
 .conc-fechado-banner{background:#fff8e1;border:1px solid #ffd54f;border-radius:10px;padding:14px 18px;margin-bottom:18px;font-size:13px;color:#7c5700;display:flex;align-items:center;gap:12px}
 
+/* ── IMPORTAÇÃO CNAB ── */
+.cnab-subtabs{display:flex;gap:8px;margin-bottom:20px;border-bottom:2px solid var(--border);padding-bottom:12px}
+.cnab-stab{background:transparent;border:1.5px solid var(--border2);padding:8px 18px;font-size:13px;font-weight:600;cursor:pointer;color:var(--text-muted);border-radius:8px;transition:.2s}
+.cnab-stab.active{background:var(--brand);color:#fff;border-color:var(--brand)}
+.cnab-upload-box{border:2.5px dashed var(--border2);border-radius:14px;padding:44px 24px;text-align:center;cursor:pointer;transition:.2s;background:var(--surface)}
+.cnab-upload-box:hover,.cnab-upload-box.drag-over{border-color:var(--brand);background:#fff8f2}
+.cnab-upload-icon{font-size:40px;margin-bottom:10px}
+.cnab-upload-lbl{font-size:15px;font-weight:600;color:var(--navy);margin-bottom:4px}
+.cnab-upload-sub{font-size:12px;color:var(--text-muted)}
+.cnab-preview-bar{display:flex;align-items:center;justify-content:space-between;margin-bottom:12px;flex-wrap:wrap;gap:10px}
+.cnab-preview-info{font-size:13px;color:var(--navy);font-weight:600}
+.cnab-tbl{width:100%;border-collapse:collapse;font-size:13px}
+.cnab-tbl thead th{background:var(--navy);color:#fff;padding:8px 10px;text-align:left;font-size:11px;text-transform:uppercase;letter-spacing:.04em}
+.cnab-tbl tbody td{padding:7px 10px;border-bottom:1px solid var(--border)}
+.cnab-tbl tbody tr:hover{background:rgba(0,0,0,.02)}
+.cnab-badge-new{font-size:10px;background:#dcfce7;color:#059669;border-radius:4px;padding:2px 6px;font-weight:600}
+.cnab-badge-dup{font-size:10px;background:#fef9c3;color:#92400e;border-radius:4px;padding:2px 6px;font-weight:600}
+.cnab-badge-pago{font-size:10px;background:#dbeafe;color:#1e40af;border-radius:4px;padding:2px 6px;font-weight:600}
+.cnab-badge-nosso{font-size:11px;background:#f3f4f6;color:#374151;border-radius:4px;padding:2px 7px;font-family:'DM Mono',monospace;font-weight:600}
+.cnab-badge-nomatch{font-size:10px;background:#fee2e2;color:#991b1b;border-radius:4px;padding:2px 6px;font-weight:600}
 /* ── CADASTROS PANEL ── */
 #cad-panel{position:fixed;top:0;right:0;width:480px;height:100vh;background:var(--surface);border-left:1px solid var(--border2);box-shadow:-8px 0 32px rgba(0,0,0,.12);z-index:500;display:flex;flex-direction:column;transform:translateX(100%);transition:transform .3s cubic-bezier(.4,0,.2,1)}
 #cad-panel.open{transform:translateX(0)}
@@ -666,6 +686,26 @@ input[type="checkbox"]{width:14px;height:14px;accent-color:var(--green-accent);c
 .conc-badge-lock{font-size:10px;background:#dcfce7;color:#059669;border-radius:4px;padding:2px 7px;font-weight:600;white-space:nowrap;display:inline-block}
 .conc-fechado-banner{background:#fff8e1;border:1px solid #ffd54f;border-radius:10px;padding:14px 18px;margin-bottom:18px;font-size:13px;color:#7c5700;display:flex;align-items:center;gap:12px}
 
+/* ── IMPORTAÇÃO CNAB ── */
+.cnab-subtabs{display:flex;gap:8px;margin-bottom:20px;border-bottom:2px solid var(--border);padding-bottom:12px}
+.cnab-stab{background:transparent;border:1.5px solid var(--border2);padding:8px 18px;font-size:13px;font-weight:600;cursor:pointer;color:var(--text-muted);border-radius:8px;transition:.2s}
+.cnab-stab.active{background:var(--brand);color:#fff;border-color:var(--brand)}
+.cnab-upload-box{border:2.5px dashed var(--border2);border-radius:14px;padding:44px 24px;text-align:center;cursor:pointer;transition:.2s;background:var(--surface)}
+.cnab-upload-box:hover,.cnab-upload-box.drag-over{border-color:var(--brand);background:#fff8f2}
+.cnab-upload-icon{font-size:40px;margin-bottom:10px}
+.cnab-upload-lbl{font-size:15px;font-weight:600;color:var(--navy);margin-bottom:4px}
+.cnab-upload-sub{font-size:12px;color:var(--text-muted)}
+.cnab-preview-bar{display:flex;align-items:center;justify-content:space-between;margin-bottom:12px;flex-wrap:wrap;gap:10px}
+.cnab-preview-info{font-size:13px;color:var(--navy);font-weight:600}
+.cnab-tbl{width:100%;border-collapse:collapse;font-size:13px}
+.cnab-tbl thead th{background:var(--navy);color:#fff;padding:8px 10px;text-align:left;font-size:11px;text-transform:uppercase;letter-spacing:.04em}
+.cnab-tbl tbody td{padding:7px 10px;border-bottom:1px solid var(--border)}
+.cnab-tbl tbody tr:hover{background:rgba(0,0,0,.02)}
+.cnab-badge-new{font-size:10px;background:#dcfce7;color:#059669;border-radius:4px;padding:2px 6px;font-weight:600}
+.cnab-badge-dup{font-size:10px;background:#fef9c3;color:#92400e;border-radius:4px;padding:2px 6px;font-weight:600}
+.cnab-badge-pago{font-size:10px;background:#dbeafe;color:#1e40af;border-radius:4px;padding:2px 6px;font-weight:600}
+.cnab-badge-nosso{font-size:11px;background:#f3f4f6;color:#374151;border-radius:4px;padding:2px 7px;font-family:'DM Mono',monospace;font-weight:600}
+.cnab-badge-nomatch{font-size:10px;background:#fee2e2;color:#991b1b;border-radius:4px;padding:2px 6px;font-weight:600}
 /* ── CADASTROS PANEL ── */
 #cad-panel{position:fixed;top:0;right:0;width:480px;height:100vh;background:var(--surface);border-left:1px solid var(--border2);box-shadow:-8px 0 32px rgba(0,0,0,.12);z-index:500;display:flex;flex-direction:column;transform:translateX(100%);transition:transform .3s cubic-bezier(.4,0,.2,1)}
 #cad-panel.open{transform:translateX(0)}
@@ -890,6 +930,7 @@ input[type="checkbox"]{width:14px;height:14px;accent-color:var(--green-accent);c
     <button class="nav-tab" onclick="goTab('cr')" id="tab-cr">💰 Contas a Receber</button>
     <button class="nav-tab" onclick="goTab('saldo')" id="tab-saldo">🏦 Saldo</button>
     <button class="nav-tab" onclick="goTab('conciliacao')" id="tab-conciliacao">🔄 Conciliação</button>
+    <button class="nav-tab" onclick="goTab('cnab')" id="tab-cnab">📂 CNAB</button>
     <button class="nav-tab" onclick="goTab('comissoes')" id="tab-comissoes">🏆 Comissões</button>
   </div>
 </nav>
@@ -1749,6 +1790,79 @@ input[type="checkbox"]{width:14px;height:14px;accent-color:var(--green-accent);c
     </div>
   </div><!-- /page-comissoes -->
 
+  <!-- ═══════════════════════════════════
+       PAGE: IMPORTAÇÃO CNAB
+  ═══════════════════════════════════ -->
+  <div id="page-cnab" style="display:none;padding:24px">
+    <div class="fin-page-hdr" style="margin-bottom:20px">
+      <div>
+        <h2 class="fin-page-title">📂 Importação CNAB 400 — Itaú</h2>
+        <p style="font-size:12px;color:var(--text-muted);margin-top:3px">Remessa: cria cobranças no Contas a Receber · Retorno: baixa pagamentos automaticamente</p>
+      </div>
+    </div>
+    <!-- Sub-abas -->
+    <div class="cnab-subtabs">
+      <button class="cnab-stab active" id="cnab-stab-rem" onclick="cnabSetTab('remessa')">📤 Remessa → Criar Cobranças</button>
+      <button class="cnab-stab" id="cnab-stab-ret" onclick="cnabSetTab('retorno')">📥 Retorno → Baixar Pagamentos</button>
+    </div>
+    <!-- Painel Remessa -->
+    <div id="cnab-panel-remessa">
+      <div class="cnab-upload-box" id="cnab-rem-dropzone"
+        onclick="document.getElementById('cnab-rem-input').click()"
+        ondragover="event.preventDefault();this.classList.add('drag-over')"
+        ondragleave="this.classList.remove('drag-over')"
+        ondrop="event.preventDefault();this.classList.remove('drag-over');cnabHandleRemessa(event.dataTransfer.files[0])">
+        <div class="cnab-upload-icon">📄</div>
+        <div class="cnab-upload-lbl">Clique ou arraste o arquivo de Remessa</div>
+        <div class="cnab-upload-sub">Formato .REM · CNAB 400 · Banco Itaú</div>
+        <input type="file" id="cnab-rem-input" accept=".rem,.txt,.REM" style="display:none" onchange="cnabHandleRemessa(this.files[0])">
+      </div>
+      <div id="cnab-rem-preview" style="display:none;margin-top:20px">
+        <div class="cnab-preview-bar">
+          <span class="cnab-preview-info" id="cnab-rem-info"></span>
+          <div style="display:flex;gap:8px;flex-wrap:wrap">
+            <button class="btn-primary" onclick="cnabImportRemessa()" id="cnab-rem-btn">⬆️ Importar para Contas a Receber</button>
+            <button onclick="cnabResetRemessa()" style="background:#f3f4f6;border:none;border-radius:8px;padding:8px 14px;cursor:pointer;font-size:13px;font-weight:600">✖ Cancelar</button>
+          </div>
+        </div>
+        <div style="overflow-x:auto;border-radius:10px;border:1px solid var(--border)">
+          <table class="cnab-tbl">
+            <thead><tr><th>Nosso Nº</th><th>Sacado (Cliente)</th><th>Vencimento</th><th style="text-align:right">Valor</th><th>Status</th></tr></thead>
+            <tbody id="cnab-rem-tbody"></tbody>
+          </table>
+        </div>
+      </div>
+    </div>
+    <!-- Painel Retorno -->
+    <div id="cnab-panel-retorno" style="display:none">
+      <div class="cnab-upload-box" id="cnab-ret-dropzone"
+        onclick="document.getElementById('cnab-ret-input').click()"
+        ondragover="event.preventDefault();this.classList.add('drag-over')"
+        ondragleave="this.classList.remove('drag-over')"
+        ondrop="event.preventDefault();this.classList.remove('drag-over');cnabHandleRetorno(event.dataTransfer.files[0])">
+        <div class="cnab-upload-icon">📋</div>
+        <div class="cnab-upload-lbl">Clique ou arraste o arquivo de Retorno</div>
+        <div class="cnab-upload-sub">Formato .RET · CNAB 400 · Banco Itaú</div>
+        <input type="file" id="cnab-ret-input" accept=".ret,.txt,.RET" style="display:none" onchange="cnabHandleRetorno(this.files[0])">
+      </div>
+      <div id="cnab-ret-preview" style="display:none;margin-top:20px">
+        <div class="cnab-preview-bar">
+          <span class="cnab-preview-info" id="cnab-ret-info"></span>
+          <div style="display:flex;gap:8px;flex-wrap:wrap">
+            <button class="btn-primary" onclick="cnabBaixarRetorno()" id="cnab-ret-btn" style="background:#059669">✅ Baixar Pagamentos</button>
+            <button onclick="cnabResetRetorno()" style="background:#f3f4f6;border:none;border-radius:8px;padding:8px 14px;cursor:pointer;font-size:13px;font-weight:600">✖ Cancelar</button>
+          </div>
+        </div>
+        <div style="overflow-x:auto;border-radius:10px;border:1px solid var(--border)">
+          <table class="cnab-tbl">
+            <thead><tr><th>Nosso Nº</th><th>Sacado (Cliente)</th><th>Data Pagamento</th><th style="text-align:right">Valor</th><th>Status</th></tr></thead>
+            <tbody id="cnab-ret-tbody"></tbody>
+          </table>
+        </div>
+      </div>
+    </div>
+  </div><!-- /page-cnab -->
+
 </main>
 
 <!-- MODAL SC -->
@@ -1802,7 +1916,7 @@ window.addEventListener('DOMContentLoaded',()=>{
   loadData();
 });
 
-const PAGES=['overview','fc','sc','relatorios','cp','cr','saldo','conciliacao','comissoes'];
+const PAGES=['overview','fc','sc','relatorios','cp','cr','saldo','conciliacao','cnab','comissoes'];
 function goTab(id){
   PAGES.forEach(p=>{
     document.getElementById('page-'+p).style.display=p===id?'':'none';
@@ -1821,6 +1935,7 @@ function goTab(id){
   if(id==='cr') crLoad();
   if(id==='saldo') saldoLoad();
   if(id==='conciliacao') conciliacaoLoad();
+  if(id==='cnab') cnabLoad();
   if(id==='comissoes') comLoad();
 }
 
@@ -2974,7 +3089,7 @@ function authApplySession(session){
 
   if(isRestricted){
     // Ocultar abas financeiras (SC fica visível mas apenas a aba Realizadas)
-    ["overview","fc","relatorios","cp","cr","saldo","conciliacao"].forEach(function(t){
+    ["overview","fc","relatorios","cp","cr","saldo","conciliacao","cnab"].forEach(function(t){
       var el=document.getElementById("tab-"+t); if(el) el.style.display="none";
     });
     // Mostrar SC mas esconder botão Solicitar e ir direto para Realizadas
@@ -2990,7 +3105,7 @@ function authApplySession(session){
     },100);
   } else if(isOperador){
     // Operador: apenas Relatórios, Contas a Pagar, Contas a Receber
-    ["overview","fc","sc","saldo","conciliacao","comissoes"].forEach(function(t){
+    ["overview","fc","sc","saldo","conciliacao","cnab","comissoes"].forEach(function(t){
       var el=document.getElementById("tab-"+t); if(el) el.style.display="none";
     });
     ["relatorios","cp","cr"].forEach(function(t){
@@ -3002,7 +3117,7 @@ function authApplySession(session){
     setTimeout(function(){ if(typeof goTab==="function") goTab("relatorios"); },100);
   } else {
     // Acesso total — mostrar todas as abas
-    ["overview","fc","relatorios","cp","cr","saldo","conciliacao"].forEach(function(t){
+    ["overview","fc","relatorios","cp","cr","saldo","conciliacao","cnab"].forEach(function(t){
       var el=document.getElementById("tab-"+t); if(el) el.style.removeProperty("display");
     });
     document.querySelectorAll(".cad-open-btn").forEach(function(el){el.style.display="flex";});
@@ -6822,6 +6937,305 @@ function conciliacaoNovoLancamento(tipo){
     var contaEl = document.getElementById('fm-conta');
     if(contaEl && concState.contaId) contaEl.value = concState.contaId;
   }, 80);
+}
+
+// ═══════════════════════════════════════════════════════
+// IMPORTAÇÃO CNAB 400 — ITAÚ
+// ═══════════════════════════════════════════════════════
+var _cnabRemParsed = [];
+var _cnabRetParsed = [];
+
+function cnabLoad(){
+  cnabSetTab('remessa');
+}
+
+function cnabSetTab(tab){
+  document.getElementById('cnab-panel-remessa').style.display = tab==='remessa' ? '' : 'none';
+  document.getElementById('cnab-panel-retorno').style.display  = tab==='retorno'  ? '' : 'none';
+  document.getElementById('cnab-stab-rem').classList.toggle('active', tab==='remessa');
+  document.getElementById('cnab-stab-ret').classList.toggle('active', tab==='retorno');
+}
+
+function cnabResetRemessa(){
+  _cnabRemParsed = [];
+  document.getElementById('cnab-rem-preview').style.display = 'none';
+  document.getElementById('cnab-rem-input').value = '';
+}
+
+function cnabResetRetorno(){
+  _cnabRetParsed = [];
+  document.getElementById('cnab-ret-preview').style.display = 'none';
+  document.getElementById('cnab-ret-input').value = '';
+}
+
+// ── Parser utilitário ────────────────────────────────
+function cnabDDMMAA(s){
+  // "DDMMAA" → "YYYY-MM-DD"
+  if(!s||s.length<6) return '';
+  return '20'+s.substring(4,6)+'-'+s.substring(2,4)+'-'+s.substring(0,2);
+}
+function cnabDDMMYYYY(s){
+  // "DDMMYYYY" → "YYYY-MM-DD"
+  if(!s||s.length<8) return '';
+  return s.substring(4,8)+'-'+s.substring(2,4)+'-'+s.substring(0,2);
+}
+
+// ── Remessa ─────────────────────────────────────────
+// CNAB 400 Itaú Cobrança – Carteira 109
+// Linha tipo "1" (detalhe), posições 0-indexadas:
+//   106-112  Nosso número (7 chars)
+//   113-118  Vencimento DDMMAA
+//   119-131  Valor × 1000 (13 chars) → dividir por 1000 = R$
+//   219      Tipo inscrição sacado (1=CPF 2=CNPJ)
+//   220-233  CPF/CNPJ sacado (14 chars, com zeros à esquerda)
+//   234-273  Nome sacado (40 chars)
+// Linha tipo "22" logo após o detalhe:
+//   2-9      Vencimento DDMMYYYY (preciso)
+
+async function cnabHandleRemessa(file){
+  if(!file) return;
+  var reader = new FileReader();
+  reader.onload = async function(e){
+    var lines = e.target.result.replace(/\r/g,'').split('\n');
+    var records = [];
+
+    for(var i=0; i<lines.length; i++){
+      var ln = lines[i];
+      if(!ln || ln.charAt(0)!=='1') continue;
+
+      var nossoNro = parseInt(ln.substring(106,113)||'0');
+      if(!nossoNro) continue;
+
+      // Vencimento vem da linha 22 seguinte (DDMMYYYY) se disponível
+      var venc = cnabDDMMAA(ln.substring(113,119));
+      if(i+1 < lines.length){
+        var nxt = lines[i+1];
+        if(nxt && nxt.charAt(0)==='2' && nxt.charAt(1)==='2'){
+          var v22 = nxt.substring(2,10);
+          if(/^\d{8}$/.test(v22)) venc = cnabDDMMYYYY(v22);
+          i++; // pular linha 22
+        }
+      }
+
+      var valorRaw = parseInt(ln.substring(119,132).trim()||'0');
+      var valor    = valorRaw / 1000;
+      var nome     = (ln.substring(234,274)||'').trim();
+      var cpfCnpj  = (ln.substring(220,234)||'').trim().replace(/^0+/,'');
+
+      if(valor>0 && nome) records.push({ nossoNumero:String(nossoNro), nome, valor, venc, cpfCnpj });
+    }
+
+    if(!records.length){
+      toast('❌','Nenhum boleto encontrado. Verifique se é CNAB 400 Itaú.','err'); return;
+    }
+
+    // Verificar duplicatas no Supabase
+    var nossos = records.map(r=>r.nossoNumero);
+    var jaExist = {};
+    if(sb){
+      var {data:ex} = await sb.from('contas_receber').select('id,nosso_numero').in('nosso_numero',nossos);
+      (ex||[]).forEach(r=>{ jaExist[r.nosso_numero]=r.id; });
+    }
+
+    _cnabRemParsed = records.map(r=>({
+      ...r,
+      existente: !!jaExist[r.nossoNumero],
+      crId: jaExist[r.nossoNumero]||null
+    }));
+    cnabRenderRemPreview();
+  };
+  reader.readAsText(file,'latin1'); // CNAB usa ISO-8859-1
+}
+
+function cnabRenderRemPreview(){
+  var novos = _cnabRemParsed.filter(r=>!r.existente).length;
+  var dups  = _cnabRemParsed.filter(r=>r.existente).length;
+  var total = _cnabRemParsed.filter(r=>!r.existente).reduce((s,r)=>s+r.valor,0);
+
+  document.getElementById('cnab-rem-info').innerHTML =
+    '<strong>'+_cnabRemParsed.length+' boletos</strong> · '+
+    '<span style="color:#059669">'+novos+' novos ('+fmtBRL(total)+')</span>'+
+    (dups?' · <span style="color:#92400e">'+dups+' já importados</span>':'');
+
+  var rows = _cnabRemParsed.map(function(r){
+    var badge = r.existente
+      ? '<span class="cnab-badge-dup">⚠️ Já importado</span>'
+      : '<span class="cnab-badge-new">✅ Novo</span>';
+    return '<tr>'
+      +'<td><span class="cnab-badge-nosso">'+r.nossoNumero.padStart(6,'0')+'</span></td>'
+      +'<td>'+r.nome+'</td>'
+      +'<td>'+fmtDateBR(r.venc)+'</td>'
+      +'<td style="text-align:right;font-weight:600">'+fmtBRL(r.valor)+'</td>'
+      +'<td>'+badge+'</td>'
+      +'</tr>';
+  }).join('');
+
+  document.getElementById('cnab-rem-tbody').innerHTML = rows;
+  document.getElementById('cnab-rem-preview').style.display = '';
+  var btn = document.getElementById('cnab-rem-btn');
+  btn.disabled = novos===0;
+  if(novos===0) toast('⚠️','Todos os boletos desta remessa já foram importados.','warn');
+}
+
+async function cnabImportRemessa(){
+  var novos = _cnabRemParsed.filter(r=>!r.existente);
+  if(!novos.length){ toast('⚠️','Nenhum boleto novo para importar.','warn'); return; }
+  if(!sb){ toast('❌','Sem conexão com banco de dados.','err'); return; }
+
+  var btn = document.getElementById('cnab-rem-btn');
+  btn.disabled = true; btn.textContent = '⏳ Importando...';
+
+  try{
+    // Encontrar conta bancária Itaú e categoria Aluguel
+    var contaItau = (FS.refs.bancarias||[]).find(function(b){
+      return b.nome && (b.nome.toLowerCase().includes('itaú')||b.nome.toLowerCase().includes('itau'));
+    });
+    var catAlug = (FS.refs.categorias||[]).find(function(c){
+      return c.nome && c.nome.toLowerCase().includes('aluguel');
+    });
+
+    var inserts = novos.map(function(r){
+      return {
+        descricao:        'Aluguel · Boleto '+r.nossoNumero.padStart(6,'0'),
+        pessoa_nome:      r.nome,
+        valor:            r.valor,
+        valor_recebido:   null,
+        vencimento:       r.venc,
+        status:           'pendente',
+        categoria_id:     catAlug ? catAlug.id : null,
+        conta_bancaria_id: contaItau ? contaItau.id : null,
+        nosso_numero:     r.nossoNumero,
+        origem_cnab:      true,
+        observacoes:      'Importado via remessa CNAB 400 Itaú'
+      };
+    });
+
+    var {error} = await sb.from('contas_receber').insert(inserts);
+    if(error) throw error;
+
+    toast('✅',novos.length+' cobranças criadas no Contas a Receber!','ok');
+    cnabResetRemessa();
+  }catch(err){
+    console.error(err);
+    toast('❌','Erro ao importar: '+(err.message||err),'err');
+    btn.disabled=false; btn.textContent='⬆️ Importar para Contas a Receber';
+  }
+}
+
+// ── Retorno ─────────────────────────────────────────
+// CNAB 400 Itaú Cobrança – Retorno
+// Linha tipo "1" (detalhe), posições 0-indexadas:
+//   63-69   Nosso número (7 chars)
+//   108-109 Ocorrência (2 chars) — "06" = pago
+//   110-115 Data pagamento DDMMAA
+
+async function cnabHandleRetorno(file){
+  if(!file) return;
+  var reader = new FileReader();
+  reader.onload = async function(e){
+    var lines = e.target.result.replace(/\r/g,'').split('\n');
+    var records = [];
+
+    for(var i=0; i<lines.length; i++){
+      var ln = lines[i];
+      if(!ln || ln.charAt(0)!=='1') continue;
+
+      var nossoNro  = parseInt(ln.substring(63,70)||'0');
+      if(!nossoNro) continue;
+
+      var ocorr     = ln.substring(108,110);
+      if(ocorr!=='06') continue; // apenas pagamentos efetivos
+
+      var dataPgto  = cnabDDMMAA(ln.substring(110,116));
+      records.push({ nossoNumero:String(nossoNro), dataPgto });
+    }
+
+    if(!records.length){
+      toast('⚠️','Nenhum pagamento (ocorrência 06) encontrado neste retorno.','warn'); return;
+    }
+
+    // Buscar no Supabase os registros pelo nosso_numero
+    var nossos = records.map(r=>r.nossoNumero);
+    var crMap  = {};
+    if(sb){
+      var {data:crRows} = await sb.from('contas_receber')
+        .select('id,nosso_numero,pessoa_nome,valor,status')
+        .in('nosso_numero', nossos);
+      (crRows||[]).forEach(r=>{ crMap[r.nosso_numero]=r; });
+    }
+
+    _cnabRetParsed = records.map(function(r){
+      var cr = crMap[r.nossoNumero]||null;
+      return {
+        ...r,
+        crId:      cr ? cr.id : null,
+        sacado:    cr ? cr.pessoa_nome : '— Não encontrado —',
+        valor:     cr ? cr.valor : 0,
+        jaBaixado: cr && cr.status==='recebido'
+      };
+    });
+    cnabRenderRetPreview();
+  };
+  reader.readAsText(file,'latin1');
+}
+
+function cnabRenderRetPreview(){
+  var paraBaixar   = _cnabRetParsed.filter(r=>r.crId&&!r.jaBaixado).length;
+  var naoEncontr   = _cnabRetParsed.filter(r=>!r.crId).length;
+  var jaBaixados   = _cnabRetParsed.filter(r=>r.jaBaixado).length;
+  var totalBaixar  = _cnabRetParsed.filter(r=>r.crId&&!r.jaBaixado).reduce((s,r)=>s+r.valor,0);
+
+  document.getElementById('cnab-ret-info').innerHTML =
+    '<strong>'+_cnabRetParsed.length+' pagamentos</strong> no retorno · '+
+    '<span style="color:#059669">'+paraBaixar+' para baixar ('+fmtBRL(totalBaixar)+')</span>'+
+    (naoEncontr?' · <span style="color:#991b1b">'+naoEncontr+' não encontrados</span>':'')+
+    (jaBaixados?' · <span style="color:#92400e">'+jaBaixados+' já baixados</span>':'');
+
+  var rows = _cnabRetParsed.map(function(r){
+    var badge = !r.crId
+      ? '<span class="cnab-badge-nomatch">❌ Não encontrado</span>'
+      : r.jaBaixado
+        ? '<span class="cnab-badge-dup">⚠️ Já baixado</span>'
+        : '<span class="cnab-badge-pago">💰 Será baixado</span>';
+    return '<tr>'
+      +'<td><span class="cnab-badge-nosso">'+r.nossoNumero.padStart(6,'0')+'</span></td>'
+      +'<td>'+r.sacado+'</td>'
+      +'<td>'+fmtDateBR(r.dataPgto)+'</td>'
+      +'<td style="text-align:right;font-weight:600">'+(r.valor?fmtBRL(r.valor):'—')+'</td>'
+      +'<td>'+badge+'</td>'
+      +'</tr>';
+  }).join('');
+
+  document.getElementById('cnab-ret-tbody').innerHTML = rows;
+  document.getElementById('cnab-ret-preview').style.display = '';
+  var btn = document.getElementById('cnab-ret-btn');
+  btn.disabled = paraBaixar===0;
+  if(paraBaixar===0) toast('⚠️','Nenhum pagamento novo para baixar neste retorno.','warn');
+}
+
+async function cnabBaixarRetorno(){
+  var paraBaixar = _cnabRetParsed.filter(r=>r.crId&&!r.jaBaixado);
+  if(!paraBaixar.length){ toast('⚠️','Nenhum pagamento para baixar.','warn'); return; }
+  if(!sb){ toast('❌','Sem conexão com banco de dados.','err'); return; }
+
+  var btn = document.getElementById('cnab-ret-btn');
+  btn.disabled=true; btn.textContent='⏳ Baixando...';
+
+  try{
+    for(var r of paraBaixar){
+      await sb.from('contas_receber').update({
+        status:           'recebido',
+        data_recebimento: r.dataPgto,
+        valor_recebido:   r.valor
+      }).eq('id', r.crId);
+    }
+    toast('✅',paraBaixar.length+' pagamentos baixados com sucesso!','ok');
+    cnabResetRetorno();
+  }catch(err){
+    console.error(err);
+    toast('❌','Erro ao baixar: '+(err.message||err),'err');
+    btn.disabled=false; btn.textContent='✅ Baixar Pagamentos';
+  }
 }
 </script>
 
