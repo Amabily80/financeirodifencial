@@ -3628,6 +3628,19 @@ async function saldoLoad(){
     var hoje = new Date();
     var mesAtual = hoje.getMonth(), anoAtual = hoje.getFullYear();
 
+    function isMes(dateStr){
+      if(!dateStr) return false;
+      var d=new Date(dateStr+'T00:00:00');
+      return d.getMonth()===mesAtual && d.getFullYear()===anoAtual;
+    }
+
+    // KPI totais: TODOS os pagamentos/recebimentos do mês (incluindo sem conta vinculada)
+    var kpiSaiMes = pagamentos.filter(function(p){ return isMes(p.data_pagamento); })
+                              .reduce(function(acc,p){ return acc+(parseFloat(p.valor_pago)||0); },0);
+    var kpiEntMes = recebimentos.filter(function(r){ return isMes(r.data_recebimento); })
+                                .reduce(function(acc,r){ return acc+(parseFloat(r.valor_recebido)||0); },0);
+
+    // Por conta bancária (para os cards individuais)
     var result = bancos.map(function(b){
       var pagsBanco   = pagamentos.filter(function(p){return p.conta_bancaria_id===b.id;});
       var recsBanco   = recebimentos.filter(function(r){return r.conta_bancaria_id===b.id;});
@@ -3635,33 +3648,24 @@ async function saldoLoad(){
       var totalRec    = recsBanco.reduce(function(acc,r){return acc+(parseFloat(r.valor_recebido)||0);},0);
       var saldo       = (parseFloat(b.saldo_inicial)||0) + totalRec - totalPago;
 
-      var pagoMes   = pagsBanco.filter(function(p){
-        if(!p.data_pagamento) return false;
-        var d=new Date(p.data_pagamento+'T00:00:00');
-        return d.getMonth()===mesAtual&&d.getFullYear()===anoAtual;
-      }).reduce(function(acc,p){return acc+(parseFloat(p.valor_pago)||0);},0);
-
-      var recMes    = recsBanco.filter(function(r){
-        if(!r.data_recebimento) return false;
-        var d=new Date(r.data_recebimento+'T00:00:00');
-        return d.getMonth()===mesAtual&&d.getFullYear()===anoAtual;
-      }).reduce(function(acc,r){return acc+(parseFloat(r.valor_recebido)||0);},0);
+      var pagoMes   = pagsBanco.filter(function(p){ return isMes(p.data_pagamento); })
+                               .reduce(function(acc,p){return acc+(parseFloat(p.valor_pago)||0);},0);
+      var recMes    = recsBanco.filter(function(r){ return isMes(r.data_recebimento); })
+                               .reduce(function(acc,r){return acc+(parseFloat(r.valor_recebido)||0);},0);
 
       return {banco:b, saldo:saldo, totalPago:totalPago, totalRec:totalRec, pagoMes:pagoMes, recMes:recMes};
     });
 
-    saldoRender(result);
+    saldoRender(result, kpiEntMes, kpiSaiMes);
   }catch(e){ toast('❌','Erro ao carregar saldo: '+e.message,'error'); }
 }
 
-function saldoRender(items){
-  // KPIs globais
-  var totalSaldo=0, totalEntMes=0, totalSaiMes=0;
-  (items||[]).forEach(function(x){
-    totalSaldo += x.saldo;
-    totalEntMes += x.recMes;
-    totalSaiMes += x.pagoMes;
-  });
+function saldoRender(items, kpiEntMes, kpiSaiMes){
+  // KPIs globais — usa totais completos (inclui pagamentos sem conta vinculada)
+  var totalSaldo=0;
+  (items||[]).forEach(function(x){ totalSaldo += x.saldo; });
+  var totalEntMes = kpiEntMes !== undefined ? kpiEntMes : (items||[]).reduce(function(s,x){return s+x.recMes;},0);
+  var totalSaiMes = kpiSaiMes !== undefined ? kpiSaiMes : (items||[]).reduce(function(s,x){return s+x.pagoMes;},0);
   var resultado = totalEntMes - totalSaiMes;
   document.getElementById('sl-k1').textContent = fmtBRL(totalSaldo);
   document.getElementById('sl-k2').textContent = fmtBRL(totalEntMes);
@@ -4866,6 +4870,19 @@ async function saldoLoad(){
     var hoje = new Date();
     var mesAtual = hoje.getMonth(), anoAtual = hoje.getFullYear();
 
+    function isMes(dateStr){
+      if(!dateStr) return false;
+      var d=new Date(dateStr+'T00:00:00');
+      return d.getMonth()===mesAtual && d.getFullYear()===anoAtual;
+    }
+
+    // KPI totais: TODOS os pagamentos/recebimentos do mês (incluindo sem conta vinculada)
+    var kpiSaiMes = pagamentos.filter(function(p){ return isMes(p.data_pagamento); })
+                              .reduce(function(acc,p){ return acc+(parseFloat(p.valor_pago)||0); },0);
+    var kpiEntMes = recebimentos.filter(function(r){ return isMes(r.data_recebimento); })
+                                .reduce(function(acc,r){ return acc+(parseFloat(r.valor_recebido)||0); },0);
+
+    // Por conta bancária (para os cards individuais)
     var result = bancos.map(function(b){
       var pagsBanco   = pagamentos.filter(function(p){return p.conta_bancaria_id===b.id;});
       var recsBanco   = recebimentos.filter(function(r){return r.conta_bancaria_id===b.id;});
@@ -4873,33 +4890,24 @@ async function saldoLoad(){
       var totalRec    = recsBanco.reduce(function(acc,r){return acc+(parseFloat(r.valor_recebido)||0);},0);
       var saldo       = (parseFloat(b.saldo_inicial)||0) + totalRec - totalPago;
 
-      var pagoMes   = pagsBanco.filter(function(p){
-        if(!p.data_pagamento) return false;
-        var d=new Date(p.data_pagamento+'T00:00:00');
-        return d.getMonth()===mesAtual&&d.getFullYear()===anoAtual;
-      }).reduce(function(acc,p){return acc+(parseFloat(p.valor_pago)||0);},0);
-
-      var recMes    = recsBanco.filter(function(r){
-        if(!r.data_recebimento) return false;
-        var d=new Date(r.data_recebimento+'T00:00:00');
-        return d.getMonth()===mesAtual&&d.getFullYear()===anoAtual;
-      }).reduce(function(acc,r){return acc+(parseFloat(r.valor_recebido)||0);},0);
+      var pagoMes   = pagsBanco.filter(function(p){ return isMes(p.data_pagamento); })
+                               .reduce(function(acc,p){return acc+(parseFloat(p.valor_pago)||0);},0);
+      var recMes    = recsBanco.filter(function(r){ return isMes(r.data_recebimento); })
+                               .reduce(function(acc,r){return acc+(parseFloat(r.valor_recebido)||0);},0);
 
       return {banco:b, saldo:saldo, totalPago:totalPago, totalRec:totalRec, pagoMes:pagoMes, recMes:recMes};
     });
 
-    saldoRender(result);
+    saldoRender(result, kpiEntMes, kpiSaiMes);
   }catch(e){ toast('❌','Erro ao carregar saldo: '+e.message,'error'); }
 }
 
-function saldoRender(items){
-  // KPIs globais
-  var totalSaldo=0, totalEntMes=0, totalSaiMes=0;
-  (items||[]).forEach(function(x){
-    totalSaldo += x.saldo;
-    totalEntMes += x.recMes;
-    totalSaiMes += x.pagoMes;
-  });
+function saldoRender(items, kpiEntMes, kpiSaiMes){
+  // KPIs globais — usa totais completos (inclui pagamentos sem conta vinculada)
+  var totalSaldo=0;
+  (items||[]).forEach(function(x){ totalSaldo += x.saldo; });
+  var totalEntMes = kpiEntMes !== undefined ? kpiEntMes : (items||[]).reduce(function(s,x){return s+x.recMes;},0);
+  var totalSaiMes = kpiSaiMes !== undefined ? kpiSaiMes : (items||[]).reduce(function(s,x){return s+x.pagoMes;},0);
   var resultado = totalEntMes - totalSaiMes;
   document.getElementById('sl-k1').textContent = fmtBRL(totalSaldo);
   document.getElementById('sl-k2').textContent = fmtBRL(totalEntMes);
