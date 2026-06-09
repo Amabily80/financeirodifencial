@@ -2363,6 +2363,8 @@ function scOpenModal(){
 function scCloseModal(){document.getElementById('sc-modal').classList.remove('open');}
 
 // ── VISÃO GERAL ──
+var _ovComData = null;
+
 async function overviewLoad(){
   if(!sb){toast('⚠️','Supabase não conectado','warn');return;}
   document.getElementById('ov-updated').textContent = new Date().toLocaleTimeString('pt-BR',{hour:'2-digit',minute:'2-digit'});
@@ -2381,13 +2383,37 @@ async function overviewLoad(){
   var mesIni = hoje.getFullYear()+'-'+String(hoje.getMonth()+1).padStart(2,'0')+'-01';
   var mesFim = new Date(hoje.getFullYear(),hoje.getMonth()+1,0).toISOString().split('T')[0];
   try {
-    // 1. Solicitações da semana
-    var r1 = await sb.from('solicitacoes_comissao').select('total_valor,data_solicitacao')
+    // 1. Solicitações da semana (com itens para calcular comissões)
+    var r1 = await sb.from('solicitacoes_comissao').select('*')
       .gte('data_solicitacao', segFmt).lte('data_solicitacao', domFmt+'T23:59:59');
     var solics = r1.data||[];
     var solTotal = solics.reduce(function(s,x){return s+(parseFloat(x.total_valor)||0);},0);
     document.getElementById('ov-solic-valor').textContent = fmtBRL(solTotal);
     document.getElementById('ov-solic-count').textContent = solics.length+' solicitação(ões) esta semana';
+
+    // Calcula comissões com base nos itens da semana
+    var allItens = [];
+    solics.forEach(function(s){ if(Array.isArray(s.itens)) allItens = allItens.concat(s.itens); });
+    var corretorTotal = 0, gerenteBase = 0;
+    allItens.forEach(function(it){
+      var val = parseFloat(it.valor)||0;
+      var perc = it.perc;
+      var jaRecebeu = it.jaRecebeuPrimeiros3||false;
+      if(perc===6){
+        // Primeiro e único pagamento: corretor 2%, gerentes recebem
+        corretorTotal += val * 0.02;
+        gerenteBase   += val;
+      } else if(perc===3 && !jaRecebeu){
+        // Primeira parcela de 3%: corretor 1%, gerentes recebem
+        corretorTotal += val * 0.01;
+        gerenteBase   += val;
+      } else {
+        // Segunda parcela de 3% (completando 6%): corretor 1%, gerentes NÃO recebem
+        corretorTotal += val * 0.01;
+      }
+    });
+    _ovComData = {corretorTotal:corretorTotal, gerenteBase:gerenteBase, totalItens:allItens.length, solicsCount:solics.length};
+
     // 2. Contas a pagar pendentes
     var r2 = await sb.from('contas_pagar').select('valor,vencimento,conta_bancaria_nome').in('status',['pendente','vencido']);
     var cp = r2.data||[];
@@ -2397,18 +2423,19 @@ async function overviewLoad(){
     cpSem.forEach(function(x){var c=x.conta_bancaria_nome||'Sem conta';bySem[c]=(bySem[c]||0)+(parseFloat(x.valor)||0);});
     cpMes.forEach(function(x){var c=x.conta_bancaria_nome||'Sem conta';byMes[c]=(byMes[c]||0)+(parseFloat(x.valor)||0);});
     var allContas=Array.from(new Set(Object.keys(bySem).concat(Object.keys(byMes)))).sort();
-    var totSem=0,totMes=0;
-    var rows=allContas.map(function(c){
+    var totSem=0, totMes=0;
+    var cpRows=allContas.map(function(c){
       var s=bySem[c]||0, m=byMes[c]||0; totSem+=s; totMes+=m;
       return '<tr><td>'+c+'</td>'
         +'<td class="mono" style="text-align:right;color:#c0392b">'+fmtBRL(s)+'</td>'
         +'<td class="mono" style="text-align:right;color:#e67e22">'+fmtBRL(m)+'</td></tr>';
     });
-    rows.push('<tr style="border-top:2px solid var(--border);font-weight:700">'
+    if(!cpRows.length) cpRows.push('<tr><td colspan="3" style="text-align:center;padding:20px;color:var(--text-muted)">Nenhuma conta a vencer no período.</td></tr>');
+    cpRows.push('<tr style="border-top:2px solid var(--border);font-weight:700">'
       +'<td>Total</td>'
       +'<td class="mono" style="text-align:right;color:#c0392b">'+fmtBRL(totSem)+'</td>'
       +'<td class="mono" style="text-align:right;color:#e67e22">'+fmtBRL(totMes)+'</td></tr>');
-    document.getElementById('ov-cp-tbody').innerHTML = rows.join('');
+    document.getElementById('ov-cp-tbody').innerHTML = cpRows.join('');
     document.getElementById('ov-cp-semana-total').textContent = fmtBRL(totSem);
     document.getElementById('ov-cp-mes-total').textContent = fmtBRL(totMes);
   } catch(e) {
@@ -2421,22 +2448,22 @@ function ovRenderComissoes(){
   var tbody = document.getElementById('ov-com-tbody');
   var info  = document.getElementById('ov-com-info');
   if(!tbody) return;
-  if(!allRows||!allRows.length){
-    tbody.innerHTML='<tr><td colspan="4" style="text-align:center;padding:20px;color:var(--text-muted)">'
-      +'Dados de contratos não carregados. '
-      +'<button class="btn-primary" style="margin-left:8px;font-size:11px;height:26px;padding:0 10px" '
-      +'onclick="loadData().then(ovRenderComissoes)">Carregar dados</button></td></tr>';
+  if(!_ovComData){
+    tbody.innerHTML='<tr><td colspan="4" style="text-align:center;padding:20px;color:var(--text-muted)">Carregando...</td></tr>';
+    return;
+  }
+  if(!_ovComData.totalItens){
+    tbody.innerHTML='<tr><td colspan="4" style="text-align:center;padding:20px;color:var(--text-muted)">Nenhuma solicitação esta semana — sem comissões a calcular.</td></tr>';
     if(info) info.textContent='';
     return;
   }
-  var base = allRows.reduce(function(s,r){return s+(parseFloat(r.valor)||0);},0);
-  if(info) info.textContent = allRows.length+' contratos carregados · base: '+fmtBRL(base);
+  if(info) info.textContent = _ovComData.totalItens+' contrato(s) em '+_ovComData.solicsCount+' solicitação(ões) esta semana';
   var coms=[
-    {nome:'Corretor',   tipo:'Corretor', calc:'2% do contrato',   valor:base*0.02},
-    {nome:'Ariel',      tipo:'Gerência', calc:'5% × 10% × 47%',   valor:base*0.05*0.10*0.47},
-    {nome:'Rodrigo',    tipo:'Gerência', calc:'5% × 10% × 33%',   valor:base*0.05*0.10*0.33},
-    {nome:'Erick',      tipo:'Gerência', calc:'5% × 10% × 20%',   valor:base*0.05*0.10*0.20},
-    {nome:'Guilherme',  tipo:'Gerência', calc:'5% × 12%',          valor:base*0.05*0.12},
+    {nome:'Corretor',   tipo:'Corretor', calc:'2% (6%) · 1% (3%)',        valor:_ovComData.corretorTotal},
+    {nome:'Ariel',      tipo:'Gerência', calc:'0,235% · somente 1ª comissão', valor:_ovComData.gerenteBase*0.00235},
+    {nome:'Rodrigo',    tipo:'Gerência', calc:'0,165% · somente 1ª comissão', valor:_ovComData.gerenteBase*0.00165},
+    {nome:'Erick',      tipo:'Gerência', calc:'0,1% · somente 1ª comissão',   valor:_ovComData.gerenteBase*0.001},
+    {nome:'Guilherme',  tipo:'Gerência', calc:'0,6% · somente 1ª comissão',   valor:_ovComData.gerenteBase*0.006},
   ];
   tbody.innerHTML=coms.map(function(c){
     var badge=c.tipo==='Corretor'
@@ -2600,7 +2627,7 @@ async function scExportXLSX(){
   try {
     var session = authCurrentUser();
     var itensParaSalvar = sel.map(function(r){
-      return {id:r.id, cliente:r.cliente, emp:r.emp, sigla:r.sigla||'', unidade:r.unidade||'', perc:r.perc, valor:r.valor, saldo:r.saldo};
+      return {id:r.id, cliente:r.cliente, emp:r.emp, sigla:r.sigla||'', unidade:r.unidade||'', perc:r.perc, valor:r.valor, saldo:r.saldo, jaRecebeuPrimeiros3:r.jaRecebeuPrimeiros3||false};
     });
     await sb.from('solicitacoes_comissao').insert({
       data_solicitacao: new Date().toISOString(),
