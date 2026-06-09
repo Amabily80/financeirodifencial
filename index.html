@@ -7003,11 +7003,17 @@ async function cnabHandleRemessa(file){
       var ln = lines[i];
       if(!ln || ln.charAt(0)!=='1') continue;
 
-      var nossoNro = parseInt(ln.substring(106,113)||'0');
+      // Localizar 'I0' dinamicamente (CNAB 400 Itaú — instrução 1)
+      var ip = ln.indexOf('I0');
+      if(ip < 80) continue; // sanidade: I deve aparecer após pos 80
+
+      // Nosso número: 7 chars a partir de I+6
+      var nossoNro = parseInt(ln.substring(ip+6, ip+13)||'0');
       if(!nossoNro) continue;
 
-      // Vencimento vem da linha 22 seguinte (DDMMYYYY) se disponível
-      var venc = cnabDDMMAA(ln.substring(113,119));
+      // Vencimento: 6 chars a partir de I+13 (DDMMAA)
+      // Ou linha tipo 22 seguinte (DDMMYYYY = mais precisa)
+      var venc = cnabDDMMAA(ln.substring(ip+13, ip+19));
       if(i+1 < lines.length){
         var nxt = lines[i+1];
         if(nxt && nxt.charAt(0)==='2' && nxt.charAt(1)==='2'){
@@ -7017,8 +7023,11 @@ async function cnabHandleRemessa(file){
         }
       }
 
-      var valorRaw = parseInt(ln.substring(119,132).trim()||'0');
+      // Valor: 13 chars a partir de I+19, dividir por 1000 = R$
+      var valorRaw = parseInt(ln.substring(ip+19, ip+32).trim()||'0');
       var valor    = valorRaw / 1000;
+
+      // Nome sacado: pos 234-273 (0-indexed), 40 chars fixos no layout
       var nome     = (ln.substring(234,274)||'').trim();
       var cpfCnpj  = (ln.substring(220,234)||'').trim().replace(/^0+/,'');
 
