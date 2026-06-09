@@ -240,6 +240,17 @@ input[type="checkbox"]{width:14px;height:14px;accent-color:var(--green-accent);c
 .scr-tbl tr:last-child td{border-bottom:none}
 .scr-empty{text-align:center;padding:56px;color:var(--text-muted)}
 .scr-filter-bar{display:flex;align-items:center;gap:10px;margin-bottom:18px;flex-wrap:wrap}
+.ov-sec{font-size:11px;font-weight:700;text-transform:uppercase;letter-spacing:.08em;color:var(--text-muted);margin-bottom:10px;margin-top:0}
+.ov-grid4{display:grid;grid-template-columns:repeat(auto-fit,minmax(190px,1fr));gap:14px}
+.ov-grid2{display:grid;grid-template-columns:1fr 1fr;gap:20px}
+.ov-grid2i{display:grid;grid-template-columns:1fr 1fr;gap:12px}
+.ov-card{background:var(--card);border:1px solid var(--border);border-radius:12px;padding:16px 20px;border-top:3px solid var(--border);transition:box-shadow .15s}
+.ov-card:hover{box-shadow:0 4px 16px rgba(0,0,0,.06)}
+.ov-card-lbl{font-size:10px;font-weight:700;text-transform:uppercase;letter-spacing:.07em;color:var(--text-muted);margin-bottom:6px}
+.ov-card-val{font-size:20px;font-weight:800;font-family:'DM Mono',monospace;line-height:1.2;margin-bottom:4px}
+.ov-card-sub{font-size:11px;color:var(--text-muted);line-height:1.5}
+.ov-divider{border:none;border-top:1px solid var(--border);margin:24px 0}
+@media(max-width:700px){.ov-grid2{grid-template-columns:1fr}.ov-grid2i{grid-template-columns:1fr}}
 
 /* ── MODAL ── */
 .overlay{display:none;position:fixed;inset:0;background:rgba(0,0,0,.45);z-index:200;backdrop-filter:blur(4px);align-items:center;justify-content:center}
@@ -867,71 +878,118 @@ input[type="checkbox"]{width:14px;height:14px;accent-color:var(--green-accent);c
        PAGE: VISÃO GERAL
   ═══════════════════════════════════ -->
   <div id="page-overview" style="display:none">
-    <div class="fin-page-hdr" style="margin-bottom:24px">
+
+    <!-- Header -->
+    <div class="fin-page-hdr" style="margin-bottom:22px">
       <div>
         <h2 class="fin-page-title">🏠 Visão Geral</h2>
-        <p style="font-size:13px;color:var(--text-muted);margin-top:4px">Painel consolidado · atualizado às <span id="ov-updated">—</span></p>
+        <p style="font-size:12px;color:var(--text-muted);margin-top:3px">Painel executivo · <span id="ov-period">—</span> · atualizado às <span id="ov-updated">—</span></p>
       </div>
       <button class="btn-primary" style="height:34px;font-size:12px;padding:0 14px;background:linear-gradient(135deg,var(--gray-600),var(--gray-700));box-shadow:none" onclick="overviewLoad()">🔄 Atualizar</button>
     </div>
 
-    <!-- ── SOLICITAÇÕES DA SEMANA ── -->
-    <div style="font-size:11px;font-weight:700;text-transform:uppercase;letter-spacing:.08em;color:var(--text-muted);margin-bottom:10px">📋 Solicitações de Comissão — Esta Semana</div>
-    <div class="kpi-grid" style="margin-bottom:28px">
-      <div class="fin-kpi-card" style="background:var(--card);border:1px solid var(--border);border-radius:14px;padding:18px 22px">
-        <div style="font-size:11px;color:var(--text-muted);font-weight:600;text-transform:uppercase;letter-spacing:.06em;margin-bottom:6px">Total Solicitado</div>
-        <div id="ov-solic-valor" style="font-size:24px;font-weight:800;color:var(--gold);font-family:'DM Mono',monospace">—</div>
-        <div id="ov-solic-count" style="font-size:12px;color:var(--text-muted);margin-top:4px">0 solicitação(ões)</div>
+    <!-- ── DESEMPENHO DO MÊS ── -->
+    <p class="ov-sec">📊 Desempenho do Mês Atual</p>
+    <div class="ov-grid4" style="margin-bottom:26px">
+      <div class="ov-card" style="border-top-color:#059669">
+        <div class="ov-card-lbl">💰 Recebido no Mês</div>
+        <div class="ov-card-val" id="ov-cr-mes" style="color:#059669">—</div>
+        <div class="ov-card-sub" id="ov-cr-mes-n">0 recebimento(s)</div>
       </div>
-      <div class="fin-kpi-card" style="background:var(--card);border:1px solid var(--border);border-radius:14px;padding:18px 22px">
-        <div style="font-size:11px;color:var(--text-muted);font-weight:600;text-transform:uppercase;letter-spacing:.06em;margin-bottom:6px">A Vencer em 7 dias (CP)</div>
-        <div id="ov-cp-semana-total" style="font-size:24px;font-weight:800;color:#c0392b;font-family:'DM Mono',monospace">—</div>
-        <div style="font-size:12px;color:var(--text-muted);margin-top:4px">Contas a pagar</div>
+      <div class="ov-card" style="border-top-color:#c0392b">
+        <div class="ov-card-lbl">💸 Pago no Mês</div>
+        <div class="ov-card-val" id="ov-cp-pago-mes" style="color:#c0392b">—</div>
+        <div class="ov-card-sub" id="ov-cp-pago-mes-n">0 pagamento(s)</div>
       </div>
-      <div class="fin-kpi-card" style="background:var(--card);border:1px solid var(--border);border-radius:14px;padding:18px 22px">
-        <div style="font-size:11px;color:var(--text-muted);font-weight:600;text-transform:uppercase;letter-spacing:.06em;margin-bottom:6px">No Mês Atual (CP)</div>
-        <div id="ov-cp-mes-total" style="font-size:24px;font-weight:800;color:#e67e22;font-family:'DM Mono',monospace">—</div>
-        <div style="font-size:12px;color:var(--text-muted);margin-top:4px">Contas a pagar</div>
+      <div class="ov-card" id="ov-resultado-card" style="border-top-color:#94a3b8">
+        <div class="ov-card-lbl">📈 Resultado Líquido</div>
+        <div class="ov-card-val" id="ov-resultado" style="color:#94a3b8">—</div>
+        <div class="ov-card-sub">receitas − despesas pagas</div>
+      </div>
+      <div class="ov-card" style="border-top-color:var(--gold)">
+        <div class="ov-card-lbl">🏆 Comissões Pagas no Mês</div>
+        <div class="ov-card-val" id="ov-com-pago-mes" style="color:var(--gold)">—</div>
+        <div class="ov-card-sub" id="ov-com-pago-mes-n">0 comissão(ões)</div>
       </div>
     </div>
 
-    <!-- ── CONTAS A PAGAR POR CONTA BANCÁRIA ── -->
-    <div style="font-size:11px;font-weight:700;text-transform:uppercase;letter-spacing:.08em;color:var(--text-muted);margin-bottom:10px">🏦 Previsão de Contas a Pagar — Por Conta Bancária</div>
-    <div class="fin-table-card" style="margin-bottom:28px">
+    <!-- ── ALERTAS + SOLICITAÇÕES DA SEMANA ── -->
+    <div class="ov-grid2" style="margin-bottom:26px">
+      <div>
+        <p class="ov-sec">⚠️ Alertas — Contas em Atraso</p>
+        <div class="ov-grid2i">
+          <div class="ov-card" style="border-top-color:#c0392b">
+            <div class="ov-card-lbl">CP Vencidas</div>
+            <div class="ov-card-val" id="ov-cp-vencida" style="color:#c0392b">—</div>
+            <div class="ov-card-sub" id="ov-cp-vencida-n">0 conta(s)</div>
+          </div>
+          <div class="ov-card" style="border-top-color:#e67e22">
+            <div class="ov-card-lbl">CR Vencidas</div>
+            <div class="ov-card-val" id="ov-cr-vencida" style="color:#e67e22">—</div>
+            <div class="ov-card-sub" id="ov-cr-vencida-n">0 conta(s)</div>
+          </div>
+        </div>
+      </div>
+      <div>
+        <p class="ov-sec">📋 Solicitações de Comissão — Esta Semana</p>
+        <div class="ov-grid2i">
+          <div class="ov-card" style="border-top-color:var(--gold)">
+            <div class="ov-card-lbl">Total Solicitado</div>
+            <div class="ov-card-val" id="ov-solic-valor" style="color:var(--gold)">—</div>
+            <div class="ov-card-sub" id="ov-solic-count">0 solicitação(ões)</div>
+          </div>
+          <div class="ov-card" style="border-top-color:var(--brand)">
+            <div class="ov-card-lbl">Contratos Solicitados</div>
+            <div class="ov-card-val" id="ov-solic-items" style="color:var(--brand)">—</div>
+            <div class="ov-card-sub">contratos na semana</div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- ── PREVISÃO CP POR CONTA ── -->
+    <p class="ov-sec">🏦 Previsão de Contas a Pagar</p>
+    <div class="ov-grid2" style="margin-bottom:12px">
+      <div class="ov-card" style="border-top-color:#c0392b">
+        <div class="ov-card-lbl">Esta Semana — Ter → Seg</div>
+        <div class="ov-card-val" id="ov-cp-semana-total" style="color:#c0392b">—</div>
+        <div class="ov-card-sub" id="ov-cp-semana-n">0 conta(s) pendente(s)</div>
+      </div>
+      <div class="ov-card" style="border-top-color:#e67e22">
+        <div class="ov-card-lbl">Mês Atual — pendente</div>
+        <div class="ov-card-val" id="ov-cp-mes-total" style="color:#e67e22">—</div>
+        <div class="ov-card-sub" id="ov-cp-mes-n">0 conta(s) pendente(s)</div>
+      </div>
+    </div>
+    <div class="fin-table-card" style="margin-bottom:26px">
       <div style="overflow-x:auto">
         <table class="fin-table">
           <thead><tr>
             <th>Conta Bancária</th>
-            <th style="text-align:right">Semana (próx. 7 dias)</th>
+            <th style="text-align:right">Esta Semana</th>
             <th style="text-align:right">Mês Atual</th>
           </tr></thead>
-          <tbody id="ov-cp-tbody">
-            <tr><td colspan="3" style="text-align:center;padding:24px;color:var(--text-muted)">Carregando...</td></tr>
-          </tbody>
+          <tbody id="ov-cp-tbody"><tr><td colspan="3" style="text-align:center;padding:20px;color:var(--text-muted)">Carregando...</td></tr></tbody>
         </table>
       </div>
     </div>
 
-    <!-- ── PREVISÃO DE COMISSÕES ── -->
+    <!-- ── COMISSÕES A PAGAR ── -->
     <div style="display:flex;align-items:center;gap:12px;margin-bottom:10px;flex-wrap:wrap">
-      <div style="font-size:11px;font-weight:700;text-transform:uppercase;letter-spacing:.08em;color:var(--text-muted)">💰 Previsão de Comissões a Pagar</div>
+      <p class="ov-sec" style="margin-bottom:0">💰 Previsão de Comissões a Pagar — Esta Semana</p>
       <span id="ov-com-info" style="font-size:11px;color:var(--text-muted)"></span>
     </div>
-    <div class="fin-table-card" style="margin-bottom:28px">
+    <div class="fin-table-card">
       <div style="overflow-x:auto">
         <table class="fin-table">
           <thead><tr>
-            <th>Profissional</th>
-            <th>Tipo</th>
-            <th>Cálculo</th>
-            <th style="text-align:right">Comissão Estimada</th>
+            <th>Profissional</th><th>Tipo</th><th>Base de Cálculo</th><th style="text-align:right">Comissão Estimada</th>
           </tr></thead>
-          <tbody id="ov-com-tbody">
-            <tr><td colspan="4" style="text-align:center;padding:24px;color:var(--text-muted)">Carregando...</td></tr>
-          </tbody>
+          <tbody id="ov-com-tbody"><tr><td colspan="4" style="text-align:center;padding:20px;color:var(--text-muted)">Carregando...</td></tr></tbody>
         </table>
       </div>
     </div>
+
   </div>
 
   <!-- ═══════════════════════════════════
@@ -2367,104 +2425,146 @@ var _ovComData = null;
 
 async function overviewLoad(){
   if(!sb){toast('⚠️','Supabase não conectado','warn');return;}
-  document.getElementById('ov-updated').textContent = new Date().toLocaleTimeString('pt-BR',{hour:'2-digit',minute:'2-digit'});
-  var hoje = new Date();
-  var hojeFmt = hoje.toISOString().split('T')[0];
-  // Semana atual (seg a dom)
-  var dow = hoje.getDay();
-  var seg = new Date(hoje); seg.setDate(hoje.getDate()-(dow===0?6:dow-1));
-  var dom = new Date(seg);  dom.setDate(seg.getDate()+6);
-  var segFmt = seg.toISOString().split('T')[0];
-  var domFmt = dom.toISOString().split('T')[0];
-  // 7 dias à frente
-  var em7 = new Date(hoje); em7.setDate(hoje.getDate()+7);
-  var em7Fmt = em7.toISOString().split('T')[0];
+  var now = new Date();
+  document.getElementById('ov-updated').textContent = now.toLocaleTimeString('pt-BR',{hour:'2-digit',minute:'2-digit'});
+
+  // Semana: Ter → Seg (semana corrente)
+  var dow = now.getDay(); // 0=dom,1=seg,2=ter...
+  var daysFromTue = dow===0?5:(dow===1?6:dow-2);
+  var ter = new Date(now); ter.setDate(now.getDate()-daysFromTue);
+  var segProx = new Date(ter); segProx.setDate(ter.getDate()+6);
+  var terFmt  = ter.toISOString().split('T')[0];
+  var segFmt  = segProx.toISOString().split('T')[0];
+
   // Mês atual
-  var mesIni = hoje.getFullYear()+'-'+String(hoje.getMonth()+1).padStart(2,'0')+'-01';
-  var mesFim = new Date(hoje.getFullYear(),hoje.getMonth()+1,0).toISOString().split('T')[0];
+  var mesIni = now.getFullYear()+'-'+String(now.getMonth()+1).padStart(2,'0')+'-01';
+  var mesFim = new Date(now.getFullYear(),now.getMonth()+1,0).toISOString().split('T')[0];
+
+  // Período exibido no header
+  document.getElementById('ov-period').textContent =
+    'semana '+ter.toLocaleDateString('pt-BR',{day:'2-digit',month:'2-digit'})+' → '+segProx.toLocaleDateString('pt-BR',{day:'2-digit',month:'2-digit'});
+
+  var sum = function(arr,field){ return arr.reduce(function(s,x){return s+(parseFloat(x[field||'valor'])||0);},0); };
+
   try {
-    // 1. Solicitações da semana (com itens para calcular comissões)
-    var r1 = await sb.from('solicitacoes_comissao').select('*')
-      .gte('data_solicitacao', segFmt).lte('data_solicitacao', domFmt+'T23:59:59');
-    var solics = r1.data||[];
-    var solTotal = solics.reduce(function(s,x){return s+(parseFloat(x.total_valor)||0);},0);
-    document.getElementById('ov-solic-valor').textContent = fmtBRL(solTotal);
-    document.getElementById('ov-solic-count').textContent = solics.length+' solicitação(ões) esta semana';
+    // Queries paralelas
+    var results = await Promise.all([
+      sb.from('contas_pagar').select('valor,vencimento,data_pagamento,conta_bancaria_id,status,categoria_nome'),
+      sb.from('contas_receber').select('valor,vencimento,data_recebimento,status'),
+      sb.from('solicitacoes_comissao').select('*').gte('data_solicitacao',terFmt).lte('data_solicitacao',segFmt+'T23:59:59'),
+      sb.from('contas_bancarias').select('id,nome')
+    ]);
+    var cp    = results[0].data||[];
+    var cr    = results[1].data||[];
+    var solic = results[2].data||[];
+    var bancMap = {};
+    (results[3].data||[]).forEach(function(b){bancMap[b.id]=b.nome;});
 
-    // Calcula comissões com base nos itens da semana
+    // ── DESEMPENHO DO MÊS ──
+    var isComissao = function(x){return (x.categoria_nome||'').toLowerCase().includes('comiss');};
+    var cpPagoMes  = cp.filter(function(x){return x.status==='pago'&&x.data_pagamento>=mesIni&&x.data_pagamento<=mesFim;});
+    var crRecMes   = cr.filter(function(x){return x.status==='recebido'&&x.data_recebimento>=mesIni&&x.data_recebimento<=mesFim;});
+    var comPagoMes = cpPagoMes.filter(isComissao);
+    var recMes = sum(crRecMes), pagMes = sum(cpPagoMes), comPagMes = sum(comPagoMes);
+    var resultado  = recMes - pagMes;
+
+    document.getElementById('ov-cr-mes').textContent       = fmtBRL(recMes);
+    document.getElementById('ov-cr-mes-n').textContent     = crRecMes.length+' recebimento(s)';
+    document.getElementById('ov-cp-pago-mes').textContent  = fmtBRL(pagMes);
+    document.getElementById('ov-cp-pago-mes-n').textContent= cpPagoMes.length+' pagamento(s)';
+    document.getElementById('ov-com-pago-mes').textContent = fmtBRL(comPagMes);
+    document.getElementById('ov-com-pago-mes-n').textContent = comPagoMes.length+' comissão(ões)';
+    var resEl = document.getElementById('ov-resultado');
+    var resCard = document.getElementById('ov-resultado-card');
+    resEl.textContent = fmtBRL(resultado);
+    var resColor = resultado>0?'#059669':(resultado<0?'#c0392b':'#94a3b8');
+    resEl.style.color = resColor;
+    resCard.style.borderTopColor = resColor;
+
+    // ── ALERTAS ──
+    var cpVenc = cp.filter(function(x){return x.status==='vencido';});
+    var crVenc = cr.filter(function(x){return x.status==='vencido';});
+    document.getElementById('ov-cp-vencida').textContent   = fmtBRL(sum(cpVenc));
+    document.getElementById('ov-cp-vencida-n').textContent = cpVenc.length+' conta(s) em atraso';
+    document.getElementById('ov-cr-vencida').textContent   = fmtBRL(sum(crVenc));
+    document.getElementById('ov-cr-vencida-n').textContent = crVenc.length+' conta(s) em atraso';
+
+    // ── SOLICITAÇÕES DA SEMANA ──
+    var solTotal = solic.reduce(function(s,x){return s+(parseFloat(x.total_valor)||0);},0);
     var allItens = [];
-    solics.forEach(function(s){ if(Array.isArray(s.itens)) allItens = allItens.concat(s.itens); });
-    var corretorTotal = 0, gerenteBase = 0;
-    allItens.forEach(function(it){
-      var val = parseFloat(it.valor)||0;
-      var perc = it.perc;
-      var jaRecebeu = it.jaRecebeuPrimeiros3||false;
-      if(perc===6){
-        // Primeiro e único pagamento: corretor 2%, gerentes recebem
-        corretorTotal += val * 0.02;
-        gerenteBase   += val;
-      } else if(perc===3 && !jaRecebeu){
-        // Primeira parcela de 3%: corretor 1%, gerentes recebem
-        corretorTotal += val * 0.01;
-        gerenteBase   += val;
-      } else {
-        // Segunda parcela de 3% (completando 6%): corretor 1%, gerentes NÃO recebem
-        corretorTotal += val * 0.01;
-      }
-    });
-    _ovComData = {corretorTotal:corretorTotal, gerenteBase:gerenteBase, totalItens:allItens.length, solicsCount:solics.length};
+    solic.forEach(function(s){if(Array.isArray(s.itens)) allItens=allItens.concat(s.itens);});
+    document.getElementById('ov-solic-valor').textContent  = fmtBRL(solTotal);
+    document.getElementById('ov-solic-count').textContent  = solic.length+' solicitação(ões)';
+    document.getElementById('ov-solic-items').textContent  = allItens.length;
 
-    // 2. Contas a pagar pendentes
-    var r2 = await sb.from('contas_pagar').select('valor,vencimento,conta_bancaria_nome').in('status',['pendente','vencido']);
-    var cp = r2.data||[];
-    var cpSem = cp.filter(function(x){return x.vencimento>=hojeFmt&&x.vencimento<=em7Fmt;});
-    var cpMes = cp.filter(function(x){return x.vencimento>=mesIni&&x.vencimento<=mesFim;});
+    // ── PREVISÃO CP ──
+    var cpPend = cp.filter(function(x){return x.status==='pendente'||x.status==='vencido';});
+    var cpSem  = cpPend.filter(function(x){return x.vencimento>=terFmt&&x.vencimento<=segFmt;});
+    var cpMes  = cpPend.filter(function(x){return x.vencimento>=mesIni&&x.vencimento<=mesFim;});
+    var totSem=sum(cpSem), totMes=sum(cpMes);
+    document.getElementById('ov-cp-semana-total').textContent = fmtBRL(totSem);
+    document.getElementById('ov-cp-semana-n').textContent     = cpSem.length+' conta(s) pendente(s)';
+    document.getElementById('ov-cp-mes-total').textContent    = fmtBRL(totMes);
+    document.getElementById('ov-cp-mes-n').textContent        = cpMes.length+' conta(s) pendente(s)';
+
+    // Agrupar por conta bancária (usando id → nome)
     var bySem={}, byMes={};
-    cpSem.forEach(function(x){var c=x.conta_bancaria_nome||'Sem conta';bySem[c]=(bySem[c]||0)+(parseFloat(x.valor)||0);});
-    cpMes.forEach(function(x){var c=x.conta_bancaria_nome||'Sem conta';byMes[c]=(byMes[c]||0)+(parseFloat(x.valor)||0);});
-    var allContas=Array.from(new Set(Object.keys(bySem).concat(Object.keys(byMes)))).sort();
-    var totSem=0, totMes=0;
-    var cpRows=allContas.map(function(c){
-      var s=bySem[c]||0, m=byMes[c]||0; totSem+=s; totMes+=m;
-      return '<tr><td>'+c+'</td>'
-        +'<td class="mono" style="text-align:right;color:#c0392b">'+fmtBRL(s)+'</td>'
-        +'<td class="mono" style="text-align:right;color:#e67e22">'+fmtBRL(m)+'</td></tr>';
+    cpSem.forEach(function(x){
+      var n=(x.conta_bancaria_id&&bancMap[x.conta_bancaria_id])||'Sem conta vinculada';
+      bySem[n]=(bySem[n]||0)+(parseFloat(x.valor)||0);
     });
-    if(!cpRows.length) cpRows.push('<tr><td colspan="3" style="text-align:center;padding:20px;color:var(--text-muted)">Nenhuma conta a vencer no período.</td></tr>');
-    cpRows.push('<tr style="border-top:2px solid var(--border);font-weight:700">'
+    cpMes.forEach(function(x){
+      var n=(x.conta_bancaria_id&&bancMap[x.conta_bancaria_id])||'Sem conta vinculada';
+      byMes[n]=(byMes[n]||0)+(parseFloat(x.valor)||0);
+    });
+    var contas=Array.from(new Set(Object.keys(bySem).concat(Object.keys(byMes)))).sort();
+    var tRows=contas.map(function(c){
+      return '<tr><td>'+c+'</td>'
+        +'<td class="mono" style="text-align:right;color:#c0392b">'+fmtBRL(bySem[c]||0)+'</td>'
+        +'<td class="mono" style="text-align:right;color:#e67e22">'+fmtBRL(byMes[c]||0)+'</td></tr>';
+    });
+    if(!tRows.length) tRows.push('<tr><td colspan="3" style="text-align:center;padding:20px;color:var(--text-muted)">Nenhuma conta pendente no período.</td></tr>');
+    tRows.push('<tr style="border-top:2px solid var(--border);font-weight:700">'
       +'<td>Total</td>'
       +'<td class="mono" style="text-align:right;color:#c0392b">'+fmtBRL(totSem)+'</td>'
       +'<td class="mono" style="text-align:right;color:#e67e22">'+fmtBRL(totMes)+'</td></tr>');
-    document.getElementById('ov-cp-tbody').innerHTML = cpRows.join('');
-    document.getElementById('ov-cp-semana-total').textContent = fmtBRL(totSem);
-    document.getElementById('ov-cp-mes-total').textContent = fmtBRL(totMes);
+    document.getElementById('ov-cp-tbody').innerHTML=tRows.join('');
+
+    // ── CÁLCULO COMISSÕES ──
+    var corretorTotal=0, gerenteBase=0;
+    allItens.forEach(function(it){
+      var val=parseFloat(it.valor)||0;
+      if(it.perc===6){ corretorTotal+=val*0.02; gerenteBase+=val; }
+      else if(it.perc===3&&!it.jaRecebeuPrimeiros3){ corretorTotal+=val*0.01; gerenteBase+=val; }
+      else { corretorTotal+=val*0.01; }
+    });
+    _ovComData={corretorTotal:corretorTotal,gerenteBase:gerenteBase,totalItens:allItens.length,solicsCount:solic.length};
+
   } catch(e) {
     toast('❌','Erro ao carregar visão geral: '+e.message,'error');
+    console.error('overviewLoad:',e);
   }
   ovRenderComissoes();
 }
 
 function ovRenderComissoes(){
-  var tbody = document.getElementById('ov-com-tbody');
-  var info  = document.getElementById('ov-com-info');
+  var tbody=document.getElementById('ov-com-tbody');
+  var info=document.getElementById('ov-com-info');
   if(!tbody) return;
-  if(!_ovComData){
-    tbody.innerHTML='<tr><td colspan="4" style="text-align:center;padding:20px;color:var(--text-muted)">Carregando...</td></tr>';
-    return;
+  if(!_ovComData||!_ovComData.totalItens){
+    tbody.innerHTML='<tr><td colspan="4" style="text-align:center;padding:20px;color:var(--text-muted)">'
+      +(_ovComData?'Nenhuma solicitação esta semana.':'Carregando...')+'</td></tr>';
+    if(info) info.textContent=''; return;
   }
-  if(!_ovComData.totalItens){
-    tbody.innerHTML='<tr><td colspan="4" style="text-align:center;padding:20px;color:var(--text-muted)">Nenhuma solicitação esta semana — sem comissões a calcular.</td></tr>';
-    if(info) info.textContent='';
-    return;
-  }
-  if(info) info.textContent = _ovComData.totalItens+' contrato(s) em '+_ovComData.solicsCount+' solicitação(ões) esta semana';
+  if(info) info.textContent=_ovComData.totalItens+' contrato(s) em '+_ovComData.solicsCount+' solicitação(ões)';
   var coms=[
-    {nome:'Corretor',   tipo:'Corretor', calc:'2% (6%) · 1% (3%)',        valor:_ovComData.corretorTotal},
-    {nome:'Ariel',      tipo:'Gerência', calc:'0,235% · somente 1ª comissão', valor:_ovComData.gerenteBase*0.00235},
-    {nome:'Rodrigo',    tipo:'Gerência', calc:'0,165% · somente 1ª comissão', valor:_ovComData.gerenteBase*0.00165},
-    {nome:'Erick',      tipo:'Gerência', calc:'0,1% · somente 1ª comissão',   valor:_ovComData.gerenteBase*0.001},
-    {nome:'Guilherme',  tipo:'Gerência', calc:'0,6% · somente 1ª comissão',   valor:_ovComData.gerenteBase*0.006},
+    {nome:'Corretor',  tipo:'Corretor', calc:'2% nos de 6% · 1% nos de 3%',   valor:_ovComData.corretorTotal},
+    {nome:'Ariel',     tipo:'Gerência', calc:'0,235% · somente 1ª comissão',   valor:_ovComData.gerenteBase*0.00235},
+    {nome:'Rodrigo',   tipo:'Gerência', calc:'0,165% · somente 1ª comissão',   valor:_ovComData.gerenteBase*0.00165},
+    {nome:'Erick',     tipo:'Gerência', calc:'0,1% · somente 1ª comissão',     valor:_ovComData.gerenteBase*0.001},
+    {nome:'Guilherme', tipo:'Gerência', calc:'0,6% · somente 1ª comissão',     valor:_ovComData.gerenteBase*0.006},
   ];
+  var totalComs=coms.reduce(function(s,c){return s+c.valor;},0);
   tbody.innerHTML=coms.map(function(c){
     var badge=c.tipo==='Corretor'
       ?'<span class="cfg-user-row-badge" style="background:#d1fae5;color:#065f46">Corretor</span>'
@@ -2472,7 +2572,10 @@ function ovRenderComissoes(){
     return '<tr><td style="font-weight:600">'+c.nome+'</td><td>'+badge+'</td>'
       +'<td style="font-size:11px;color:var(--text-muted)">'+c.calc+'</td>'
       +'<td class="mono" style="text-align:right;font-weight:700;color:var(--gold)">'+fmtBRL(c.valor)+'</td></tr>';
-  }).join('');
+  }).join('')
+  +'<tr style="border-top:2px solid var(--border);font-weight:700">'
+  +'<td colspan="3">Total a pagar</td>'
+  +'<td class="mono" style="text-align:right;color:var(--gold)">'+fmtBRL(totalComs)+'</td></tr>';
 }
 
 // ── SUBMENUS SC ──
