@@ -1652,11 +1652,34 @@ input[type="checkbox"]{width:14px;height:14px;accent-color:var(--green-accent);c
       </div>
     </div>
 
+    <!-- FLUXO DIÁRIO -->
+    <div id="conc-fluxo-section" style="display:none;margin-bottom:20px;background:var(--surface);border:1.5px solid var(--border2);border-radius:12px;overflow:hidden">
+      <div style="background:#f8faff;padding:11px 18px;border-bottom:1px solid var(--border2);display:flex;justify-content:space-between;align-items:center">
+        <span style="font-size:11px;font-weight:700;text-transform:uppercase;letter-spacing:.07em;color:var(--navy)">📊 Fluxo de Saldo por Dia</span>
+        <button onclick="document.getElementById('conc-fluxo-section').style.display='none'" style="background:none;border:none;font-size:18px;cursor:pointer;color:var(--text-muted);line-height:1">×</button>
+      </div>
+      <div style="overflow-x:auto">
+        <table style="width:100%;border-collapse:collapse;font-size:13px" id="conc-fluxo-tbl">
+          <thead>
+            <tr style="background:#f0f4ff;font-size:10px;font-weight:700;text-transform:uppercase;letter-spacing:.05em;color:var(--text-muted)">
+              <th style="padding:8px 14px;text-align:left;border-bottom:2px solid var(--border2)">Data</th>
+              <th style="padding:8px 14px;text-align:right;border-bottom:2px solid var(--border2);color:#059669">Entradas (CR)</th>
+              <th style="padding:8px 14px;text-align:right;border-bottom:2px solid var(--border2);color:#dc2626">Saídas (CP)</th>
+              <th style="padding:8px 14px;text-align:right;border-bottom:2px solid var(--border2)">Saldo Inicial</th>
+              <th style="padding:8px 14px;text-align:right;border-bottom:2px solid var(--border2)">Saldo Final</th>
+            </tr>
+          </thead>
+          <tbody id="conc-fluxo-body"></tbody>
+        </table>
+      </div>
+    </div>
+
     <!-- Ações -->
     <div id="conc-actions" style="display:flex;gap:10px;margin-bottom:20px;flex-wrap:wrap;align-items:center">
       <button onclick="conciliacaoNovoLancamento('cp')" style="background:linear-gradient(135deg,#ef4444,#dc2626);border:none;border-radius:8px;padding:9px 16px;color:#fff;font-size:13px;font-family:'DM Sans',sans-serif;font-weight:600;cursor:pointer">+ Lançamento CP</button>
       <button onclick="conciliacaoNovoLancamento('cr')" style="background:linear-gradient(135deg,#059669,#047857);border:none;border-radius:8px;padding:9px 16px;color:#fff;font-size:13px;font-family:'DM Sans',sans-serif;font-weight:600;cursor:pointer">+ Lançamento CR</button>
       <button onclick="conciliacaoFecharMes()" style="background:var(--navy);border:none;border-radius:8px;padding:9px 16px;color:#fff;font-size:13px;font-family:'DM Sans',sans-serif;font-weight:600;cursor:pointer">🔒 Fechar Mês</button>
+      <button onclick="conciliacaoToggleFluxo()" style="background:linear-gradient(135deg,#7c3aed,#6d28d9);border:none;border-radius:8px;padding:9px 16px;color:#fff;font-size:13px;font-family:'DM Sans',sans-serif;font-weight:600;cursor:pointer">📊 Fluxo Diário</button>
       <button onclick="document.getElementById('conc-ofx-input').click()" style="background:linear-gradient(135deg,#2563eb,#1d4ed8);border:none;border-radius:8px;padding:9px 16px;color:#fff;font-size:13px;font-family:'DM Sans',sans-serif;font-weight:600;cursor:pointer" title="Exporte no Sicoob em: OFX (Padrão Unix)">📂 Importar Extrato OFX</button>
       <input type="file" id="conc-ofx-input" accept=".ofx,.OFX" style="display:none" onchange="conciliacaoHandleOFX(this.files[0]);this.value=''">
     </div>
@@ -7031,7 +7054,10 @@ function conciliacaoRender(){
   } else {
     bodySai.innerHTML = '<div style="padding:16px;text-align:center;font-size:13px;color:var(--text-muted)">Nenhuma saída neste período para esta conta.</div>';
   }
-  // Re-renderiza extrato OFX se já importado (para atualizar matches após mudança de período/dados)
+  // Re-renderiza fluxo diário se estiver aberto
+  var fluxoSec = document.getElementById('conc-fluxo-section');
+  if(fluxoSec && fluxoSec.style.display !== 'none') conciliacaoRenderFluxo();
+  // Re-renderiza extrato OFX se já importado
   if(_ofxRows && _ofxRows.length) conciliacaoRenderExtrato();
 }
 
@@ -7119,6 +7145,88 @@ function conciliacaoNovoLancamento(tipo){
     var contaEl = document.getElementById('fm-conta');
     if(contaEl && concState.contaId) contaEl.value = concState.contaId;
   }, 80);
+}
+
+// ═══════════════════════════════════════════════════════
+// CONCILIAÇÃO — FLUXO DIÁRIO DE SALDO
+// ═══════════════════════════════════════════════════════
+function conciliacaoToggleFluxo(){
+  var sec = document.getElementById('conc-fluxo-section');
+  if(!sec) return;
+  if(sec.style.display === 'none' || !sec.style.display){
+    if(!concState.contaId){ toast('⚠️','Selecione a conta e o período primeiro.','warn'); return; }
+    conciliacaoRenderFluxo();
+    sec.style.display = '';
+  } else {
+    sec.style.display = 'none';
+  }
+}
+
+function conciliacaoRenderFluxo(){
+  var banco    = concState.banco;
+  var saldoIni = banco ? (parseFloat(banco.saldo_inicial)||0) : 0;
+
+  // Monta lista de todos os movimentos: {date, cr, cp, desc}
+  var movs = [];
+  (concState.crRows||[]).forEach(function(r){
+    var d = r.data_recebimento; if(!d) return;
+    movs.push({ date:d, cr: parseFloat(r.valor_recebido||r.valor)||0, cp:0, desc: r.pessoa_nome||r.descricao||'' });
+  });
+  (concState.cpRows||[]).forEach(function(p){
+    var d = p.data_pagamento; if(!d) return;
+    movs.push({ date:d, cr:0, cp: parseFloat(p.valor_pago||p.valor)||0, desc: p.pessoa_nome||p.descricao||'' });
+  });
+
+  // Agrupa por dia
+  var byDay = {};
+  movs.forEach(function(m){
+    if(!byDay[m.date]) byDay[m.date] = {cr:0, cp:0};
+    byDay[m.date].cr += m.cr;
+    byDay[m.date].cp += m.cp;
+  });
+
+  var dates = Object.keys(byDay).sort();
+  if(!dates.length){
+    document.getElementById('conc-fluxo-body').innerHTML =
+      '<tr><td colspan="5" style="padding:20px;text-align:center;color:var(--text-muted)">Nenhum lançamento neste período.</td></tr>';
+    return;
+  }
+
+  var saldo = saldoIni;
+  var html  = '';
+
+  // Linha de saldo inicial (antes do primeiro dia)
+  html += '<tr style="background:#f8faff;font-weight:600;border-bottom:1px solid #e0e7ff">'
+    + '<td style="padding:8px 14px;color:var(--text-muted);font-style:italic">Saldo Inicial</td>'
+    + '<td colspan="3"></td>'
+    + '<td style="padding:8px 14px;text-align:right;font-family:DM Mono,monospace;color:var(--navy)">'+fmtBRL(saldo)+'</td>'
+    + '</tr>';
+
+  dates.forEach(function(date, idx){
+    var d          = byDay[date];
+    var saldoInDay = saldo;
+    saldo          = saldo + d.cr - d.cp;
+    var saldoFin   = saldo;
+    var negativo   = saldoFin < 0;
+    var rowBg      = idx % 2 === 0 ? '' : 'background:#fafafa;';
+
+    html += '<tr style="border-bottom:1px solid var(--border);'+rowBg+'">'
+      + '<td style="padding:8px 14px;font-family:DM Mono,monospace;font-size:12px">'+fmtDateBR(date)+'</td>'
+      + '<td style="padding:8px 14px;text-align:right;font-family:DM Mono,monospace;color:#059669">'+(d.cr>0?'+'+fmtBRL(d.cr):'—')+'</td>'
+      + '<td style="padding:8px 14px;text-align:right;font-family:DM Mono,monospace;color:#dc2626">'+(d.cp>0?'−'+fmtBRL(d.cp):'—')+'</td>'
+      + '<td style="padding:8px 14px;text-align:right;font-family:DM Mono,monospace;color:var(--text-muted)">'+fmtBRL(saldoInDay)+'</td>'
+      + '<td style="padding:8px 14px;text-align:right;font-family:DM Mono,monospace;font-weight:600;color:'+(negativo?'#dc2626':'var(--navy)')+'">'+fmtBRL(saldoFin)+'</td>'
+      + '</tr>';
+  });
+
+  // Linha de saldo final
+  html += '<tr style="background:#f0f4ff;font-weight:700;border-top:2px solid #c7d2fe">'
+    + '<td style="padding:9px 14px;color:var(--navy)">Saldo Final do Período</td>'
+    + '<td colspan="3"></td>'
+    + '<td style="padding:9px 14px;text-align:right;font-family:DM Mono,monospace;font-size:15px;color:var(--navy)">'+fmtBRL(saldo)+'</td>'
+    + '</tr>';
+
+  document.getElementById('conc-fluxo-body').innerHTML = html;
 }
 
 // ═══════════════════════════════════════════════════════
