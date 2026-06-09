@@ -3487,7 +3487,7 @@ function cpRender(){
       +'</td>';
     return '<tr '+bg+' onclick="cpRowClick(event,\''+r.id+'\');" style="cursor:pointer">'
       + '<td style="width:40px;text-align:center" onclick="event.stopPropagation()">'
-      +   '<input type="checkbox" class="cp-row-chk"'+(sel?' checked':'')+' onchange="cpToggleRow(\''+r.id+'\',this)" style="width:15px;height:15px;cursor:pointer;accent-color:#F47920">'
+      +   '<input type="checkbox" class="cp-row-chk" data-id="'+r.id+'"'+(sel?' checked':'')+' onchange="cpToggleRow(\''+r.id+'\',this)" style="width:15px;height:15px;cursor:pointer;accent-color:#F47920">'
       + '</td>'
       + '<td style="max-width:180px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap" title="'+(r.pessoa_nome||'')+'">'+(r.pessoa_nome||'—')+'</td>'
       + '<td style="max-width:150px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap">'+(r.categoria_nome||'—')+'</td>'
@@ -3709,7 +3709,7 @@ function crRender(){
       +'</td>';
     return '<tr '+bg+' style="cursor:pointer">'
       + '<td style="width:40px;text-align:center" onclick="event.stopPropagation()">'
-      +   '<input type="checkbox" class="cr-row-chk"'+(sel?' checked':'')+' onchange="crToggleRow(\''+r.id+'\',this)" style="width:15px;height:15px;cursor:pointer;accent-color:#F47920">'
+      +   '<input type="checkbox" class="cr-row-chk" data-id="'+r.id+'"'+(sel?' checked':'')+' onchange="crToggleRow(\''+r.id+'\',this)" style="width:15px;height:15px;cursor:pointer;accent-color:#F47920">'
       + '</td>'
       + '<td style="max-width:180px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap" title="'+(r.pessoa_nome||'')+'">'+(r.pessoa_nome||'—')+'</td>'
       + '<td style="max-width:150px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap">'+(r.categoria_nome||'—')+'</td>'
@@ -5637,10 +5637,11 @@ function cpInitScroll(){
 
 function cpToggleAll(chk) {
   cpSelected.clear();
-  if (chk.checked) {
-    FS.cpRows.forEach(function(r) { cpSelected.add(r.id); });
-  }
-  document.querySelectorAll('.cp-row-chk').forEach(function(c) { c.checked = chk.checked; });
+  // Seleciona apenas as linhas VISÍVEIS (respeitando filtro de busca)
+  document.querySelectorAll('.cp-row-chk').forEach(function(c) {
+    if (chk.checked && c.dataset.id) cpSelected.add(c.dataset.id);
+    c.checked = chk.checked;
+  });
   cpUpdateBulkBar();
 }
 
@@ -5648,7 +5649,8 @@ function cpToggleRow(id, chk) {
   if (chk.checked) cpSelected.add(id);
   else cpSelected.delete(id);
   var all = document.getElementById('cp-chk-all');
-  if (all) all.checked = cpSelected.size === FS.cpRows.length && FS.cpRows.length > 0;
+  var visible = document.querySelectorAll('.cp-row-chk').length;
+  if (all) all.checked = visible > 0 && cpSelected.size === visible;
   cpUpdateBulkBar();
 }
 
@@ -5844,14 +5846,18 @@ function crInitScroll(){
 }
 function crToggleAll(chk){
   crSelected.clear();
-  if(chk.checked) FS.crRows.forEach(function(r){ crSelected.add(r.id); });
-  document.querySelectorAll('.cr-row-chk').forEach(function(c){ c.checked=chk.checked; });
+  // Seleciona apenas as linhas VISÍVEIS (respeitando filtro de busca)
+  document.querySelectorAll('.cr-row-chk').forEach(function(c){
+    if(chk.checked && c.dataset.id) crSelected.add(c.dataset.id);
+    c.checked = chk.checked;
+  });
   crUpdateBulkBar();
 }
 function crToggleRow(id,chk){
   if(chk.checked) crSelected.add(id); else crSelected.delete(id);
   var all=document.getElementById('cr-chk-all');
-  if(all) all.checked=crSelected.size===FS.crRows.length&&FS.crRows.length>0;
+  var visible = document.querySelectorAll('.cr-row-chk').length;
+  if(all) all.checked = visible > 0 && crSelected.size === visible;
   crUpdateBulkBar();
 }
 function crUpdateBulkBar(){
