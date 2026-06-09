@@ -7023,9 +7023,9 @@ async function cnabHandleRemessa(file){
         }
       }
 
-      // Valor: 12 chars a partir de I+19, em centavos → dividir por 100 = R$
-      // (os 13 chars seguintes são "VVVVVVVVVVVV3" onde 3 = primeiro dígito do banco 341)
-      var valorRaw = parseInt(ln.substring(ip+19, ip+31).trim()||'0');
+      // Valor: 13 chars a partir de I+19, em centavos → dividir por 100 = R$
+      // Ex: '0000000340497' → int 340497 → /100 = R$3.404,97
+      var valorRaw = parseInt(ln.substring(ip+19, ip+32).trim()||'0');
       var valor    = valorRaw / 100;
 
       // Nome sacado: pos 234-273 (0-indexed), 40 chars fixos no layout
