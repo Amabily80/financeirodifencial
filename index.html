@@ -290,7 +290,7 @@ input[type="checkbox"]{width:14px;height:14px;accent-color:var(--green-accent);c
 /* LOGIN OVERLAY */
 #login-overlay{position:fixed;inset:0;z-index:9999;background:linear-gradient(135deg,#1a1d2e 0%,#252840 100%);display:flex;align-items:center;justify-content:center}
 .login-box{background:#fff;border-radius:20px;padding:48px 44px;width:100%;max-width:400px;box-shadow:0 24px 80px rgba(0,0,0,.45);display:flex;flex-direction:column;gap:20px}
-.login-brand{display:flex;align-items:center;gap:14px;margin-bottom:8px}
+.login-brand{display:flex;flex-direction:column;align-items:center;gap:8px;margin-bottom:8px}
 .login-brand-icon{width:52px;height:52px;border-radius:14px;background:linear-gradient(135deg,#F47920,#C85E10);display:flex;align-items:center;justify-content:center;font-size:26px;color:#fff;flex-shrink:0}
 .login-brand-text h2{font-size:20px;font-weight:700;color:#1a1d2e;line-height:1.2}
 .login-brand-text p{font-size:12px;color:#80868b;margin-top:2px}
@@ -837,8 +837,8 @@ input[type="checkbox"]{width:14px;height:14px;accent-color:var(--green-accent);c
 <div id="login-overlay">
   <div class="login-box">
     <div class="login-brand">
-      <div class="login-brand-icon">&#127968;</div>
-      <div class="login-brand-text"><h2>Diferencial Im&oacute;veis</h2><p>Dashboard Financeiro</p></div>
+      <img src="logo.png" alt="Diferencial Imóveis" style="height:72px;width:auto;display:block;margin:0 auto">
+      <div class="login-brand-text" style="text-align:center"><p style="margin-top:6px">Dashboard Financeiro</p></div>
     </div>
     <div class="login-divider"></div>
     <div class="login-field"><label>Login</label><input type="text" id="login-user" placeholder="Seu usu&aacute;rio" autocomplete="username"></div>
@@ -853,29 +853,10 @@ input[type="checkbox"]{width:14px;height:14px;accent-color:var(--green-accent);c
 <header>
   <div class="header-inner">
     <div class="logo">
-      <!-- Logo Diferencial Imóveis — SVG inline -->
-      <svg class="logo-svg" viewBox="0 0 220 80" fill="none" xmlns="http://www.w3.org/2000/svg">
-        <!-- Casa / house icon -->
-        <g transform="translate(0,4)">
-          <polyline points="36,38 18,38 18,66 54,66 54,38 36,38" stroke="white" stroke-width="5" stroke-linejoin="round" fill="none"/>
-          <polyline points="12,42 36,20 60,42" stroke="white" stroke-width="5" stroke-linecap="round" stroke-linejoin="round" fill="none"/>
-          <!-- ≠ laranja dentro da casa -->
-          <line x1="26" y1="47" x2="46" y2="47" stroke="#F47920" stroke-width="4.5" stroke-linecap="round"/>
-          <line x1="26" y1="57" x2="46" y2="57" stroke="#F47920" stroke-width="4.5" stroke-linecap="round"/>
-          <line x1="33" y1="41" x2="39" y2="64" stroke="#F47920" stroke-width="3.5" stroke-linecap="round"/>
-        </g>
-        <!-- Texto "Diferencial" -->
-        <text x="72" y="46" font-family="'DM Sans', Arial, sans-serif" font-weight="700" font-size="26" fill="white" letter-spacing="-0.3">Diferencial</text>
-        <!-- Ponto laranja -->
-        <circle cx="84" cy="25" r="3.5" fill="#F47920"/>
-        <!-- Texto "IMÓVEIS" -->
-        <text x="72" y="63" font-family="'DM Sans', Arial, sans-serif" font-weight="400" font-size="11" fill="rgba(255,255,255,0.55)" letter-spacing="3">IMÓVEIS</text>
-        <!-- Separador -->
-        <line x1="195" y1="18" x2="195" y2="68" stroke="rgba(255,255,255,0.2)" stroke-width="1"/>
-        <!-- Dashboard Financeiro -->
-        <text x="203" y="37" font-family="'DM Sans', Arial, sans-serif" font-weight="600" font-size="10" fill="rgba(255,255,255,0.9)" letter-spacing="0.5">DASHBOARD</text>
-        <text x="203" y="52" font-family="'DM Sans', Arial, sans-serif" font-weight="400" font-size="10" fill="rgba(255,255,255,0.55)" letter-spacing="0.3">Financeiro</text>
-      </svg>
+      <!-- Logo Diferencial Imóveis -->
+      <div style="background:#fff;border-radius:10px;padding:4px 12px;display:flex;align-items:center;box-shadow:0 2px 8px rgba(0,0,0,.18)">
+        <img src="logo.png" alt="Diferencial Imóveis" style="height:42px;width:auto;display:block">
+      </div>
     </div>
     <div class="hdr-right">
       <div class="hdr-badge"><span class="hdr-dot"></span> Data base: <span id="today-lbl"></span></div>
@@ -4415,7 +4396,7 @@ function relExportPDF(){
     +'@media print{@page{margin:15mm}}'
     +'</style></head><body>'
     +'<div class="hdr">'
-    +'<div class="co">DIFERENCIAL <span>IMÓVEIS</span></div>'
+    +'<img src="https://financeiro.adiferencial.com.br/logo.png" alt="Diferencial Imóveis" style="height:56px;width:auto">'
     +'<div><h1>'+cfg.label+'</h1><p class="sub">Gerado em '+hoje+' &nbsp;|&nbsp; '+relData.length+' registro(s)</p></div>'
     +'</div>'
     +'<table><thead><tr>'+cols.map(function(c){ return '<th>'+c+'</th>'; }).join('')+'</tr></thead>'
@@ -4466,7 +4447,7 @@ function _reciboHTML(r){
   var parc     = (r.total_parcelas>1) ? String(r.parcela_atual).padStart(3,'0')+'/'+String(r.total_parcelas).padStart(3,'0') : '001/001';
   return '<div class="wrap">'
     +'<div class="top-hdr">'
-    +'<div class="co-left">&#127968; Diferencial Im&oacute;veis</div>'
+    +'<div class="co-left"><img src="https://financeiro.adiferencial.com.br/logo.png" alt="Diferencial Imóveis" style="height:60px;width:auto"></div>'
     +'<div class="co-right"><strong>DIFERENCIAL IMOVEIS LTDA</strong>'
     +'CNPJ 14.208.078/0001-71<br>'
     +'AVENIDA REPUBLICA ARGENTINA, 1464 - LOJA 01 - AGUA VERDE<br>'
@@ -6099,7 +6080,7 @@ function comExportPDF() {
     + '.footer{margin-top:20px;font-size:10px;color:#9ca3af;text-align:center}'
     + '@media print{@page{margin:15mm}}'
     + '</style></head><body>'
-    + '<div class="hdr"><div class="co">DIFERENCIAL <span>IMÓVEIS</span></div>'
+    + '<div class="hdr"><img src="https://financeiro.adiferencial.com.br/logo.png" alt="Diferencial Imóveis" style="height:56px;width:auto">'
     + '<div><h1>Relatório de Comissões</h1><p class="sub">Gerado em ' + hoje + ' &nbsp;|&nbsp; ' + comData.length + ' registro(s)</p></div></div>'
     + '<table><thead><tr><th>Tipo</th><th>Nome</th><th>Descrição</th><th style="text-align:right">Valor</th><th>Vencimento</th><th>Data Pgto</th><th>Status</th></tr></thead>'
     + '<tbody>' + rows
