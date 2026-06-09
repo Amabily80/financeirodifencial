@@ -3618,8 +3618,8 @@ async function saldoLoad(){
   try{
     var [rBanc, rCP, rCR] = await Promise.all([
       sb.from('contas_bancarias').select('id,nome,banco,saldo_inicial,data_saldo_inicial,ativo').eq('ativo',true).order('nome'),
-      sb.from('contas_pagar').select('conta_bancaria_id,valor_pago,data_pagamento').eq('status','pago'),
-      sb.from('contas_receber').select('conta_bancaria_id,valor_recebido,data_recebimento').eq('status','recebido'),
+      sb.from('contas_pagar').select('conta_bancaria_id,valor,valor_pago,data_pagamento').eq('status','pago'),
+      sb.from('contas_receber').select('conta_bancaria_id,valor,valor_recebido,data_recebimento').eq('status','recebido'),
     ]);
     var bancos = rBanc.data||[];
     var pagamentos = rCP.data||[];
@@ -3634,11 +3634,15 @@ async function saldoLoad(){
       return d.getMonth()===mesAtual && d.getFullYear()===anoAtual;
     }
 
+    // helpers: valor efetivo pago/recebido (usa valor_pago/valor_recebido se preenchido, senão valor)
+    function vPago(p){ return parseFloat(p.valor_pago)  || parseFloat(p.valor) || 0; }
+    function vRec(r){  return parseFloat(r.valor_recebido) || parseFloat(r.valor) || 0; }
+
     // KPI totais: TODOS os pagamentos/recebimentos do mês (incluindo sem conta vinculada)
     var kpiSaiMes = pagamentos.filter(function(p){ return isMes(p.data_pagamento); })
-                              .reduce(function(acc,p){ return acc+(parseFloat(p.valor_pago)||0); },0);
+                              .reduce(function(acc,p){ return acc+vPago(p); },0);
     var kpiEntMes = recebimentos.filter(function(r){ return isMes(r.data_recebimento); })
-                                .reduce(function(acc,r){ return acc+(parseFloat(r.valor_recebido)||0); },0);
+                                .reduce(function(acc,r){ return acc+vRec(r); },0);
 
     // Por conta bancária (para os cards individuais)
     var result = bancos.map(function(b){
@@ -3654,14 +3658,14 @@ async function saldoLoad(){
         return r.data_recebimento && new Date(r.data_recebimento+'T00:00:00') >= dataRef;
       }) : recsBanco;
 
-      var totalPago = pagsValidos.reduce(function(acc,p){return acc+(parseFloat(p.valor_pago)||0);},0);
-      var totalRec  = recsValidos.reduce(function(acc,r){return acc+(parseFloat(r.valor_recebido)||0);},0);
+      var totalPago = pagsValidos.reduce(function(acc,p){return acc+vPago(p);},0);
+      var totalRec  = recsValidos.reduce(function(acc,r){return acc+vRec(r);},0);
       var saldo     = (parseFloat(b.saldo_inicial)||0) + totalRec - totalPago;
 
       var pagoMes = pagsValidos.filter(function(p){ return isMes(p.data_pagamento); })
-                               .reduce(function(acc,p){return acc+(parseFloat(p.valor_pago)||0);},0);
+                               .reduce(function(acc,p){return acc+vPago(p);},0);
       var recMes  = recsValidos.filter(function(r){ return isMes(r.data_recebimento); })
-                               .reduce(function(acc,r){return acc+(parseFloat(r.valor_recebido)||0);},0);
+                               .reduce(function(acc,r){return acc+vRec(r);},0);
 
       return {banco:b, saldo:saldo, totalPago:totalPago, totalRec:totalRec, pagoMes:pagoMes, recMes:recMes};
     });
@@ -4870,8 +4874,8 @@ async function saldoLoad(){
   try{
     var [rBanc, rCP, rCR] = await Promise.all([
       sb.from('contas_bancarias').select('id,nome,banco,saldo_inicial,data_saldo_inicial,ativo').eq('ativo',true).order('nome'),
-      sb.from('contas_pagar').select('conta_bancaria_id,valor_pago,data_pagamento').eq('status','pago'),
-      sb.from('contas_receber').select('conta_bancaria_id,valor_recebido,data_recebimento').eq('status','recebido'),
+      sb.from('contas_pagar').select('conta_bancaria_id,valor,valor_pago,data_pagamento').eq('status','pago'),
+      sb.from('contas_receber').select('conta_bancaria_id,valor,valor_recebido,data_recebimento').eq('status','recebido'),
     ]);
     var bancos = rBanc.data||[];
     var pagamentos = rCP.data||[];
@@ -4886,11 +4890,15 @@ async function saldoLoad(){
       return d.getMonth()===mesAtual && d.getFullYear()===anoAtual;
     }
 
+    // helpers: valor efetivo pago/recebido (usa valor_pago/valor_recebido se preenchido, senão valor)
+    function vPago(p){ return parseFloat(p.valor_pago)  || parseFloat(p.valor) || 0; }
+    function vRec(r){  return parseFloat(r.valor_recebido) || parseFloat(r.valor) || 0; }
+
     // KPI totais: TODOS os pagamentos/recebimentos do mês (incluindo sem conta vinculada)
     var kpiSaiMes = pagamentos.filter(function(p){ return isMes(p.data_pagamento); })
-                              .reduce(function(acc,p){ return acc+(parseFloat(p.valor_pago)||0); },0);
+                              .reduce(function(acc,p){ return acc+vPago(p); },0);
     var kpiEntMes = recebimentos.filter(function(r){ return isMes(r.data_recebimento); })
-                                .reduce(function(acc,r){ return acc+(parseFloat(r.valor_recebido)||0); },0);
+                                .reduce(function(acc,r){ return acc+vRec(r); },0);
 
     // Por conta bancária (para os cards individuais)
     var result = bancos.map(function(b){
@@ -4906,14 +4914,14 @@ async function saldoLoad(){
         return r.data_recebimento && new Date(r.data_recebimento+'T00:00:00') >= dataRef;
       }) : recsBanco;
 
-      var totalPago = pagsValidos.reduce(function(acc,p){return acc+(parseFloat(p.valor_pago)||0);},0);
-      var totalRec  = recsValidos.reduce(function(acc,r){return acc+(parseFloat(r.valor_recebido)||0);},0);
+      var totalPago = pagsValidos.reduce(function(acc,p){return acc+vPago(p);},0);
+      var totalRec  = recsValidos.reduce(function(acc,r){return acc+vRec(r);},0);
       var saldo     = (parseFloat(b.saldo_inicial)||0) + totalRec - totalPago;
 
       var pagoMes = pagsValidos.filter(function(p){ return isMes(p.data_pagamento); })
-                               .reduce(function(acc,p){return acc+(parseFloat(p.valor_pago)||0);},0);
+                               .reduce(function(acc,p){return acc+vPago(p);},0);
       var recMes  = recsValidos.filter(function(r){ return isMes(r.data_recebimento); })
-                               .reduce(function(acc,r){return acc+(parseFloat(r.valor_recebido)||0);},0);
+                               .reduce(function(acc,r){return acc+vRec(r);},0);
 
       return {banco:b, saldo:saldo, totalPago:totalPago, totalRec:totalRec, pagoMes:pagoMes, recMes:recMes};
     });
