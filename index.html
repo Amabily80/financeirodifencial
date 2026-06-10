@@ -7019,17 +7019,19 @@ function conciliacaoRender(){
 
   // Entradas
   var bodyEnt = document.getElementById('conc-body-ent');
+  var ofxStatusCr = _ofxRows.length ? _concSysOfxStatus('cr') : null;
   if(concState.crRows.length){
     bodyEnt.innerHTML = concState.crRows.map(function(r){
       var v = vR(r);
       var nome = r.pessoa_nome||r.descricao||'—';
       var cat  = r.categoria_nome ? '<small style="color:var(--text-muted);margin-left:6px">'+r.categoria_nome+'</small>' : '';
+      var ofxBadge = ofxStatusCr ? _concOfxBadge(ofxStatusCr[r.id]) : '';
       return '<div class="conc-row'+(r.conciliado?' conciliado':'')+'">'
         +'<input type="checkbox"'+(r.conciliado?' checked':'')+' style="width:16px;height:16px;accent-color:#059669;cursor:'+(fechado?'default':'pointer')+'"'+(fechado?' disabled':'')+' onchange="conciliacaoToggle(\'contas_receber\',\''+r.id+'\',this.checked)">'
         +'<span style="font-family:DM Mono,monospace;font-size:12px">'+fmtDateBR(r.data_recebimento)+'</span>'
         +'<span style="overflow:hidden;text-overflow:ellipsis;white-space:nowrap" title="'+nome+'">'+nome+cat+'</span>'
         +'<span style="text-align:right;font-family:DM Mono,monospace;font-weight:600;color:#059669">'+fmtBRL(v)+'</span>'
-        +'<span>'+(r.conciliado?'<span class="conc-badge-lock">🔒 Conciliado</span>':'')+'</span>'
+        +'<span style="display:flex;flex-wrap:wrap;gap:4px;justify-content:flex-end;align-items:center">'+(r.conciliado?'<span class="conc-badge-lock">🔒 Conciliado</span>':'')+ofxBadge+'</span>'
         +'</div>';
     }).join('');
   } else {
@@ -7038,17 +7040,19 @@ function conciliacaoRender(){
 
   // Saídas
   var bodySai = document.getElementById('conc-body-sai');
+  var ofxStatusCp = _ofxRows.length ? _concSysOfxStatus('cp') : null;
   if(concState.cpRows.length){
     bodySai.innerHTML = concState.cpRows.map(function(p){
       var v = vP(p);
       var nome = p.pessoa_nome||p.descricao||'—';
       var cat  = p.categoria_nome ? '<small style="color:var(--text-muted);margin-left:6px">'+p.categoria_nome+'</small>' : '';
+      var ofxBadge = ofxStatusCp ? _concOfxBadge(ofxStatusCp[p.id]) : '';
       return '<div class="conc-row'+(p.conciliado?' conciliado':'')+'">'
         +'<input type="checkbox"'+(p.conciliado?' checked':'')+' style="width:16px;height:16px;accent-color:var(--red);cursor:'+(fechado?'default':'pointer')+'"'+(fechado?' disabled':'')+' onchange="conciliacaoToggle(\'contas_pagar\',\''+p.id+'\',this.checked)">'
         +'<span style="font-family:DM Mono,monospace;font-size:12px">'+fmtDateBR(p.data_pagamento)+'</span>'
         +'<span style="overflow:hidden;text-overflow:ellipsis;white-space:nowrap" title="'+nome+'">'+nome+cat+'</span>'
         +'<span style="text-align:right;font-family:DM Mono,monospace;font-weight:600;color:var(--red)">'+fmtBRL(v)+'</span>'
-        +'<span>'+(p.conciliado?'<span class="conc-badge-lock">🔒 Conciliado</span>':'')+'</span>'
+        +'<span style="display:flex;flex-wrap:wrap;gap:4px;justify-content:flex-end;align-items:center">'+(p.conciliado?'<span class="conc-badge-lock">🔒 Conciliado</span>':'')+ofxBadge+'</span>'
         +'</div>';
     }).join('');
   } else {
@@ -7324,6 +7328,50 @@ function _concFindMatch(ofxRow){
     });
     return found2 ? {found:true, item:found2, table:'cp'} : {found:false, item:null, table:null};
   }
+}
+
+function _concBuildOfxIndex(type){
+  // type: 'cr' ou 'cp'. Retorna map: índice do _ofxRows -> [ids dos lançamentos do sistema que combinam]
+  var TOLS = 1.00, TOLD = 3;
+  var rows = type==='cr' ? concState.crRows : concState.cpRows;
+  var map = {};
+  (rows||[]).forEach(function(r){
+    var val  = type==='cr' ? (parseFloat(r.valor_recebido||r.valor)||0) : (parseFloat(r.valor_pago||r.valor)||0);
+    var date = type==='cr' ? (r.data_recebimento||r.vencimento) : (r.data_pagamento||r.vencimento);
+    if(!date) return;
+    _ofxRows.forEach(function(ofx, idx){
+      if(type==='cr' && ofx.amount <= 0) return;
+      if(type==='cp' && ofx.amount >= 0) return;
+      var ofxAmt = Math.abs(ofx.amount);
+      if(Math.abs(val - ofxAmt) <= TOLS && _concDaysApart(date, ofx.date) <= TOLD){
+        if(!map[idx]) map[idx] = [];
+        map[idx].push(r.id);
+      }
+    });
+  });
+  return map;
+}
+
+function _concSysOfxStatus(type){
+  // Retorna map: id do lançamento -> {found:bool, dup:bool}
+  var idxMap = _concBuildOfxIndex(type);
+  var status = {};
+  Object.keys(idxMap).forEach(function(ofxIdx){
+    var ids = idxMap[ofxIdx];
+    var dup = ids.length > 1;
+    ids.forEach(function(id){
+      if(!status[id]) status[id] = {found:true, dup:false};
+      if(dup) status[id].dup = true;
+    });
+  });
+  return status;
+}
+
+function _concOfxBadge(status){
+  if(!status) return '';
+  if(status.dup) return '<span style="font-size:10px;background:#fee2e2;color:#dc2626;border-radius:4px;padding:2px 6px;white-space:nowrap;margin-left:4px" title="Mais de um lançamento do sistema corresponde à mesma transação do extrato">⚠️ Poss. duplicado</span>';
+  if(status.found) return '<span style="font-size:10px;background:#dcfce7;color:#15803d;border-radius:4px;padding:2px 6px;white-space:nowrap;margin-left:4px" title="Encontrado no extrato bancário">✅ No extrato</span>';
+  return '<span style="font-size:10px;background:#fff7ed;color:#c2410c;border-radius:4px;padding:2px 6px;white-space:nowrap;margin-left:4px" title="Não encontrado no extrato bancário">❌ Não no extrato</span>';
 }
 
 function conciliacaoRenderExtrato(){
