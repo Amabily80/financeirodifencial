@@ -3592,6 +3592,20 @@ async function cpOpenEdit(id){
   document.getElementById('fm-total-parcelas').value  = r.total_parcelas||1;
 }
 
+// Calcula a próxima data de vencimento de uma parcela conforme a frequência escolhida
+function _finRecorrenciaAdvance(baseDate, freq, i){
+  var y = baseDate.getFullYear(), m = baseDate.getMonth(), d = baseDate.getDate();
+  switch(freq){
+    case 'semanal':    return new Date(y, m, d + 7*i);
+    case 'quinzenal':  return new Date(y, m, d + 15*i);
+    case 'trimestral': return new Date(y, m + 3*i, d);
+    case 'semestral':  return new Date(y, m + 6*i, d);
+    case 'anual':      return new Date(y + i, m, d);
+    case 'mensal':
+    default:           return new Date(y, m + i, d);
+  }
+}
+
 async function cpSave(data){
   if(FS.editId){
     data.alterado_por = (authCurrentUser()||{}).login||'';
@@ -3605,9 +3619,11 @@ async function cpSave(data){
     if(totalParcelas>1){
       var grupo = (typeof crypto !== 'undefined' && crypto.randomUUID) ? crypto.randomUUID() : Date.now().toString(36)+Math.random().toString(36);
       var baseDate = new Date((data.vencimento||new Date().toISOString().split('T')[0])+'T00:00:00');
+      var freqEl = document.getElementById('fm-recorrencia-freq');
+      var freq = freqEl ? freqEl.value : 'mensal';
       var inserts = [];
       for(var i=0;i<totalParcelas;i++){
-        var d = new Date(baseDate.getFullYear(), baseDate.getMonth()+i, baseDate.getDate());
+        var d = _finRecorrenciaAdvance(baseDate, freq, i);
         var venc = d.toISOString().split('T')[0];
         inserts.push(Object.assign({},data,{
           vencimento: venc,
@@ -3827,9 +3843,11 @@ async function crSave(data){
     if(totalParcelas>1){
       var grupo = (typeof crypto !== 'undefined' && crypto.randomUUID) ? crypto.randomUUID() : Date.now().toString(36)+Math.random().toString(36);
       var baseDate = new Date((data.vencimento||new Date().toISOString().split('T')[0])+'T00:00:00');
+      var freqEl = document.getElementById('fm-recorrencia-freq');
+      var freq = freqEl ? freqEl.value : 'mensal';
       var inserts = [];
       for(var i=0;i<totalParcelas;i++){
-        var d = new Date(baseDate.getFullYear(), baseDate.getMonth()+i, baseDate.getDate());
+        var d = _finRecorrenciaAdvance(baseDate, freq, i);
         inserts.push(Object.assign({},data,{
           vencimento: d.toISOString().split('T')[0],
           parcela_atual: parcelaAtual+i,
@@ -4000,6 +4018,7 @@ function finModalOpen(title, sub){
   document.getElementById('fm-conta').innerHTML='<option value="">Selecione...</option>';
   document.getElementById('fm-parcela-atual').value='1';
   document.getElementById('fm-total-parcelas').value='1';
+  if(document.getElementById('fm-recorrencia-freq')) document.getElementById('fm-recorrencia-freq').value='mensal';
   fillProjDropdowns();
   document.getElementById('fin-modal').classList.add('open');
 }
@@ -4938,6 +4957,20 @@ async function cpOpenEdit(id){
   document.getElementById('fm-total-parcelas').value  = r.total_parcelas||1;
 }
 
+// Calcula a próxima data de vencimento de uma parcela conforme a frequência escolhida
+function _finRecorrenciaAdvance(baseDate, freq, i){
+  var y = baseDate.getFullYear(), m = baseDate.getMonth(), d = baseDate.getDate();
+  switch(freq){
+    case 'semanal':    return new Date(y, m, d + 7*i);
+    case 'quinzenal':  return new Date(y, m, d + 15*i);
+    case 'trimestral': return new Date(y, m + 3*i, d);
+    case 'semestral':  return new Date(y, m + 6*i, d);
+    case 'anual':      return new Date(y + i, m, d);
+    case 'mensal':
+    default:           return new Date(y, m + i, d);
+  }
+}
+
 async function cpSave(data){
   if(FS.editId){
     data.alterado_por = (authCurrentUser()||{}).login||'';
@@ -4951,9 +4984,11 @@ async function cpSave(data){
     if(totalParcelas>1){
       var grupo = (typeof crypto !== 'undefined' && crypto.randomUUID) ? crypto.randomUUID() : Date.now().toString(36)+Math.random().toString(36);
       var baseDate = new Date((data.vencimento||new Date().toISOString().split('T')[0])+'T00:00:00');
+      var freqEl = document.getElementById('fm-recorrencia-freq');
+      var freq = freqEl ? freqEl.value : 'mensal';
       var inserts = [];
       for(var i=0;i<totalParcelas;i++){
-        var d = new Date(baseDate.getFullYear(), baseDate.getMonth()+i, baseDate.getDate());
+        var d = _finRecorrenciaAdvance(baseDate, freq, i);
         var venc = d.toISOString().split('T')[0];
         inserts.push(Object.assign({},data,{
           vencimento: venc,
@@ -5101,9 +5136,11 @@ async function crSave(data){
     if(totalParcelas>1){
       var grupo = (typeof crypto !== 'undefined' && crypto.randomUUID) ? crypto.randomUUID() : Date.now().toString(36)+Math.random().toString(36);
       var baseDate = new Date((data.vencimento||new Date().toISOString().split('T')[0])+'T00:00:00');
+      var freqEl = document.getElementById('fm-recorrencia-freq');
+      var freq = freqEl ? freqEl.value : 'mensal';
       var inserts = [];
       for(var i=0;i<totalParcelas;i++){
-        var d = new Date(baseDate.getFullYear(), baseDate.getMonth()+i, baseDate.getDate());
+        var d = _finRecorrenciaAdvance(baseDate, freq, i);
         inserts.push(Object.assign({},data,{
           vencimento: d.toISOString().split('T')[0],
           parcela_atual: parcelaAtual+i,
@@ -5273,6 +5310,7 @@ function finModalOpen(title, sub){
   document.getElementById('fm-conta').innerHTML='<option value="">Selecione...</option>';
   document.getElementById('fm-parcela-atual').value='1';
   document.getElementById('fm-total-parcelas').value='1';
+  if(document.getElementById('fm-recorrencia-freq')) document.getElementById('fm-recorrencia-freq').value='mensal';
   fillProjDropdowns();
   document.getElementById('fin-modal').classList.add('open');
 }
@@ -6556,7 +6594,7 @@ function comExportPDF() {
       <!-- Recorrência -->
       <div class="fin-recorrencia-box">
         <div class="fin-form-section-title">🔁 Recorrência (parcelamento)</div>
-        <div class="fin-form-row">
+        <div class="fin-form-row three">
           <div class="fin-field">
             <label>Parcela atual</label>
             <input type="number" id="fm-parcela-atual" placeholder="1" min="1" value="1">
@@ -6565,9 +6603,20 @@ function comExportPDF() {
             <label>Total de parcelas</label>
             <input type="number" id="fm-total-parcelas" placeholder="1 = sem recorrência" min="1" value="1">
           </div>
+          <div class="fin-field">
+            <label>Repetir</label>
+            <select id="fm-recorrencia-freq">
+              <option value="semanal">Semanal</option>
+              <option value="quinzenal">Quinzenal</option>
+              <option value="mensal" selected>Mensal</option>
+              <option value="trimestral">Trimestral</option>
+              <option value="semestral">Semestral</option>
+              <option value="anual">Anual</option>
+            </select>
+          </div>
         </div>
         <div style="font-size:11px;color:var(--text-muted);margin-top:6px">
-          Se Total &gt; 1, serão criados N lançamentos com vencimentos mensais consecutivos, agrupados por ID de recorrência.
+          Se Total &gt; 1, serão criados N lançamentos com vencimentos consecutivos conforme a frequência escolhida, agrupados por ID de recorrência.
         </div>
       </div>
 
@@ -6718,7 +6767,7 @@ function comExportPDF() {
       <!-- Recorrência -->
       <div class="fin-recorrencia-box">
         <div class="fin-form-section-title">🔁 Recorrência (parcelamento)</div>
-        <div class="fin-form-row">
+        <div class="fin-form-row three">
           <div class="fin-field">
             <label>Parcela atual</label>
             <input type="number" id="fm-parcela-atual" placeholder="1" min="1" value="1">
@@ -6727,9 +6776,20 @@ function comExportPDF() {
             <label>Total de parcelas</label>
             <input type="number" id="fm-total-parcelas" placeholder="1 = sem recorrência" min="1" value="1">
           </div>
+          <div class="fin-field">
+            <label>Repetir</label>
+            <select id="fm-recorrencia-freq">
+              <option value="semanal">Semanal</option>
+              <option value="quinzenal">Quinzenal</option>
+              <option value="mensal" selected>Mensal</option>
+              <option value="trimestral">Trimestral</option>
+              <option value="semestral">Semestral</option>
+              <option value="anual">Anual</option>
+            </select>
+          </div>
         </div>
         <div style="font-size:11px;color:var(--text-muted);margin-top:6px">
-          Se Total &gt; 1, serão criados N lançamentos com vencimentos mensais consecutivos, agrupados por ID de recorrência.
+          Se Total &gt; 1, serão criados N lançamentos com vencimentos consecutivos conforme a frequência escolhida, agrupados por ID de recorrência.
         </div>
       </div>
 
