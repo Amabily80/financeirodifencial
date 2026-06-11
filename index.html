@@ -2998,14 +2998,20 @@ async function _xlsxParseFirstSheet(arrayBuffer){
     }
   }catch(e){ /* mantém sheet1.xml como padrão */ }
 
+  // Estilos (preenchimento/cor das células) — usado para identificar linhas
+  // marcadas em verde (liberado) ou vermelho/laranja (não liberado)
+  var styleInfo = await _xlsxParseStyles(zip);
+
   var sheetXml = await zip.file(sheetPath).async('text');
   var dom = new DOMParser().parseFromString(sheetXml,'application/xml');
   var rows = {};
+  var styles = {};
   var maxRow = 0;
   dom.querySelectorAll('row').forEach(function(rowEl){
     var rIdx = parseInt(rowEl.getAttribute('r'),10);
     if(rIdx > maxRow) maxRow = rIdx;
     var rowData = {};
+    var rowStyles = {};
     rowEl.querySelectorAll('c').forEach(function(c){
       var ref = c.getAttribute('r');
       if(!ref) return;
@@ -3022,10 +3028,71 @@ async function _xlsxParseFirstSheet(arrayBuffer){
         val = vEl.textContent;
       }
       rowData[col] = val;
+      var sIdx = c.getAttribute('s');
+      if(sIdx!=null) rowStyles[col] = _xlsxResolveFill(styleInfo, parseInt(sIdx,10));
     });
     rows[rIdx] = rowData;
+    styles[rIdx] = rowStyles;
   });
-  return {rows:rows, maxRow:maxRow};
+  return {rows:rows, styles:styles, maxRow:maxRow};
+}
+
+// Lê xl/styles.xml e retorna {fills:[...], cellXfs:[...]}
+async function _xlsxParseStyles(zip){
+  var result = {fills:[], cellXfs:[]};
+  var stylesFile = zip.file('xl/styles.xml');
+  if(!stylesFile) return result;
+  var xml = await stylesFile.async('text');
+  var dom = new DOMParser().parseFromString(xml,'application/xml');
+  var fillsEl = dom.querySelector('fills');
+  if(fillsEl){
+    Array.prototype.forEach.call(fillsEl.children, function(fillEl){
+      if(fillEl.tagName !== 'fill') return;
+      var pf = fillEl.querySelector('patternFill');
+      var info = {type:null};
+      if(pf){
+        var fg = pf.querySelector('fgColor');
+        if(fg){
+          if(fg.getAttribute('theme')!=null){ info.type='theme'; info.theme=parseInt(fg.getAttribute('theme'),10); }
+          else if(fg.getAttribute('rgb')!=null){ info.type='rgb'; info.rgb=fg.getAttribute('rgb'); }
+          else if(fg.getAttribute('indexed')!=null){ info.type='indexed'; info.indexed=parseInt(fg.getAttribute('indexed'),10); }
+        }
+      }
+      result.fills.push(info);
+    });
+  }
+  var cellXfsEl = dom.querySelector('cellXfs');
+  if(cellXfsEl){
+    Array.prototype.forEach.call(cellXfsEl.children, function(xfEl){
+      if(xfEl.tagName !== 'xf') return;
+      var fillId = xfEl.getAttribute('fillId');
+      result.cellXfs.push(fillId!=null ? parseInt(fillId,10) : null);
+    });
+  }
+  return result;
+}
+
+// Resolve o índice de estilo de uma célula (atributo s=) para a cor de preenchimento
+function _xlsxResolveFill(styleInfo, sIdx){
+  var fillId = styleInfo.cellXfs[sIdx];
+  if(fillId==null) return null;
+  return styleInfo.fills[fillId] || null;
+}
+
+// Classifica a cor de preenchimento da linha: tema 9 = verde (liberado),
+// tema 5 = vermelho/laranja (não liberado), amarelo = pendente (VALIDAR)
+function _scClassifyFill(fillInfo){
+  if(!fillInfo || !fillInfo.type) return null;
+  if(fillInfo.type==='rgb'){
+    var rgb = (fillInfo.rgb||'').toUpperCase();
+    if(rgb.indexOf('FFFF00')!==-1) return 'pendente';
+    return null;
+  }
+  if(fillInfo.type==='theme'){
+    if(fillInfo.theme===9) return 'liberado';
+    if(fillInfo.theme===5) return 'recusado';
+  }
+  return null;
 }
 
 // Classifica o texto da coluna SITUAÇÃO em liberado / recusado / pendente
@@ -3077,21 +3144,45 @@ async function scImportRetorno(file){
     if(!colSituacao){ toast('❌','Coluna SITUAÇÃO não encontrada.','error'); return; }
 
     // Monta mapa de retorno: {codigoNormalizado: {status, motivo}}
+    // Regra principal: a cor da linha define o status (verde=liberado, vermelho/laranja=não
+    // liberado, amarelo=VALIDAR/pendente). O texto da SITUAÇÃO entra como motivo/observação.
+    // Quando a linha não tem cor reconhecida, cai no texto da SITUAÇÃO como reserva.
+    var styles = parsed.styles || {};
+    var candidateCols = [colSituacao, colCodigo, colSigla, colUnidade, 2].filter(function(c){return c!=null;});
     var retornoMap = {};
     for(var r2=headerRow+1; r2<=parsed.maxRow; r2++){
       var rd = rows[r2];
       if(!rd) continue;
       var sit = colSituacao ? rd[colSituacao] : '';
-      var cls = _scClassifySituacao(sit);
-      if(!cls) continue;
+
+      // Cor da linha
+      var fillInfo = null;
+      var rowStyles = styles[r2] || {};
+      for(var ci=0; ci<candidateCols.length; ci++){
+        var f = rowStyles[candidateCols[ci]];
+        if(f && f.type){ fillInfo = f; break; }
+      }
+      var colorStatus = _scClassifyFill(fillInfo);
+
+      var status, motivo;
+      if(colorStatus){
+        status = colorStatus;
+        motivo = String(sit||'').trim() || (status==='liberado' ? 'Liberado' : (status==='pendente' ? 'Validar' : 'Não liberado'));
+      } else {
+        var cls = _scClassifySituacao(sit);
+        if(!cls) continue;
+        status = cls.status;
+        motivo = cls.motivo;
+      }
+
       var codigo = '';
       if(colCodigo && rd[colCodigo]) codigo = rd[colCodigo];
       else codigo = (colSigla?rd[colSigla]:'')+''+(colUnidade?rd[colUnidade]:'');
       codigo = _scNormCodigo(codigo);
       if(!codigo) continue;
-      retornoMap[codigo] = {status:cls.status, motivo:cls.motivo};
+      retornoMap[codigo] = {status:status, motivo:motivo};
     }
-    if(!Object.keys(retornoMap).length){ toast('⚠️','Nenhum item com situação preenchida foi encontrado na planilha.','warn'); return; }
+    if(!Object.keys(retornoMap).length){ toast('⚠️','Nenhum item com situação preenchida ou marcação de cor foi encontrado na planilha.','warn'); return; }
 
     // Busca todas as solicitações, ordenadas da mais recente para a mais antiga
     var res = await sb.from('solicitacoes_comissao').select('*').order('data_solicitacao',{ascending:false});
