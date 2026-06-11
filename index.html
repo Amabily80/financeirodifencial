@@ -1285,7 +1285,7 @@ input[type="checkbox"]{width:14px;height:14px;accent-color:var(--green-accent);c
         <input type="date" id="scr-ate" class="field-input" style="padding:7px 12px;width:140px">
         <button class="btn-primary" style="height:34px;font-size:12px;padding:0 14px" onclick="scLoadHistorico()">🔍 Filtrar</button>
         <button class="btn-primary" style="height:34px;font-size:12px;padding:0 14px;background:linear-gradient(135deg,var(--gray-600),var(--gray-700));box-shadow:none" onclick="scLoadHistorico(true)">🔄 Todos</button>
-        <button class="btn-primary" style="height:34px;font-size:12px;padding:0 14px;background:linear-gradient(135deg,#0ea5e9,#0284c7);box-shadow:none" onclick="document.getElementById('sc-retorno-input').click()">📤 Importar Retorno da Construtora</button>
+        <button id="sc-retorno-btn" class="btn-primary" style="height:34px;font-size:12px;padding:0 14px;background:linear-gradient(135deg,#0ea5e9,#0284c7);box-shadow:none" onclick="document.getElementById('sc-retorno-input').click()">📤 Importar Retorno da Construtora</button>
         <input type="file" id="sc-retorno-input" accept=".xlsx,.xls" style="display:none" onchange="scImportRetorno(this.files[0])">
       </div>
       <div id="scr-list">
@@ -3196,7 +3196,8 @@ async function scImportRetorno(file){
       var itens = Array.isArray(s.itens) ? s.itens : [];
       var changed = false;
       itens.forEach(function(it){
-        if(it.status==='liberado' || it.status==='recusado') return; // já processado
+        // Reprocessa sempre que houver retorno na planilha (mesmo que já tenha um status
+        // anterior), pois uma importação pode corrigir uma classificação anterior.
 
         // Contratos com mais de uma unidade são lançados separados por "/" (ex.: "1202/1203")
         var partes = String(it.unidade||'').split('/').map(function(p){return p.trim();}).filter(Boolean);
@@ -3223,6 +3224,7 @@ async function scImportRetorno(file){
         it.situacao_retorno = motivoText;
         it.data_retorno = new Date().toISOString();
         if(overall==='recusado') it.motivo = motivoText;
+        else delete it.motivo;
 
         if(overall==='liberado') nLiberado++;
         else if(overall==='recusado') nRecusado++;
@@ -3448,6 +3450,11 @@ function authApplySession(session){
     session.role==="restricted"
   );
   var isOperador = !session.master && session.role==="operador";
+
+  // Botão "Importar Retorno da Construtora" só aparece para Adm (master ou role admin)
+  var isAdminUser = session.master || session.role==="admin";
+  var btnRetorno = document.getElementById("sc-retorno-btn");
+  if(btnRetorno) btnRetorno.style.display = isAdminUser ? "" : "none";
 
   if(session.master) document.getElementById("cfg-open-btn").style.display="flex";
 
