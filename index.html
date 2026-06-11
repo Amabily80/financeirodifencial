@@ -3037,6 +3037,13 @@ function _scClassifySituacao(sit){
   return {status:'recusado', motivo: String(sit).trim()};
 }
 
+// Normaliza um código (sigla+unidade) para comparação "frouxa": remove espaços/hífens
+// e o sufixo "REV" que a construtora às vezes acrescenta ao código da unidade
+// (ex.: "SB1202-REV" deve casar com a unidade "1202" lançada no sistema).
+function _scNormCodigo(s){
+  return _normTxt(s).replace(/[\s-]/g,'').replace(/REV$/,'');
+}
+
 async function scImportRetorno(file){
   if(!file) return;
   try{
@@ -3069,8 +3076,8 @@ async function scImportRetorno(file){
     }
     if(!colSituacao){ toast('❌','Coluna SITUAÇÃO não encontrada.','error'); return; }
 
-    // Monta lista de itens retornados: {codigo, status, motivo}
-    var retorno = [];
+    // Monta mapa de retorno: {codigoNormalizado: {status, motivo}}
+    var retornoMap = {};
     for(var r2=headerRow+1; r2<=parsed.maxRow; r2++){
       var rd = rows[r2];
       if(!rd) continue;
@@ -3080,47 +3087,61 @@ async function scImportRetorno(file){
       var codigo = '';
       if(colCodigo && rd[colCodigo]) codigo = rd[colCodigo];
       else codigo = (colSigla?rd[colSigla]:'')+''+(colUnidade?rd[colUnidade]:'');
-      codigo = _normTxt(codigo).replace(/\s+/g,'');
+      codigo = _scNormCodigo(codigo);
       if(!codigo) continue;
-      retorno.push({codigo:codigo, status:cls.status, motivo:cls.motivo});
+      retornoMap[codigo] = {status:cls.status, motivo:cls.motivo};
     }
-    if(!retorno.length){ toast('⚠️','Nenhum item com situação preenchida foi encontrado na planilha.','warn'); return; }
+    if(!Object.keys(retornoMap).length){ toast('⚠️','Nenhum item com situação preenchida foi encontrado na planilha.','warn'); return; }
 
     // Busca todas as solicitações, ordenadas da mais recente para a mais antiga
     var res = await sb.from('solicitacoes_comissao').select('*').order('data_solicitacao',{ascending:false});
     if(res.error) throw res.error;
     var solicitacoes = res.data || [];
 
-    var nLiberado=0, nRecusado=0, nPendente=0, nNaoEncontrado=0;
+    var nLiberado=0, nRecusado=0, nPendente=0;
     var toUpdate = []; // {id, itens}
 
-    retorno.forEach(function(item){
-      var achou = false;
-      for(var i=0;i<solicitacoes.length;i++){
-        var s = solicitacoes[i];
-        var itens = Array.isArray(s.itens) ? s.itens : [];
-        for(var j=0;j<itens.length;j++){
-          var it = itens[j];
-          if(it.status==='liberado' || it.status==='recusado') continue; // já processado
-          var codItem = _normTxt((it.sigla||'')+(it.unidade||'')).replace(/\s+/g,'');
-          if(codItem !== item.codigo) continue;
-          // Encontrou correspondência
-          it.status = item.status;
-          it.situacao_retorno = item.motivo;
-          it.data_retorno = new Date().toISOString();
-          if(item.status==='recusado') it.motivo = item.motivo;
-          if(item.status==='liberado') nLiberado++;
-          else if(item.status==='recusado') nRecusado++;
-          else nPendente++;
-          var entry = toUpdate.find(function(u){return u.id===s.id;});
-          if(!entry){ entry = {id:s.id, itens:itens}; toUpdate.push(entry); }
-          achou = true;
-          break;
-        }
-        if(achou) break;
-      }
-      if(!achou) nNaoEncontrado++;
+    solicitacoes.forEach(function(s){
+      var itens = Array.isArray(s.itens) ? s.itens : [];
+      var changed = false;
+      itens.forEach(function(it){
+        if(it.status==='liberado' || it.status==='recusado') return; // já processado
+
+        // Contratos com mais de uma unidade são lançados separados por "/" (ex.: "1202/1203")
+        var partes = String(it.unidade||'').split('/').map(function(p){return p.trim();}).filter(Boolean);
+        if(!partes.length) partes = [''];
+
+        var matched = [];
+        partes.forEach(function(parte){
+          var key = _scNormCodigo((it.sigla||'')+parte);
+          var m = retornoMap[key];
+          if(m){ matched.push({parte:parte, status:m.status, motivo:m.motivo}); delete retornoMap[key]; }
+        });
+        if(!matched.length) return; // ainda sem retorno para este item
+
+        var overall;
+        if(matched.some(function(m){return m.status==='recusado';})) overall='recusado';
+        else if(matched.some(function(m){return m.status==='pendente';})) overall='pendente';
+        else overall='liberado';
+
+        // Se houver mais de uma unidade no contrato, separa as situações com " / "
+        var motivoText = matched.length===1 ? matched[0].motivo
+          : matched.map(function(m){return m.parte+': '+m.motivo;}).join(' / ');
+
+        it.status = overall;
+        it.situacao_retorno = motivoText;
+        it.data_retorno = new Date().toISOString();
+        if(overall==='recusado') it.motivo = motivoText;
+
+        if(overall==='liberado') nLiberado++;
+        else if(overall==='recusado') nRecusado++;
+        else nPendente++;
+        changed = true;
+      });
+      if(changed) toUpdate.push({id:s.id, itens:itens});
     });
+
+    var nNaoEncontrado = Object.keys(retornoMap).length;
 
     // Salva alterações no Supabase
     for(var k=0;k<toUpdate.length;k++){
@@ -3129,7 +3150,7 @@ async function scImportRetorno(file){
       if(upd.error) throw upd.error;
     }
 
-    toast('✅','Retorno importado: '+nLiberado+' liberada(s), '+nRecusado+' recusada(s)'+(nPendente?', '+nPendente+' em validação':'')+(nNaoEncontrado?', '+nNaoEncontrado+' não encontrada(s)':'')+'.','success');
+    toast('✅','Retorno importado: '+nLiberado+' liberada(s), '+nRecusado+' recusada(s)'+(nPendente?', '+nPendente+' em validação':'')+(nNaoEncontrado?', '+nNaoEncontrado+' não encontrada(s) no sistema':'')+'.','success');
     document.getElementById('sc-retorno-input').value = '';
     scLoadHistorico(true);
   }catch(e){
