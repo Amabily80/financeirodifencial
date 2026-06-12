@@ -1844,13 +1844,15 @@ input[type="checkbox"]{width:14px;height:14px;accent-color:var(--green-accent);c
     <div class="fin-page-hdr" style="margin-bottom:20px">
       <div>
         <h2 class="fin-page-title">📂 Importação CNAB 400 — Itaú</h2>
-        <p style="font-size:12px;color:var(--text-muted);margin-top:3px">Remessa: cria cobranças no Contas a Receber · Retorno: baixa pagamentos automaticamente</p>
+        <p style="font-size:12px;color:var(--text-muted);margin-top:3px">Cobrança: remessa cria cobranças no Contas a Receber e retorno baixa pagamentos · Repasse: remessa cria lançamentos no Contas a Pagar e retorno baixa os repasses pagos</p>
       </div>
     </div>
     <!-- Sub-abas -->
     <div class="cnab-subtabs">
       <button class="cnab-stab active" id="cnab-stab-rem" onclick="cnabSetTab('remessa')">📤 Remessa → Criar Cobranças</button>
       <button class="cnab-stab" id="cnab-stab-ret" onclick="cnabSetTab('retorno')">📥 Retorno → Baixar Pagamentos</button>
+      <button class="cnab-stab" id="cnab-stab-reprem" onclick="cnabSetTab('rep-remessa')">💸 Repasse Remessa → Criar Contas a Pagar</button>
+      <button class="cnab-stab" id="cnab-stab-repret" onclick="cnabSetTab('rep-retorno')">💰 Repasse Retorno → Baixar Pagamentos</button>
     </div>
     <!-- Painel Remessa -->
     <div id="cnab-panel-remessa">
@@ -1904,6 +1906,62 @@ input[type="checkbox"]{width:14px;height:14px;accent-color:var(--green-accent);c
           <table class="cnab-tbl">
             <thead><tr><th>Nosso Nº</th><th>Sacado (Cliente)</th><th>Data Pagamento</th><th style="text-align:right">Valor</th><th>Status</th></tr></thead>
             <tbody id="cnab-ret-tbody"></tbody>
+          </table>
+        </div>
+      </div>
+    </div>
+    <!-- Painel Repasse Remessa -->
+    <div id="cnab-panel-reprem" style="display:none">
+      <div class="cnab-upload-box" id="cnab-reprem-dropzone"
+        onclick="document.getElementById('cnab-reprem-input').click()"
+        ondragover="event.preventDefault();this.classList.add('drag-over')"
+        ondragleave="this.classList.remove('drag-over')"
+        ondrop="event.preventDefault();this.classList.remove('drag-over');cnabHandleRepRemessa(event.dataTransfer.files[0])">
+        <div class="cnab-upload-icon">💸</div>
+        <div class="cnab-upload-lbl">Clique ou arraste o arquivo de Remessa de Repasses</div>
+        <div class="cnab-upload-sub">Formato .REM · CNAB 400 · Banco Itaú · Pagamentos a Proprietários</div>
+        <input type="file" id="cnab-reprem-input" accept=".rem,.txt,.REM" style="display:none" onchange="cnabHandleRepRemessa(this.files[0])">
+      </div>
+      <div id="cnab-reprem-preview" style="display:none;margin-top:20px">
+        <div class="cnab-preview-bar">
+          <span class="cnab-preview-info" id="cnab-reprem-info"></span>
+          <div style="display:flex;gap:8px;flex-wrap:wrap">
+            <button class="btn-primary" onclick="cnabImportRepRemessa()" id="cnab-reprem-btn">⬆️ Importar para Contas a Pagar</button>
+            <button onclick="cnabResetRepRemessa()" style="background:#f3f4f6;border:none;border-radius:8px;padding:8px 14px;cursor:pointer;font-size:13px;font-weight:600">✖ Cancelar</button>
+          </div>
+        </div>
+        <div style="overflow-x:auto;border-radius:10px;border:1px solid var(--border)">
+          <table class="cnab-tbl">
+            <thead><tr><th>Beneficiário</th><th>Data Pagamento</th><th style="text-align:right">Valor</th><th>Status</th></tr></thead>
+            <tbody id="cnab-reprem-tbody"></tbody>
+          </table>
+        </div>
+      </div>
+    </div>
+    <!-- Painel Repasse Retorno -->
+    <div id="cnab-panel-repret" style="display:none">
+      <div class="cnab-upload-box" id="cnab-repret-dropzone"
+        onclick="document.getElementById('cnab-repret-input').click()"
+        ondragover="event.preventDefault();this.classList.add('drag-over')"
+        ondragleave="this.classList.remove('drag-over')"
+        ondrop="event.preventDefault();this.classList.remove('drag-over');cnabHandleRepRetorno(event.dataTransfer.files[0])">
+        <div class="cnab-upload-icon">📋</div>
+        <div class="cnab-upload-lbl">Clique ou arraste o arquivo de Retorno de Repasses</div>
+        <div class="cnab-upload-sub">Formato .RET · CNAB 400 · Banco Itaú · Pagamentos a Proprietários</div>
+        <input type="file" id="cnab-repret-input" accept=".ret,.txt,.RET" style="display:none" onchange="cnabHandleRepRetorno(this.files[0])">
+      </div>
+      <div id="cnab-repret-preview" style="display:none;margin-top:20px">
+        <div class="cnab-preview-bar">
+          <span class="cnab-preview-info" id="cnab-repret-info"></span>
+          <div style="display:flex;gap:8px;flex-wrap:wrap">
+            <button class="btn-primary" onclick="cnabBaixarRepRetorno()" id="cnab-repret-btn" style="background:#059669">✅ Baixar Pagamentos</button>
+            <button onclick="cnabResetRepRetorno()" style="background:#f3f4f6;border:none;border-radius:8px;padding:8px 14px;cursor:pointer;font-size:13px;font-weight:600">✖ Cancelar</button>
+          </div>
+        </div>
+        <div style="overflow-x:auto;border-radius:10px;border:1px solid var(--border)">
+          <table class="cnab-tbl">
+            <thead><tr><th>Beneficiário</th><th>Data Pagamento</th><th style="text-align:right">Valor</th><th>Status</th></tr></thead>
+            <tbody id="cnab-repret-tbody"></tbody>
           </table>
         </div>
       </div>
@@ -7811,6 +7869,9 @@ function conciliacaoLimparExtrato(){
 // ═══════════════════════════════════════════════════════
 var _cnabRemParsed = [];
 var _cnabRetParsed = [];
+var _cnabRepRemParsed = [];
+var _cnabRepRetParsed = [];
+var CNAB_REP_MARK = '[CNAB-REPASSE]';
 
 function cnabLoad(){
   cnabSetTab('remessa');
@@ -7819,8 +7880,12 @@ function cnabLoad(){
 function cnabSetTab(tab){
   document.getElementById('cnab-panel-remessa').style.display = tab==='remessa' ? '' : 'none';
   document.getElementById('cnab-panel-retorno').style.display  = tab==='retorno'  ? '' : 'none';
+  document.getElementById('cnab-panel-reprem').style.display   = tab==='rep-remessa' ? '' : 'none';
+  document.getElementById('cnab-panel-repret').style.display   = tab==='rep-retorno' ? '' : 'none';
   document.getElementById('cnab-stab-rem').classList.toggle('active', tab==='remessa');
   document.getElementById('cnab-stab-ret').classList.toggle('active', tab==='retorno');
+  document.getElementById('cnab-stab-reprem').classList.toggle('active', tab==='rep-remessa');
+  document.getElementById('cnab-stab-repret').classList.toggle('active', tab==='rep-retorno');
 }
 
 function cnabResetRemessa(){
@@ -7833,6 +7898,45 @@ function cnabResetRetorno(){
   _cnabRetParsed = [];
   document.getElementById('cnab-ret-preview').style.display = 'none';
   document.getElementById('cnab-ret-input').value = '';
+}
+
+function cnabResetRepRemessa(){
+  _cnabRepRemParsed = [];
+  document.getElementById('cnab-reprem-preview').style.display = 'none';
+  document.getElementById('cnab-reprem-input').value = '';
+}
+
+function cnabResetRepRetorno(){
+  _cnabRepRetParsed = [];
+  document.getElementById('cnab-repret-preview').style.display = 'none';
+  document.getElementById('cnab-repret-input').value = '';
+}
+
+// ── Chave de conciliação para repasses (nome normalizado + valor) ─────
+function _cnabRepKeyNV(nome, valor){
+  return (nome||'').trim().toUpperCase().replace(/\s+/g,' ')+'|'+Number(valor).toFixed(2);
+}
+
+// ── Parser linha-padrão de Repasse (Segmento A) ─────────────────────
+// CNAB 400 Itaú Pagamento a Fornecedores/Repasses, registro tipo "3", segmento "A":
+//   posições 0-13   Identificação do registro ("341"+lote+"3"+sequencial+"A")
+//   posições 43-72  Nome do favorecido (30 chars)
+//   posições 93-100 Data do pagamento DDMMYYYY
+//   posições 124-133 Valor do pagamento (10 dígitos, ÷100 = R$)
+//   posições 220-239 (retorno) Código de ocorrência: "BD"=pago, "RJxx"=rejeitado
+function cnabParseRepLine(ln){
+  if(!ln || ln.length<134) return null;
+  if(ln.substring(0,3)!=='341' || ln.charAt(7)!=='3' || ln.charAt(13)!=='A') return null;
+  var nome  = ln.substring(43,73).trim();
+  var data  = cnabDDMMYYYY(ln.substring(93,101));
+  var valor = parseInt(ln.substring(124,134).trim()||'0',10)/100;
+  if(!nome || !valor) return null;
+  var status = '';
+  if(ln.length>=240){
+    var m = ln.substring(220,240).match(/(BD|RJ[A-Z]{2})/);
+    if(m) status = m[1];
+  }
+  return { nome:nome, data:data, valor:valor, status:status };
 }
 
 // ── Parser utilitário ────────────────────────────────
@@ -8108,6 +8212,209 @@ async function cnabBaixarRetorno(){
     }
     toast('✅',paraBaixar.length+' pagamentos baixados com sucesso!','ok');
     cnabResetRetorno();
+  }catch(err){
+    console.error(err);
+    toast('❌','Erro ao baixar: '+(err.message||err),'err');
+    btn.disabled=false; btn.textContent='✅ Baixar Pagamentos';
+  }
+}
+
+// ── Repasse · Remessa → Contas a Pagar ──────────────────────────────
+async function cnabHandleRepRemessa(file){
+  if(!file) return;
+  var reader = new FileReader();
+  reader.onload = async function(e){
+    var lines = e.target.result.replace(/\r/g,'').split('\n');
+    var records = [];
+    lines.forEach(function(ln){
+      var r = cnabParseRepLine(ln);
+      if(r) records.push(r);
+    });
+
+    if(!records.length){
+      toast('❌','Nenhum repasse encontrado. Verifique se é CNAB 400 Itaú (remessa de pagamentos).','err'); return;
+    }
+
+    // Verificar duplicatas no Supabase (mesmo favorecido + valor já importado)
+    var jaExist = {};
+    if(sb){
+      var {data:ex} = await sb.from('contas_pagar')
+        .select('pessoa_nome,valor')
+        .like('observacoes', CNAB_REP_MARK+'%');
+      (ex||[]).forEach(function(r){ jaExist[_cnabRepKeyNV(r.pessoa_nome,r.valor)] = true; });
+    }
+
+    _cnabRepRemParsed = records.map(function(r){
+      return { ...r, existente: !!jaExist[_cnabRepKeyNV(r.nome,r.valor)] };
+    });
+    cnabRenderRepRemPreview();
+  };
+  reader.readAsText(file,'latin1');
+}
+
+function cnabRenderRepRemPreview(){
+  var novos = _cnabRepRemParsed.filter(r=>!r.existente).length;
+  var dups  = _cnabRepRemParsed.filter(r=>r.existente).length;
+  var total = _cnabRepRemParsed.filter(r=>!r.existente).reduce((s,r)=>s+r.valor,0);
+
+  document.getElementById('cnab-reprem-info').innerHTML =
+    '<strong>'+_cnabRepRemParsed.length+' repasses</strong> · '+
+    '<span style="color:#059669">'+novos+' novos ('+fmtBRL(total)+')</span>'+
+    (dups?' · <span style="color:#92400e">'+dups+' já importados</span>':'');
+
+  var rows = _cnabRepRemParsed.map(function(r){
+    var badge = r.existente
+      ? '<span class="cnab-badge-dup">⚠️ Já importado</span>'
+      : '<span class="cnab-badge-new">✅ Novo</span>';
+    return '<tr>'
+      +'<td>'+r.nome+'</td>'
+      +'<td>'+fmtDateBR(r.data)+'</td>'
+      +'<td style="text-align:right;font-weight:600">'+fmtBRL(r.valor)+'</td>'
+      +'<td>'+badge+'</td>'
+      +'</tr>';
+  }).join('');
+
+  document.getElementById('cnab-reprem-tbody').innerHTML = rows;
+  document.getElementById('cnab-reprem-preview').style.display = '';
+  var btn = document.getElementById('cnab-reprem-btn');
+  btn.disabled = novos===0;
+  if(novos===0) toast('⚠️','Todos os repasses desta remessa já foram importados.','warn');
+}
+
+async function cnabImportRepRemessa(){
+  var novos = _cnabRepRemParsed.filter(r=>!r.existente);
+  if(!novos.length){ toast('⚠️','Nenhum repasse novo para importar.','warn'); return; }
+  if(!sb){ toast('❌','Sem conexão com banco de dados.','err'); return; }
+
+  var btn = document.getElementById('cnab-reprem-btn');
+  btn.disabled = true; btn.textContent = '⏳ Importando...';
+
+  try{
+    var contaItau = (FS.refs.bancarias||[]).find(function(b){
+      return b.nome && (b.nome.toLowerCase().includes('itaú')||b.nome.toLowerCase().includes('itau'));
+    });
+    var catRepasse = (FS.refs.categorias||[]).find(function(c){
+      return c.nome && c.nome.toLowerCase().includes('repasse');
+    });
+
+    var inserts = novos.map(function(r){
+      return {
+        descricao:        'Repasse Proprietário · '+r.nome,
+        pessoa_nome:      r.nome,
+        valor:            r.valor,
+        valor_pago:       null,
+        vencimento:       r.data,
+        status:           'pendente',
+        categoria_id:     catRepasse ? catRepasse.id : null,
+        categoria_nome:   catRepasse ? catRepasse.nome : 'Repasse Proprietários',
+        conta_bancaria_id: contaItau ? contaItau.id : null,
+        observacoes:      CNAB_REP_MARK+' Importado via remessa CNAB 400 Itaú'
+      };
+    });
+
+    var {error} = await sb.from('contas_pagar').insert(inserts);
+    if(error) throw error;
+
+    toast('✅',novos.length+' repasses criados no Contas a Pagar!','ok');
+    cnabResetRepRemessa();
+  }catch(err){
+    console.error(err);
+    toast('❌','Erro ao importar: '+(err.message||err),'err');
+    btn.disabled=false; btn.textContent='⬆️ Importar para Contas a Pagar';
+  }
+}
+
+// ── Repasse · Retorno → Baixar Contas a Pagar ───────────────────────
+async function cnabHandleRepRetorno(file){
+  if(!file) return;
+  var reader = new FileReader();
+  reader.onload = async function(e){
+    var lines = e.target.result.replace(/\r/g,'').split('\n');
+    var records = [];
+    lines.forEach(function(ln){
+      var r = cnabParseRepLine(ln);
+      if(r) records.push(r);
+    });
+
+    if(!records.length){
+      toast('⚠️','Nenhum repasse encontrado neste retorno.','warn'); return;
+    }
+
+    // Buscar no Supabase os lançamentos de repasse pendentes
+    var cpMap = {};
+    if(sb){
+      var {data:cpRows} = await sb.from('contas_pagar')
+        .select('id,pessoa_nome,valor,status')
+        .like('observacoes', CNAB_REP_MARK+'%')
+        .eq('status','pendente');
+      (cpRows||[]).forEach(function(r){ cpMap[_cnabRepKeyNV(r.pessoa_nome,r.valor)] = r; });
+    }
+
+    _cnabRepRetParsed = records.map(function(r){
+      var cp = cpMap[_cnabRepKeyNV(r.nome,r.valor)]||null;
+      return {
+        ...r,
+        cpId:      cp ? cp.id : null,
+        pago:      r.status==='BD',
+        rejeitado: r.status.indexOf('RJ')===0
+      };
+    });
+    cnabRenderRepRetPreview();
+  };
+  reader.readAsText(file,'latin1');
+}
+
+function cnabRenderRepRetPreview(){
+  var paraBaixar  = _cnabRepRetParsed.filter(r=>r.cpId&&r.pago).length;
+  var rejeitados  = _cnabRepRetParsed.filter(r=>r.rejeitado).length;
+  var naoEncontr  = _cnabRepRetParsed.filter(r=>!r.cpId&&r.pago).length;
+  var totalBaixar = _cnabRepRetParsed.filter(r=>r.cpId&&r.pago).reduce((s,r)=>s+r.valor,0);
+
+  document.getElementById('cnab-repret-info').innerHTML =
+    '<strong>'+_cnabRepRetParsed.length+' repasses</strong> no retorno · '+
+    '<span style="color:#059669">'+paraBaixar+' para baixar ('+fmtBRL(totalBaixar)+')</span>'+
+    (rejeitados?' · <span style="color:#991b1b">'+rejeitados+' rejeitados</span>':'')+
+    (naoEncontr?' · <span style="color:#92400e">'+naoEncontr+' não encontrados</span>':'');
+
+  var rows = _cnabRepRetParsed.map(function(r){
+    var badge;
+    if(r.rejeitado)    badge = '<span class="cnab-badge-nomatch">❌ Rejeitado ('+r.status+')</span>';
+    else if(!r.cpId)   badge = '<span class="cnab-badge-nomatch">⚠️ Não encontrado</span>';
+    else if(r.pago)    badge = '<span class="cnab-badge-pago">💰 Será baixado</span>';
+    else               badge = '<span class="cnab-badge-dup">⏳ Aguardando confirmação</span>';
+    return '<tr>'
+      +'<td>'+r.nome+'</td>'
+      +'<td>'+fmtDateBR(r.data)+'</td>'
+      +'<td style="text-align:right;font-weight:600">'+fmtBRL(r.valor)+'</td>'
+      +'<td>'+badge+'</td>'
+      +'</tr>';
+  }).join('');
+
+  document.getElementById('cnab-repret-tbody').innerHTML = rows;
+  document.getElementById('cnab-repret-preview').style.display = '';
+  var btn = document.getElementById('cnab-repret-btn');
+  btn.disabled = paraBaixar===0;
+  if(paraBaixar===0) toast('⚠️','Nenhum repasse novo para baixar neste retorno.','warn');
+}
+
+async function cnabBaixarRepRetorno(){
+  var paraBaixar = _cnabRepRetParsed.filter(r=>r.cpId&&r.pago);
+  if(!paraBaixar.length){ toast('⚠️','Nenhum repasse para baixar.','warn'); return; }
+  if(!sb){ toast('❌','Sem conexão com banco de dados.','err'); return; }
+
+  var btn = document.getElementById('cnab-repret-btn');
+  btn.disabled=true; btn.textContent='⏳ Baixando...';
+
+  try{
+    for(var r of paraBaixar){
+      await sb.from('contas_pagar').update({
+        status:         'pago',
+        data_pagamento: r.data,
+        valor_pago:     r.valor
+      }).eq('id', r.cpId);
+    }
+    toast('✅',paraBaixar.length+' repasses baixados com sucesso!','ok');
+    cnabResetRepRetorno();
   }catch(err){
     console.error(err);
     toast('❌','Erro ao baixar: '+(err.message||err),'err');
