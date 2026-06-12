@@ -4997,7 +4997,7 @@ function _reciboCSS(){
   +'.sig-area{display:flex;gap:48px;margin-top:44px}'
   +'.sig-line{border-top:1px solid #1a1d2e;padding-top:5px;font-size:12px;color:#374151;min-width:200px}'
   +'.btn-print{display:block;margin:28px auto 0;background:#F47920;color:#fff;border:none;border-radius:8px;padding:11px 28px;font-size:13px;font-weight:700;cursor:pointer;font-family:Arial}'
-  +'@media print{.btn-print{display:none!important}body{background:#fff;padding:0}.wrap{border:none;margin:0;padding:28px}}';
+  +'@media print{@page{margin:15mm}.btn-print{display:none!important}body{background:#fff;padding:0}.wrap{border:none;margin:0;padding:28px;page-break-inside:avoid;page-break-after:always}.wrap:last-of-type{page-break-after:auto}}';
 }
 function _reciboHTML(r){
   var pessoa   = r.pessoas || {};
