@@ -6125,7 +6125,12 @@ function cpUpdateBulkBar() {
   if (!bar) return;
   if (cpSelected.size > 0) {
     bar.classList.add('visible');
-    cnt.innerHTML = '<span>' + cpSelected.size + '</span> conta(s) selecionada(s)';
+    var total = 0;
+    cpSelected.forEach(function(id){
+      var r = (FS.cpRows||[]).find(function(x){return x.id===id;});
+      if(r) total += Number(r.valor)||0;
+    });
+    cnt.innerHTML = '<span>' + cpSelected.size + '</span> conta(s) selecionada(s) · <span>' + fmtBRL(total) + '</span>';
   } else {
     bar.classList.remove('visible');
   }
