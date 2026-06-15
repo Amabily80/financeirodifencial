@@ -3249,6 +3249,11 @@ async function scImportRetorno(file){
 
     var nLiberado=0, nRecusado=0, nPendente=0;
     var toUpdate = []; // {id, itens}
+    var crPending = []; // itens liberados que ainda precisam gerar lançamento no Contas a Receber
+    var hojeISO = new Date().toISOString().slice(0,10);
+    var SC_CR_CATEGORIA_ID   = '432e0315-9694-47a8-8840-ec597b4faf61'; // COMISSÕES VENDA - BICALHO
+    var SC_CR_CATEGORIA_NOME = 'COMISSÕES VENDA - BICALHO';
+    var SC_CR_CONTA_ID       = 'ad9699b8-bcda-4fd5-baa4-81ad8fe882a4'; // Bradesco
 
     solicitacoes.forEach(function(s){
       var itens = Array.isArray(s.itens) ? s.itens : [];
@@ -3287,12 +3292,42 @@ async function scImportRetorno(file){
         if(overall==='liberado') nLiberado++;
         else if(overall==='recusado') nRecusado++;
         else nPendente++;
+
+        // Comissão liberada: gera lançamento no Contas a Receber (Bradesco ·
+        // COMISSÕES VENDA - BICALHO). Só uma vez por item (controla via it.cr_lancado).
+        if(overall==='liberado' && !it.cr_lancado){
+          crPending.push({
+            item: it,
+            row: {
+              pessoa_nome:       'EMPREENDIMENTO ' + (it.emp||''),
+              categoria_id:      SC_CR_CATEGORIA_ID,
+              categoria_nome:    SC_CR_CATEGORIA_NOME,
+              conta_bancaria_id: SC_CR_CONTA_ID,
+              projeto_nome:      'Venda',
+              descricao:         (it.sigla||'')+(it.unidade||'')+' - '+(it.cliente||''),
+              valor:             it.saldo||0,
+              vencimento:        hojeISO,
+              status:            'pendente'
+            }
+          });
+        }
         changed = true;
       });
       if(changed) toUpdate.push({id:s.id, itens:itens});
     });
 
     var nNaoEncontrado = Object.keys(retornoMap).length;
+
+    // Cria os lançamentos no Contas a Receber das comissões recém-liberadas
+    var nCriados = 0;
+    for(var ci=0; ci<crPending.length; ci++){
+      var pend = crPending[ci];
+      var insRes = await sb.from('contas_receber').insert(pend.row).select('id').single();
+      if(insRes.error) throw insRes.error;
+      pend.item.cr_lancado = true;
+      pend.item.cr_id = insRes.data.id;
+      nCriados++;
+    }
 
     // Salva alterações no Supabase
     for(var k=0;k<toUpdate.length;k++){
@@ -3301,7 +3336,7 @@ async function scImportRetorno(file){
       if(upd.error) throw upd.error;
     }
 
-    toast('✅','Retorno importado: '+nLiberado+' liberada(s), '+nRecusado+' recusada(s)'+(nPendente?', '+nPendente+' em validação':'')+(nNaoEncontrado?', '+nNaoEncontrado+' não encontrada(s) no sistema':'')+'.','success');
+    toast('✅','Retorno importado: '+nLiberado+' liberada(s), '+nRecusado+' recusada(s)'+(nPendente?', '+nPendente+' em validação':'')+(nNaoEncontrado?', '+nNaoEncontrado+' não encontrada(s) no sistema':'')+(nCriados?' · '+nCriados+' lançamento(s) criado(s) no Contas a Receber':'')+'.','success');
     document.getElementById('sc-retorno-input').value = '';
     scLoadHistorico(true);
   }catch(e){
