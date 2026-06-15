@@ -8351,7 +8351,7 @@ async function cnabHandleRepRetorno(file){
       var {data:cpRows} = await sb.from('contas_pagar')
         .select('id,pessoa_nome,valor,status')
         .like('observacoes', CNAB_REP_MARK+'%')
-        .eq('status','pendente');
+        .in('status',['pendente','vencido']);
       (cpRows||[]).forEach(function(r){ cpMap[_cnabRepKeyNV(r.pessoa_nome,r.valor)] = r; });
     }
 
