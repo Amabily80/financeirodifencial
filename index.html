@@ -2009,39 +2009,59 @@ input[type="checkbox"]{width:14px;height:14px;accent-color:var(--green-accent);c
     <div class="fin-page-hdr">
       <div>
         <div class="fin-page-title">📊 Fechamento de Leads</div>
-        <div class="fin-page-sub">Custo por lead · Performance por portal · Evolução mensal</div>
+        <div class="fin-page-sub">Custo por lead · Performance por portal · Análise trimestral e semestral</div>
       </div>
       <div class="fin-page-actions">
-        <button class="btn-primary" onclick="document.getElementById('leads-file-input').click()" style="height:34px;font-size:12px;padding:0 16px">📤 Importar Relatório</button>
+        <button class="btn-primary" onclick="document.getElementById('leads-file-input').click()" style="height:34px;font-size:12px;padding:0 16px">📤 Importar Mês</button>
         <input type="file" id="leads-file-input" accept=".xlsx,.xls" style="display:none" onchange="leadsHandleXLSX(this.files[0])">
       </div>
+    </div>
+
+    <!-- Sub-tabs -->
+    <div class="sc-sub-bar" id="leads-subtabs" style="display:none">
+      <button class="sc-sub-btn active" id="leads-sub-analise" onclick="leadsGoSub('analise')">📊 Análise de Custos</button>
+      <button class="sc-sub-btn" id="leads-sub-convertidos" onclick="leadsGoSub('convertidos')">✅ Convertidos</button>
     </div>
 
     <div id="leads-empty" class="leads-empty-state">
       <div style="font-size:52px;margin-bottom:16px">📊</div>
       <div style="font-size:17px;font-weight:700;color:var(--navy);margin-bottom:8px">Importe o Relatório de Leads</div>
-      <div style="font-size:13px;max-width:420px;margin:0 auto 22px">Selecione o arquivo <strong>_Relatório de Leads - Gerência.xlsx</strong> exportado do Google Sheets. O sistema detecta todos os meses automaticamente.</div>
-      <button class="btn-primary" onclick="document.getElementById('leads-file-input').click()">📤 Selecionar Arquivo</button>
+      <div style="font-size:13px;max-width:460px;margin:0 auto 22px">A cada mês, exporte somente a aba do mês do Google Sheets e importe aqui. O histórico de outros meses e os leads convertidos são <strong>preservados automaticamente</strong>.</div>
+      <button class="btn-primary" onclick="document.getElementById('leads-file-input').click()">📤 Importar Primeiro Mês</button>
     </div>
 
-    <div id="leads-dashboard" style="display:none">
+    <!-- VIEW: ANÁLISE -->
+    <div id="leads-view-analise" style="display:none">
+      <!-- Period filter -->
+      <div style="display:flex;align-items:center;gap:12px;margin-bottom:18px;flex-wrap:wrap">
+        <label style="font-size:12px;font-weight:700;color:var(--text-muted)">PERÍODO</label>
+        <select class="fin-select" id="leads-periodo-tipo" onchange="leadsChangePeriodo()" style="min-width:140px">
+          <option value="all">Todo o período</option>
+          <option value="mes">Mês específico</option>
+          <option value="tri">Trimestre</option>
+          <option value="sem">Semestre</option>
+        </select>
+        <select class="fin-select" id="leads-periodo-val" onchange="leadsRenderAnalise()" style="min-width:120px;display:none"></select>
+        <span id="leads-periodo-lbl" style="font-size:12px;color:var(--text-muted)"></span>
+      </div>
+
       <div class="leads-kpi-bar" id="leads-kpis"></div>
 
       <div class="leads-section-title">💰 Custo por Portal
-        <span style="font-size:11px;font-weight:400;color:var(--text-muted);text-transform:none;letter-spacing:0">— edite o custo mensal (assinatura) e o CPL é calculado automaticamente</span>
+        <span style="font-size:11px;font-weight:400;color:var(--text-muted);text-transform:none;letter-spacing:0">— edite o custo/mês (assinatura) e o CPL é calculado automaticamente</span>
       </div>
       <table class="leads-portal-tbl">
         <thead><tr>
           <th>Portal</th>
           <th class="r">Custo / Mês</th>
           <th class="r">Meses</th>
-          <th class="r">Total Leads</th>
+          <th class="r">Leads</th>
           <th class="r">Venda</th>
           <th class="r">Locação</th>
           <th class="r">Split V/L</th>
-          <th class="r">Total Investido</th>
+          <th class="r">Investido</th>
           <th class="r">CPL</th>
-          <th style="text-align:center">Volume relativo</th>
+          <th style="text-align:center">Volume</th>
         </tr></thead>
         <tbody id="leads-portal-tbody"></tbody>
         <tfoot id="leads-portal-tfoot"></tfoot>
@@ -2050,7 +2070,25 @@ input[type="checkbox"]{width:14px;height:14px;accent-color:var(--green-accent);c
       <div class="leads-section-title">📅 Evolução Mensal por Portal</div>
       <div style="overflow-x:auto"><table class="leads-evo-tbl" id="leads-evo-tbl"></table></div>
 
+      <div id="leads-periodic-wrap">
+        <div class="leads-section-title">📆 Análise Trimestral</div>
+        <table class="leads-portal-tbl" id="leads-tri-tbl"></table>
+        <div class="leads-section-title" style="margin-top:8px">📆 Análise Semestral</div>
+        <table class="leads-portal-tbl" id="leads-sem-tbl"></table>
+      </div>
+
       <div id="leads-footer" style="margin-top:12px;font-size:11px;color:var(--text-muted)"></div>
+    </div>
+
+    <!-- VIEW: CONVERTIDOS -->
+    <div id="leads-view-convertidos" style="display:none">
+      <div class="leads-kpi-bar" id="leads-conv-kpis" style="grid-template-columns:repeat(4,1fr)"></div>
+      <div style="display:flex;align-items:center;gap:12px;margin:18px 0 10px">
+        <div class="leads-section-title" style="margin:0">✅ Conversões por Mês e Portal</div>
+        <select class="fin-select" id="leads-conv-mes" onchange="leadsRenderConv()" style="min-width:130px"></select>
+      </div>
+      <p style="font-size:12px;color:var(--text-muted);margin-bottom:14px">Informe quantos leads desse portal e mês resultaram em negócio fechado. Os dados ficam salvos automaticamente.</p>
+      <table class="leads-portal-tbl" id="leads-conv-tbl"></table>
     </div>
   </div><!-- /page-leads -->
 
@@ -8604,6 +8642,7 @@ async function cnabBaixarRepRetorno(){
 // MÓDULO: FECHAMENTO DE LEADS
 // ══════════════════════════════════════════════════════
 var _leadsAll = [];
+var _leadsSubCurrent = 'analise';
 
 var LEADS_CORES = {
   'OLX':              '#6d28d9',
@@ -8618,6 +8657,8 @@ var LEADS_CORES = {
 var LEADS_PORTAIS = ['OLX','Imóvel Web','Chaves na Mão','Site Diferencial','Site Bicalho','WhatsApp','Telefone','Vira Real'];
 var LEADS_MESES_NUM = {JANEIRO:1,FEVEREIRO:2,MARCO:3,ABRIL:4,MAIO:5,JUNHO:6,JULHO:7,AGOSTO:8,SETEMBRO:9,OUTUBRO:10,NOVEMBRO:11,DEZEMBRO:12};
 var LEADS_MES_ABR = ['','Jan','Fev','Mar','Abr','Mai','Jun','Jul','Ago','Set','Out','Nov','Dez'];
+var LEADS_TRI_LABELS = ['','Q1 (Jan-Mar)','Q2 (Abr-Jun)','Q3 (Jul-Set)','Q4 (Out-Dez)'];
+var LEADS_SEM_LABELS = ['','H1 (Jan-Jun)','H2 (Jul-Dez)'];
 
 function leadsNormPortal(s){
   var n=String(s||'').normalize('NFD').replace(/[̀-ͯ]/g,'').trim().toUpperCase().replace(/\s+/g,' ');
@@ -8644,6 +8685,8 @@ function leadsSheetInfo(name){
 }
 function leadsGetCusto(p){ try{return parseFloat(JSON.parse(localStorage.getItem('leads_custos')||'{}')[p])||0;}catch(e){return 0;} }
 function leadsSaveCusto(p,v){ try{var c=JSON.parse(localStorage.getItem('leads_custos')||'{}');c[p]=parseFloat(v)||0;localStorage.setItem('leads_custos',JSON.stringify(c));}catch(e){} }
+function leadsGetConv(portal,mesKey){ try{return JSON.parse(localStorage.getItem('leads_conv')||'{}')[portal+'|'+mesKey]||{v:0,l:0};}catch(e){return {v:0,l:0};} }
+function leadsSaveConv(portal,mesKey,tipo,val){ try{var k=portal+'|'+mesKey,c=JSON.parse(localStorage.getItem('leads_conv')||'{}');if(!c[k])c[k]={v:0,l:0};c[k][tipo]=Math.max(0,parseInt(val)||0);localStorage.setItem('leads_conv',JSON.stringify(c));}catch(e){} }
 
 async function _xlsxAllSheets(buf){
   var zip=await JSZip.loadAsync(buf);
@@ -8684,23 +8727,71 @@ async function _xlsxAllSheets(buf){
 
 function leadsLoad(){
   var cached=localStorage.getItem('leads_data');
-  if(cached){try{_leadsAll=JSON.parse(cached);if(_leadsAll.length){leadsRender();return;}}catch(e){}}
+  if(cached){try{_leadsAll=JSON.parse(cached);if(_leadsAll.length){leadsShowDashboard();return;}}catch(e){}}
   document.getElementById('leads-empty').style.display='';
-  document.getElementById('leads-dashboard').style.display='none';
+  document.getElementById('leads-subtabs').style.display='none';
+  document.getElementById('leads-view-analise').style.display='none';
+  document.getElementById('leads-view-convertidos').style.display='none';
+}
+
+function leadsShowDashboard(){
+  document.getElementById('leads-empty').style.display='none';
+  document.getElementById('leads-subtabs').style.display='';
+  leadsGoSub(_leadsSubCurrent);
+}
+
+function leadsGoSub(view){
+  _leadsSubCurrent=view;
+  ['analise','convertidos'].forEach(function(v){
+    document.getElementById('leads-view-'+v).style.display=v===view?'':'none';
+    document.getElementById('leads-sub-'+v).classList.toggle('active',v===view);
+  });
+  if(view==='analise') leadsRenderAnalise();
+  if(view==='convertidos') leadsRenderConv();
+}
+
+function leadsChangePeriodo(){
+  var tipo=document.getElementById('leads-periodo-tipo').value;
+  var sel=document.getElementById('leads-periodo-val');
+  sel.style.display=tipo==='all'?'none':'';
+  sel.innerHTML='';
+  var meses=[...new Set(_leadsAll.map(function(r){return r.mes;}))].sort();
+  var mesLabels={};_leadsAll.forEach(function(r){mesLabels[r.mes]=r.mesLabel;});
+  if(tipo==='mes'){
+    meses.forEach(function(m){sel.innerHTML+='<option value="'+m+'">'+mesLabels[m]+'</option>';});
+  } else if(tipo==='tri'){
+    var periodos={};
+    meses.forEach(function(m){var a=Math.floor(m/100),mo=m%100,q=Math.ceil(mo/3),k=a+'Q'+q;if(!periodos[k])periodos[k]={a:a,q:q,label:'Q'+q+' '+a};});
+    Object.values(periodos).sort(function(a,b){return a.a*10+a.q-(b.a*10+b.q);}).forEach(function(p){sel.innerHTML+='<option value="'+p.a+'|'+p.q+'">'+p.label+'</option>';});
+  } else if(tipo==='sem'){
+    var sems={};
+    meses.forEach(function(m){var a=Math.floor(m/100),mo=m%100,h=mo<=6?1:2,k=a+'H'+h;if(!sems[k])sems[k]={a:a,h:h,label:'H'+h+' '+a};});
+    Object.values(sems).sort(function(a,b){return a.a*10+a.h-(b.a*10+b.h);}).forEach(function(p){sel.innerHTML+='<option value="'+p.a+'|'+p.h+'">'+p.label+'</option>';});
+  }
+  leadsRenderAnalise();
+}
+
+function leadsFilterData(){
+  var tipo=document.getElementById('leads-periodo-tipo').value;
+  var val=document.getElementById('leads-periodo-val').value;
+  if(tipo==='all'||!val) return _leadsAll;
+  if(tipo==='mes') return _leadsAll.filter(function(r){return r.mes===parseInt(val);});
+  if(tipo==='tri'){var parts=val.split('|'),a=parseInt(parts[0]),q=parseInt(parts[1]),ms=[q*3-2,q*3-1,q*3];return _leadsAll.filter(function(r){var mo=r.mes%100;return Math.floor(r.mes/100)===a&&ms.indexOf(mo)!==-1;});}
+  if(tipo==='sem'){var parts2=val.split('|'),a2=parseInt(parts2[0]),h=parseInt(parts2[1]),ms1=h===1?[1,2,3,4,5,6]:[7,8,9,10,11,12];return _leadsAll.filter(function(r){return Math.floor(r.mes/100)===a2&&ms1.indexOf(r.mes%100)!==-1;});}
+  return _leadsAll;
 }
 
 async function leadsHandleXLSX(file){
   if(!file)return;
   try{
-    toast('⏳','Lendo planilha de leads...','info');
+    toast('⏳','Lendo planilha...','info');
     var allSheets=await _xlsxAllSheets(await file.arrayBuffer());
-    var records=[];
+    var novos=[], mesesNovos=new Set();
     allSheets.forEach(function(sheet){
       var info=leadsSheetInfo(sheet.name);
       if(!info.valid)return;
       var rows=sheet.rows;
-      // Detect header row and column positions
-      var hdrRow=1,colP=4,colPr=5,colC=6;
+      var hdrRow=1,colP=4,colPr=5;
       for(var r=1;r<=Math.min(sheet.maxRow,5);r++){
         var rd=rows[r];if(!rd)continue;
         var found=false;
@@ -8708,45 +8799,83 @@ async function leadsHandleXLSX(file){
           var v=String(rd[c]||'').normalize('NFD').replace(/[̀-ͯ]/g,'').trim().toUpperCase();
           if(v==='ORIGEM'||v==='PORTAL'){colP=+c;found=true;}
           if(v.indexOf('PRETEN')!==-1)colPr=+c;
-          if(v==='CORRETOR')colC=+c;
         }
-        // header row detected if it has REFERÊNCIA/CÓDIGO/COLUNA keywords
         var rowVals=Object.values(rd).map(function(v){return String(v||'').toUpperCase();});
-        if(found||rowVals.some(function(v){return v.indexOf('REFER')!==-1||v.indexOf('CODIGO')!==-1||v.indexOf('COLUNA')!==-1;})){
-          hdrRow=r;break;
-        }
+        if(found||rowVals.some(function(v){return v.indexOf('REFER')!==-1||v.indexOf('CODIGO')!==-1||v.indexOf('COLUNA')!==-1;})){hdrRow=r;break;}
       }
       for(var r2=hdrRow+1;r2<=sheet.maxRow;r2++){
         var rd2=rows[r2];if(!rd2)continue;
         var portal=leadsNormPortal(rd2[colP]||'');
         if(!portal)continue;
         var pret=leadsNormPret(rd2[colPr]||'')||'N/A';
-        records.push({mes:info.key,mesLabel:info.label,portal:portal,pret:pret});
+        novos.push({mes:info.key,mesLabel:info.label,portal:portal,pret:pret});
+        mesesNovos.add(info.key);
       }
     });
-    _leadsAll=records;
-    localStorage.setItem('leads_data',JSON.stringify(records));
+    if(!novos.length){toast('⚠️','Nenhum lead encontrado na planilha.','warn');return;}
+    // Merge: remove existing data for months in the new file, keep everything else
+    var mantidos=_leadsAll.filter(function(r){return !mesesNovos.has(r.mes);});
+    _leadsAll=mantidos.concat(novos);
+    localStorage.setItem('leads_data',JSON.stringify(_leadsAll));
     document.getElementById('leads-file-input').value='';
-    toast('✅',records.length+' leads carregados!','ok');
-    leadsRender();
+    var mesLabelsNovos=[...mesesNovos].sort().map(function(m){
+      var r=novos.find(function(x){return x.mes===m;}); return r?r.mesLabel:m;
+    });
+    toast('✅',novos.length+' leads de '+mesLabelsNovos.join(', ')+' adicionados. Histórico preservado.','ok');
+    leadsShowDashboard();
   }catch(e){console.error(e);toast('❌','Erro: '+e.message,'error');}
 }
 
-function leadsRender(){
-  if(!_leadsAll.length){document.getElementById('leads-empty').style.display='';document.getElementById('leads-dashboard').style.display='none';return;}
-  document.getElementById('leads-empty').style.display='none';
-  document.getElementById('leads-dashboard').style.display='';
-
-  // Aggregate
+function _leadsAggregate(data){
   var pm={};
-  _leadsAll.forEach(function(r){
+  data.forEach(function(r){
     if(!pm[r.portal])pm[r.portal]={tot:0,v:0,l:0,meses:new Set()};
     pm[r.portal].tot++;
     if(r.pret==='Venda')pm[r.portal].v++;
     else if(r.pret==='Locação')pm[r.portal].l++;
     pm[r.portal].meses.add(r.mes);
   });
-  var totalAll=_leadsAll.length;
+  return pm;
+}
+
+function _leadsPortalTable(pm, data, showCostInput){
+  var totalAll=data.length;
+  var portaisAtivos=LEADS_PORTAIS.filter(function(p){return pm[p];});
+  Object.keys(pm).forEach(function(p){if(portaisAtivos.indexOf(p)===-1)portaisAtivos.push(p);});
+  var maxTot=Math.max.apply(null,portaisAtivos.map(function(p){return pm[p]?pm[p].tot:1;}));
+  var tTot=0,tV=0,tL=0,tInv=0;
+  var tbody=portaisAtivos.map(function(p){
+    var d=pm[p],c=leadsGetCusto(p),nM=d.meses.size,inv=c*nM,cpl=inv>0&&d.tot>0?inv/d.tot:0;
+    var cor=LEADS_CORES[p]||'#888';
+    var pctVp=d.tot>0?d.v/d.tot*100:0,pctLp=100-pctVp,barW=Math.round(d.tot/maxTot*100);
+    tTot+=d.tot;tV+=d.v;tL+=d.l;tInv+=inv;
+    var costCell=showCostInput
+      ?'<input class="leads-cost-input" type="number" min="0" step="100" value="'+(c||'')+'" placeholder="0" onchange="leadsSaveCusto(\''+p+'\',this.value);leadsRenderAnalise()" title="Custo mensal">'
+      :fmtBRL(c);
+    var cplHtml=c===0?'<span style="color:var(--text-muted);font-size:11px">— gratuito</span>'
+      :'<span class="leads-cpl '+(cpl<100?'leads-cpl-ok':cpl<300?'leads-cpl-mid':'leads-cpl-high')+'">'+fmtBRL(cpl)+'</span>';
+    return '<tr>'
+      +'<td><div class="leads-portal-name"><div class="leads-dot" style="background:'+cor+'"></div>'+p+'</div></td>'
+      +'<td class="r">'+costCell+'</td>'
+      +'<td class="r">'+nM+'</td>'
+      +'<td class="r"><strong>'+d.tot+'</strong></td>'
+      +'<td class="r">'+d.v+'</td><td class="r">'+d.l+'</td>'
+      +'<td class="r" style="white-space:nowrap"><div class="leads-split"><div class="leads-split-v" style="width:'+pctVp.toFixed(0)+'%"></div><div class="leads-split-l" style="width:'+pctLp.toFixed(0)+'%"></div></div> <span style="font-size:10px;color:var(--text-muted)">'+pctVp.toFixed(0)+'%V</span></td>'
+      +'<td class="r">'+(inv>0?fmtBRL(inv):'—')+'</td>'
+      +'<td class="r">'+cplHtml+'</td>'
+      +'<td style="text-align:center"><div class="leads-vol-wrap"><div class="leads-vol-fill" style="width:'+barW+'%;background:'+cor+'"></div></div></td>'
+      +'</tr>';
+  }).join('');
+  var cplTot=tInv>0&&tTot>0?'<span class="leads-cpl leads-cpl-mid">'+fmtBRL(tInv/tTot)+'</span>':'—';
+  return {tbody:tbody, tfoot:'<tr style="background:#f1f5f9;font-weight:700;border-top:2px solid var(--navy)"><td><strong>TOTAL</strong></td><td></td><td></td><td class="r"><strong>'+tTot+'</strong></td><td class="r">'+tV+'</td><td class="r">'+tL+'</td><td></td><td class="r">'+fmtBRL(tInv)+'</td><td class="r">'+cplTot+'</td><td></td></tr>', portaisAtivos:portaisAtivos, tTot:tTot, tInv:tInv};
+}
+
+function leadsRenderAnalise(){
+  if(!_leadsAll.length) return;
+  var data=leadsFilterData();
+  var tipo=document.getElementById('leads-periodo-tipo').value;
+  var pm=_leadsAggregate(data);
+  var totalAll=data.length;
 
   // KPIs
   var totInv=0,totV=0,bestP='—',bestCpl=Infinity;
@@ -8755,76 +8884,129 @@ function leadsRender(){
     if(c>0&&pm[p].tot>0){var cpl=inv/pm[p].tot;if(cpl<bestCpl){bestCpl=cpl;bestP=p;}}
   });
   var cplMedio=totInv>0&&totalAll>0?totInv/totalAll:0;
-  var pctV=totalAll>0?(totV/totalAll*100):0;
+  var pctV=totalAll>0?totV/totalAll*100:0;
+  var periodoLabel=tipo==='all'?'no período completo':'no período selecionado';
   document.getElementById('leads-kpis').innerHTML=
-    _lKpi('📋','Total de Leads',totalAll.toLocaleString('pt-BR'),'no período completo')+
-    _lKpi('💰','Total Investido',fmtBRL(totInv),'em portais pagos')+
-    _lKpi('🎯','CPL Médio Geral',totInv>0?fmtBRL(cplMedio):'—','custo médio por lead')+
+    _lKpi('📋','Total de Leads',totalAll.toLocaleString('pt-BR'),periodoLabel)+
+    _lKpi('💰','Total Investido',fmtBRL(totInv),'portais pagos')+
+    _lKpi('🎯','CPL Médio',totInv>0?fmtBRL(cplMedio):'—','custo por lead')+
     _lKpi('🏆','Melhor Portal',bestP,bestCpl<Infinity?'CPL: '+fmtBRL(bestCpl):'configure os custos')+
-    _lKpi('🏠','Leads de Venda',pctV.toFixed(1)+'%',totV+' de '+totalAll+' leads');
+    _lKpi('🏠','Leads de Venda',pctV.toFixed(1)+'%',totV+' de '+totalAll);
 
   // Portal table
-  var portaisAtivos=LEADS_PORTAIS.filter(function(p){return pm[p];});
-  Object.keys(pm).forEach(function(p){if(portaisAtivos.indexOf(p)===-1)portaisAtivos.push(p);});
-  var maxTot=Math.max.apply(null,portaisAtivos.map(function(p){return pm[p]?pm[p].tot:0;}));
-  var tTot=0,tV=0,tL=0,tInv=0;
-  var tbody=portaisAtivos.map(function(p){
-    var d=pm[p],c=leadsGetCusto(p),nM=d.meses.size,inv=c*nM,cpl=inv>0&&d.tot>0?inv/d.tot:0;
-    var cor=LEADS_CORES[p]||'#888';
-    var pctVp=d.tot>0?d.v/d.tot*100:0,pctLp=100-pctVp;
-    var barW=Math.round(d.tot/maxTot*100);
-    tTot+=d.tot;tV+=d.v;tL+=d.l;tInv+=inv;
-    var cplHtml=c===0?'<span style="color:var(--text-muted);font-size:11px">— gratuito</span>'
-      :'<span class="leads-cpl '+(cpl<100?'leads-cpl-ok':cpl<300?'leads-cpl-mid':'leads-cpl-high')+'">'+fmtBRL(cpl)+'</span>';
-    return '<tr>'
-      +'<td><div class="leads-portal-name"><div class="leads-dot" style="background:'+cor+'"></div>'+p+'</div></td>'
-      +'<td class="r"><input class="leads-cost-input" type="number" min="0" step="100" value="'+(c||'')+'" placeholder="0" onchange="leadsSaveCusto(\''+p+'\',this.value);leadsRender()" title="Custo mensal (assinatura)"></td>'
-      +'<td class="r">'+nM+'</td>'
-      +'<td class="r"><strong>'+d.tot+'</strong></td>'
-      +'<td class="r">'+d.v+'</td>'
-      +'<td class="r">'+d.l+'</td>'
-      +'<td class="r" style="white-space:nowrap">'
-        +'<div class="leads-split"><div class="leads-split-v" style="width:'+pctVp.toFixed(0)+'%"></div><div class="leads-split-l" style="width:'+pctLp.toFixed(0)+'%"></div></div>'
-        +' <span style="font-size:10px;color:var(--text-muted)">'+pctVp.toFixed(0)+'%V</span>'
-      +'</td>'
-      +'<td class="r">'+(inv>0?fmtBRL(inv):'—')+'</td>'
-      +'<td class="r">'+cplHtml+'</td>'
-      +'<td style="text-align:center"><div class="leads-vol-wrap"><div class="leads-vol-fill" style="width:'+barW+'%;background:'+cor+'"></div></div></td>'
-      +'</tr>';
-  }).join('');
-  var cplTotalHtml=tInv>0&&tTot>0?'<span class="leads-cpl leads-cpl-mid">'+fmtBRL(tInv/tTot)+'</span>':'—';
-  document.getElementById('leads-portal-tbody').innerHTML=tbody;
-  document.getElementById('leads-portal-tfoot').innerHTML='<tr style="background:#f1f5f9;font-weight:700;border-top:2px solid var(--navy)">'
-    +'<td><strong>TOTAL</strong></td><td></td><td></td>'
-    +'<td class="r"><strong>'+tTot+'</strong></td>'
-    +'<td class="r">'+tV+'</td><td class="r">'+tL+'</td><td></td>'
-    +'<td class="r">'+fmtBRL(tInv)+'</td>'
-    +'<td class="r">'+cplTotalHtml+'</td><td></td></tr>';
+  var showInput = tipo==='all'||tipo==='mes';
+  var tbl=_leadsPortalTable(pm,data,showInput);
+  document.getElementById('leads-portal-tbody').innerHTML=tbl.tbody;
+  document.getElementById('leads-portal-tfoot').innerHTML=tbl.tfoot;
 
-  // Monthly evolution table
-  var meses=[...new Set(_leadsAll.map(function(r){return r.mes;}))].sort();
-  var mesLabels={};_leadsAll.forEach(function(r){mesLabels[r.mes]=r.mesLabel;});
-  // Pre-compute matrix
+  // Evolution table
+  var meses=[...new Set(data.map(function(r){return r.mes;}))].sort();
+  var mesLabels={};data.forEach(function(r){mesLabels[r.mes]=r.mesLabel;});
   var matrix={};
-  _leadsAll.forEach(function(r){if(!matrix[r.mes])matrix[r.mes]={};matrix[r.mes][r.portal]=(matrix[r.mes][r.portal]||0)+1;});
-  var mesRowTotals={};
-  meses.forEach(function(m){mesRowTotals[m]=_leadsAll.filter(function(r){return r.mes===m;}).length;});
-
-  var hdr='<tr><th>Mês</th>'+portaisAtivos.map(function(p){var cor=LEADS_CORES[p]||'#888';return '<th><span style="display:inline-block;width:7px;height:7px;border-radius:50%;background:'+cor+';margin-right:4px"></span>'+p+'</th>';}).join('')+'<th>Total</th></tr>';
-  var rows=meses.map(function(m){
+  data.forEach(function(r){if(!matrix[r.mes])matrix[r.mes]={};matrix[r.mes][r.portal]=(matrix[r.mes][r.portal]||0)+1;});
+  var portaisAtivos=tbl.portaisAtivos;
+  var hdr='<tr><th>Mês</th>'+portaisAtivos.map(function(p){var cor=LEADS_CORES[p]||'#888';return '<th><span style="display:inline-block;width:7px;height:7px;border-radius:50%;background:'+cor+';margin-right:3px"></span>'+p+'</th>';}).join('')+'<th>Total</th></tr>';
+  var evoRows=meses.map(function(m){
+    var rowTot=data.filter(function(r){return r.mes===m;}).length;
     var rowMax=Math.max.apply(null,portaisAtivos.map(function(p){return (matrix[m]&&matrix[m][p])||0;}));
-    var cells=portaisAtivos.map(function(p){
-      var n=(matrix[m]&&matrix[m][p])||0;
-      var isPeak=n>0&&n===rowMax;
-      return '<td'+(isPeak?' class="leads-evo-peak"':'')+'>'+(n||'—')+'</td>';
-    }).join('');
-    return '<tr><td>'+mesLabels[m]+'</td>'+cells+'<td><strong>'+mesRowTotals[m]+'</strong></td></tr>';
+    return '<tr><td>'+mesLabels[m]+'</td>'+portaisAtivos.map(function(p){var n=(matrix[m]&&matrix[m][p])||0;return '<td'+(n>0&&n===rowMax?' class="leads-evo-peak"':'')+'>'+(n||'—')+'</td>';}).join('')+'<td><strong>'+rowTot+'</strong></td></tr>';
   }).join('');
   var totRow='<tr><td>TOTAL</td>'+portaisAtivos.map(function(p){return '<td>'+(pm[p]?pm[p].tot:'—')+'</td>';}).join('')+'<td><strong>'+totalAll+'</strong></td></tr>';
-  document.getElementById('leads-evo-tbl').innerHTML=hdr+rows+totRow;
+  document.getElementById('leads-evo-tbl').innerHTML=hdr+evoRows+totRow;
 
-  var mesesStr=meses.map(function(m){return mesLabels[m];}).join(', ');
-  document.getElementById('leads-footer').textContent=totalAll+' leads · '+meses.length+' meses ('+mesesStr+') · Importado via planilha Google Sheets';
+  // Periodic analysis (shown only in "all" view)
+  document.getElementById('leads-periodic-wrap').style.display=tipo==='all'?'':'none';
+  if(tipo==='all') _leadsRenderPeriodic();
+
+  var allMesLabels=[...new Set(_leadsAll.map(function(r){return r.mes;}))].sort().map(function(m){var x=_leadsAll.find(function(r){return r.mes===m;});return x?x.mesLabel:'';});
+  document.getElementById('leads-footer').textContent=_leadsAll.length+' leads totais · '+allMesLabels.join(', ')+' · Importação mensal incremental';
+}
+
+function _leadsRenderPeriodic(){
+  // Build quarter and semester groups from ALL data
+  var mesLabels={};_leadsAll.forEach(function(r){mesLabels[r.mes]=r.mesLabel;});
+  var triMap={},semMap={};
+  _leadsAll.forEach(function(r){
+    var a=Math.floor(r.mes/100),mo=r.mes%100;
+    var q=Math.ceil(mo/3),triKey=a+'Q'+q;
+    if(!triMap[triKey])triMap[triKey]={label:'Q'+q+'/'+String(a).slice(-2),tot:0,v:0,meses:new Set(),inv:0};
+    triMap[triKey].tot++;if(r.pret==='Venda')triMap[triKey].v++;triMap[triKey].meses.add(r.mes);
+    var h=mo<=6?1:2,semKey=a+'H'+h;
+    if(!semMap[semKey])semMap[semKey]={label:'H'+h+'/'+String(a).slice(-2),tot:0,v:0,meses:new Set(),inv:0};
+    semMap[semKey].tot++;if(r.pret==='Venda')semMap[semKey].v++;semMap[semKey].meses.add(r.mes);
+  });
+  // Compute investment per group (sum of custo*months active per portal per group)
+  function calcInv(groupMeses){
+    var totInv=0;
+    LEADS_PORTAIS.forEach(function(p){
+      var c=leadsGetCusto(p);if(!c)return;
+      var mesesP=[...groupMeses].filter(function(m){return _leadsAll.some(function(r){return r.mes===m&&r.portal===p;});});
+      totInv+=c*mesesP.length;
+    });
+    return totInv;
+  }
+  function periodTbl(map){
+    var keys=Object.keys(map).sort();
+    var hdr='<thead><tr><th>Período</th><th class="r">Leads</th><th class="r">Venda</th><th class="r">% Venda</th><th class="r">Meses</th><th class="r">Investido</th><th class="r">CPL</th></tr></thead>';
+    var rows=keys.map(function(k){
+      var d=map[k],inv=calcInv(d.meses),cpl=inv>0&&d.tot>0?inv/d.tot:0;
+      var pctV=d.tot>0?d.v/d.tot*100:0;
+      var cplHtml=inv===0?'<span style="color:var(--text-muted)">—</span>':'<span class="leads-cpl '+(cpl<100?'leads-cpl-ok':cpl<300?'leads-cpl-mid':'leads-cpl-high')+'">'+fmtBRL(cpl)+'</span>';
+      return '<tr><td><strong>'+d.label+'</strong></td><td class="r">'+d.tot+'</td><td class="r">'+d.v+'</td><td class="r">'+pctV.toFixed(1)+'%</td><td class="r">'+d.meses.size+'</td><td class="r">'+fmtBRL(inv)+'</td><td class="r">'+cplHtml+'</td></tr>';
+    }).join('');
+    return hdr+'<tbody>'+rows+'</tbody>';
+  }
+  document.getElementById('leads-tri-tbl').innerHTML=periodTbl(triMap);
+  document.getElementById('leads-sem-tbl').innerHTML=periodTbl(semMap);
+}
+
+function leadsRenderConv(){
+  if(!_leadsAll.length)return;
+  var meses=[...new Set(_leadsAll.map(function(r){return r.mes;}))].sort().reverse();
+  var mesLabels={};_leadsAll.forEach(function(r){mesLabels[r.mes]=r.mesLabel;});
+  // Populate month selector
+  var sel=document.getElementById('leads-conv-mes');
+  var curVal=sel.value;
+  sel.innerHTML=meses.map(function(m){return '<option value="'+m+'">'+mesLabels[m]+'</option>';}).join('');
+  if(curVal&&meses.indexOf(parseInt(curVal))!==-1)sel.value=curVal;
+  var mesSel=parseInt(sel.value)||meses[0];
+  var dataMes=_leadsAll.filter(function(r){return r.mes===mesSel;});
+  var pmMes=_leadsAggregate(dataMes);
+  var portaisAtivos=LEADS_PORTAIS.filter(function(p){return pmMes[p];});
+
+  // Global conversion KPIs (all months)
+  var totalLeads=_leadsAll.length,totalConvV=0,totalConvL=0,totalInvAll=0;
+  try{var convAll=JSON.parse(localStorage.getItem('leads_conv')||'{}');Object.values(convAll).forEach(function(x){totalConvV+=x.v||0;totalConvL+=x.l||0;});}catch(e){}
+  LEADS_PORTAIS.forEach(function(p){var c=leadsGetCusto(p);if(!c)return;var nm=[...new Set(_leadsAll.filter(function(r){return r.portal===p;}).map(function(r){return r.mes;}))].length;totalInvAll+=c*nm;});
+  var totalConv=totalConvV+totalConvL;
+  var txConv=totalLeads>0?totalConv/totalLeads*100:0;
+  var custoConv=totalInvAll>0&&totalConv>0?totalInvAll/totalConv:0;
+  document.getElementById('leads-conv-kpis').innerHTML=
+    _lKpi('📋','Total Leads',totalLeads.toLocaleString('pt-BR'),'histórico completo')+
+    _lKpi('✅','Convertidos',totalConv,''+totalConvV+' vendas · '+totalConvL+' locações')+
+    _lKpi('📈','Taxa de Conversão',txConv.toFixed(1)+'%','leads que viraram negócio')+
+    _lKpi('💰','Custo / Conversão',custoConv>0?fmtBRL(custoConv):'—','investimento por negócio fechado');
+
+  // Table for selected month
+  var hdr='<thead><tr><th>Portal</th><th class="r">Leads no Mês</th><th class="r">Conv. Venda</th><th class="r">Conv. Locação</th><th class="r">Taxa Conv.</th><th class="r">Custo/Conv.</th></tr></thead>';
+  var rows=portaisAtivos.map(function(p){
+    var d=pmMes[p],conv=leadsGetConv(p,mesSel);
+    var c=leadsGetCusto(p),inv=c*1; // 1 month
+    var totConv=(conv.v||0)+(conv.l||0);
+    var tx=d.tot>0?totConv/d.tot*100:0;
+    var cc=inv>0&&totConv>0?fmtBRL(inv/totConv):'—';
+    var cor=LEADS_CORES[p]||'#888';
+    return '<tr>'
+      +'<td><div class="leads-portal-name"><div class="leads-dot" style="background:'+cor+'"></div>'+p+'</div></td>'
+      +'<td class="r"><strong>'+d.tot+'</strong></td>'
+      +'<td class="r"><input class="leads-cost-input" type="number" min="0" max="'+d.tot+'" step="1" value="'+(conv.v||'')+'" placeholder="0" style="width:80px" onchange="leadsSaveConv(\''+p+'\','+mesSel+',\'v\',this.value);leadsRenderConv()"></td>'
+      +'<td class="r"><input class="leads-cost-input" type="number" min="0" max="'+d.tot+'" step="1" value="'+(conv.l||'')+'" placeholder="0" style="width:80px" onchange="leadsSaveConv(\''+p+'\','+mesSel+',\'l\',this.value);leadsRenderConv()"></td>'
+      +'<td class="r">'+(totConv>0?'<span class="leads-cpl leads-cpl-ok">'+tx.toFixed(1)+'%</span>':'<span style="color:var(--text-muted)">—</span>')+'</td>'
+      +'<td class="r">'+cc+'</td>'
+      +'</tr>';
+  }).join('');
+  if(!portaisAtivos.length)rows='<tr><td colspan="6" style="text-align:center;padding:20px;color:var(--text-muted)">Nenhum lead registrado neste mês.</td></tr>';
+  document.getElementById('leads-conv-tbl').innerHTML=hdr+'<tbody>'+rows+'</tbody>';
 }
 
 function _lKpi(icon,lbl,val,sub){
