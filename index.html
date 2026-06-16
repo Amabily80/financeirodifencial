@@ -4043,7 +4043,7 @@ async function updateVencidos(){
 async function cpLoad(){
   if(!sb){ cpRender(); return; }
   try{
-    var q = sb.from('contas_pagar').select('*').order('vencimento');
+    var q = sb.from('contas_pagar').select('*').order('vencimento').limit(9999);
     var fStatus = document.getElementById('cp-f-status')?.value;
     var fProj   = document.getElementById('cp-f-proj')?.value;
     var fCat    = document.getElementById('cp-f-cat')?.value;
@@ -4282,7 +4282,7 @@ async function cpDelete(id){
 async function crLoad(){
   if(!sb){ crRender(); return; }
   try{
-    var q = sb.from('contas_receber').select('*').order('vencimento');
+    var q = sb.from('contas_receber').select('*').order('vencimento').limit(9999);
     var fStatus = document.getElementById('cr-f-status')?.value;
     var fProj   = document.getElementById('cr-f-proj')?.value;
     var fCat    = document.getElementById('cr-f-cat')?.value;
@@ -5480,7 +5480,7 @@ async function updateVencidos(){
 async function cpLoad(){
   if(!sb){ cpRender(); return; }
   try{
-    var q = sb.from('contas_pagar').select('*').order('vencimento');
+    var q = sb.from('contas_pagar').select('*').order('vencimento').limit(9999);
     var fStatus = document.getElementById('cp-f-status')?.value;
     var fProj   = document.getElementById('cp-f-proj')?.value;
     var fCat    = document.getElementById('cp-f-cat')?.value;
@@ -5646,7 +5646,7 @@ async function cpDelete(id){
 async function crLoad(){
   if(!sb){ crRender(); return; }
   try{
-    var q = sb.from('contas_receber').select('*').order('vencimento');
+    var q = sb.from('contas_receber').select('*').order('vencimento').limit(9999);
     var fStatus = document.getElementById('cr-f-status')?.value;
     var fProj   = document.getElementById('cr-f-proj')?.value;
     var fCat    = document.getElementById('cr-f-cat')?.value;
