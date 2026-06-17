@@ -8669,6 +8669,8 @@ async function cnabBaixarRepRetorno(){
 // MÓDULO: FECHAMENTO DE LEADS
 // ══════════════════════════════════════════════════════
 var _leadsAll = [];
+var _leadsCustosMap = {};
+var _leadsConvMap = {};
 var _leadsSubCurrent = 'dashboard';
 
 var LEADS_CORES = {
@@ -8710,10 +8712,20 @@ function leadsSheetInfo(name){
   var m=LEADS_MESES_NUM[norm[0]]||0, a=parseInt(norm[1])||0;
   return {key:a*100+m, label:LEADS_MES_ABR[m]+'/'+(String(a).slice(-2)), valid:m>0&&a>2000};
 }
-function leadsGetCusto(p){ try{return parseFloat(JSON.parse(localStorage.getItem('leads_custos')||'{}')[p])||0;}catch(e){return 0;} }
-function leadsSaveCusto(p,v){ try{var c=JSON.parse(localStorage.getItem('leads_custos')||'{}');c[p]=parseFloat(v)||0;localStorage.setItem('leads_custos',JSON.stringify(c));}catch(e){} }
-function leadsGetConv(portal,mesKey){ try{return JSON.parse(localStorage.getItem('leads_conv')||'{}')[portal+'|'+mesKey]||{v:0,l:0};}catch(e){return {v:0,l:0};} }
-function leadsSaveConv(portal,mesKey,tipo,val){ try{var k=portal+'|'+mesKey,c=JSON.parse(localStorage.getItem('leads_conv')||'{}');if(!c[k])c[k]={v:0,l:0};c[k][tipo]=Math.max(0,parseInt(val)||0);localStorage.setItem('leads_conv',JSON.stringify(c));}catch(e){} }
+function leadsGetCusto(p){ return _leadsCustosMap[p]||0; }
+async function leadsSaveCusto(p,v){
+  var val=parseFloat(v)||0;
+  _leadsCustosMap[p]=val;
+  if(sb) sb.from('leads_custos').upsert({portal:p,custo:val,atualizado_em:new Date().toISOString()},{onConflict:'portal'}).then(function(){});
+}
+function leadsGetConv(portal,mesKey){ return _leadsConvMap[portal+'|'+mesKey]||{v:0,l:0}; }
+async function leadsSaveConv(portal,mesKey,tipo,val){
+  var k=portal+'|'+mesKey;
+  if(!_leadsConvMap[k])_leadsConvMap[k]={v:0,l:0};
+  _leadsConvMap[k][tipo]=Math.max(0,parseInt(val)||0);
+  var e=_leadsConvMap[k];
+  if(sb) sb.from('leads_convertidos').upsert({portal:portal,mes_key:mesKey,vendas:e.v,locacoes:e.l,atualizado_em:new Date().toISOString()},{onConflict:'portal,mes_key'}).then(function(){});
+}
 
 async function _xlsxAllSheets(buf){
   var zip=await JSZip.loadAsync(buf);
@@ -8752,14 +8764,40 @@ async function _xlsxAllSheets(buf){
   return result;
 }
 
-function leadsLoad(){
-  var cached=localStorage.getItem('leads_data');
-  if(cached){try{_leadsAll=JSON.parse(cached);if(_leadsAll.length){leadsShowDashboard();return;}}catch(e){}}
-  document.getElementById('leads-empty').style.display='';
-  document.getElementById('leads-subtabs').style.display='none';
-  document.getElementById('leads-view-dashboard').style.display='none';
-  document.getElementById('leads-view-analise').style.display='none';
-  document.getElementById('leads-view-convertidos').style.display='none';
+async function leadsLoad(){
+  if(sb){
+    try{
+      var results=await Promise.all([
+        sb.from('leads_dados').select('mes,mes_label,portal,pret').order('mes').limit(99999),
+        sb.from('leads_custos').select('portal,custo'),
+        sb.from('leads_convertidos').select('portal,mes_key,vendas,locacoes')
+      ]);
+      _leadsAll=results[0].data||[];
+      _leadsCustosMap={};
+      (results[1].data||[]).forEach(function(r){_leadsCustosMap[r.portal]=parseFloat(r.custo)||0;});
+      // migrar custos do localStorage se Supabase ainda estiver vazio
+      if(!(results[1].data||[]).length){
+        try{var lc=JSON.parse(localStorage.getItem('leads_custos')||'{}');Object.keys(lc).forEach(function(p){_leadsCustosMap[p]=parseFloat(lc[p])||0;});}catch(e2){}
+      }
+      _leadsConvMap={};
+      (results[2].data||[]).forEach(function(r){_leadsConvMap[r.portal+'|'+r.mes_key]={v:r.vendas||0,l:r.locacoes||0};});
+    }catch(e){
+      // fallback localStorage
+      try{_leadsAll=JSON.parse(localStorage.getItem('leads_data')||'[]');}catch(e2){}
+      try{var lc2=JSON.parse(localStorage.getItem('leads_custos')||'{}');Object.keys(lc2).forEach(function(p){_leadsCustosMap[p]=parseFloat(lc2[p])||0;});}catch(e3){}
+    }
+  } else {
+    try{_leadsAll=JSON.parse(localStorage.getItem('leads_data')||'[]');}catch(e){}
+    try{var lc3=JSON.parse(localStorage.getItem('leads_custos')||'{}');Object.keys(lc3).forEach(function(p){_leadsCustosMap[p]=parseFloat(lc3[p])||0;});}catch(e){}
+  }
+  if(_leadsAll.length){leadsShowDashboard();}
+  else{
+    document.getElementById('leads-empty').style.display='';
+    document.getElementById('leads-subtabs').style.display='none';
+    document.getElementById('leads-view-dashboard').style.display='none';
+    document.getElementById('leads-view-analise').style.display='none';
+    document.getElementById('leads-view-convertidos').style.display='none';
+  }
 }
 
 function leadsShowDashboard(){
@@ -8842,10 +8880,19 @@ async function leadsHandleXLSX(file){
       }
     });
     if(!novos.length){toast('⚠️','Nenhum lead encontrado na planilha.','warn');return;}
-    // Merge: remove existing data for months in the new file, keep everything else
-    var mantidos=_leadsAll.filter(function(r){return !mesesNovos.has(r.mes);});
-    _leadsAll=mantidos.concat(novos);
-    localStorage.setItem('leads_data',JSON.stringify(_leadsAll));
+    var mesesArr=[...mesesNovos];
+    if(sb){
+      toast('⏳','Salvando no banco...','info');
+      var {error:delErr}=await sb.from('leads_dados').delete().in('mes',mesesArr);
+      if(delErr) throw delErr;
+      var BATCH=500;
+      for(var bi=0;bi<novos.length;bi+=BATCH){
+        var batch=novos.slice(bi,bi+BATCH).map(function(r){return {mes:r.mes,mes_label:r.mesLabel,portal:r.portal,pret:r.pret};});
+        var {error:insErr}=await sb.from('leads_dados').insert(batch);
+        if(insErr) throw insErr;
+      }
+    }
+    _leadsAll=_leadsAll.filter(function(r){return !mesesNovos.has(r.mes);}).concat(novos);
     document.getElementById('leads-file-input').value='';
     var mesLabelsNovos=[...mesesNovos].sort().map(function(m){
       var r=novos.find(function(x){return x.mes===m;}); return r?r.mesLabel:m;
@@ -9005,7 +9052,7 @@ function leadsRenderConv(){
 
   // Global conversion KPIs (all months)
   var totalLeads=_leadsAll.length,totalConvV=0,totalConvL=0,totalInvAll=0;
-  try{var convAll=JSON.parse(localStorage.getItem('leads_conv')||'{}');Object.values(convAll).forEach(function(x){totalConvV+=x.v||0;totalConvL+=x.l||0;});}catch(e){}
+  Object.values(_leadsConvMap).forEach(function(x){totalConvV+=x.v||0;totalConvL+=x.l||0;});
   LEADS_PORTAIS.forEach(function(p){var c=leadsGetCusto(p);if(!c)return;var nm=[...new Set(_leadsAll.filter(function(r){return r.portal===p;}).map(function(r){return r.mes;}))].length;totalInvAll+=c*nm;});
   var totalConv=totalConvV+totalConvL;
   var txConv=totalLeads>0?totalConv/totalLeads*100:0;
@@ -9046,7 +9093,7 @@ function leadsRenderDashboard(){
 
   // KPIs
   var totalLeads=_leadsAll.length, totalConvV=0, totalConvL=0, totalInv=0;
-  try{var ca=JSON.parse(localStorage.getItem('leads_conv')||'{}');Object.values(ca).forEach(function(x){totalConvV+=x.v||0;totalConvL+=x.l||0;});}catch(e){}
+  Object.values(_leadsConvMap).forEach(function(x){totalConvV+=x.v||0;totalConvL+=x.l||0;});
   portaisAtivos.forEach(function(p){var c=leadsGetCusto(p);if(c)totalInv+=c*pm[p].meses.size;});
   var totalConv=totalConvV+totalConvL;
   var txConv=totalLeads>0?(totalConv/totalLeads*100).toFixed(1)+'%':'—';
