@@ -1958,6 +1958,9 @@ input[type="checkbox"]{width:14px;height:14px;accent-color:var(--green-accent);c
       <span class="pill-sep">|</span>
       <button class="pill-btn active" id="fce-v-tudo" onclick="fcExecSetTipo('tudo',this)">Tudo</button>
       <button class="pill-btn" id="fce-v-pago" onclick="fcExecSetTipo('pago',this)">Só realizados</button>
+      <span class="pill-sep">|</span>
+      <label style="font-size:11px;color:var(--text-muted);font-weight:600;text-transform:uppercase;letter-spacing:.08em">A partir de:</label>
+      <input type="date" id="fce-dt-ini" class="fc-select" style="padding:4px 8px;font-size:12px" onchange="fcExecRender()">
     </div>
     <div class="exec-kpi-grid">
       <div class="exec-kpi"><div class="exec-kpi-lbl">Entradas (CR)</div><div class="exec-kpi-val blue" id="fce-k-entradas">—</div></div>
@@ -7464,6 +7467,12 @@ async function fcExecLoad(){
     _fceCpData=rCp.data||[];
     _fceCrData=rCr.data||[];
     _fceScData=rSc.data||[];
+    // Auto-preencher data de início com a menor data_saldo_inicial das contas bancárias
+    var dtIniEl=document.getElementById('fce-dt-ini');
+    if(dtIniEl&&!dtIniEl.value){
+      var datas=(FS.refs.bancarias||[]).map(function(b){return b.data_saldo_inicial;}).filter(Boolean).sort();
+      dtIniEl.value=datas.length?datas[0]:'';
+    }
     fcExecRender();
   }catch(e){toast('❌','Erro: '+e.message,'error');}
 }
@@ -7487,7 +7496,15 @@ function _mesLabel(mk){
 function fcExecRender(){
   if(!_fceCpData.length&&!_fceCrData.length&&!_fceScData.length)return;
   var hoje=new Date();
+  var dtIniVal=(document.getElementById('fce-dt-ini')||{}).value||'';
+  var dtIniMk=dtIniVal?dtIniVal.substring(0,7):'';
   var ini=new Date(hoje.getFullYear(),hoje.getMonth()-Math.floor(_fceMonths/2),1);
+  // Se há data de início definida e ela é posterior ao início calculado, usar a data de início
+  if(dtIniMk){
+    var dtIniDate=new Date(dtIniVal+'T00:00:00');
+    var dtIniFirstOfMonth=new Date(dtIniDate.getFullYear(),dtIniDate.getMonth(),1);
+    if(dtIniFirstOfMonth>ini) ini=dtIniFirstOfMonth;
+  }
   var meses=[];
   for(var i=0;i<_fceMonths;i++){
     var d=new Date(ini.getFullYear(),ini.getMonth()+i,1);
