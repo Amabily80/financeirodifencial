@@ -1279,7 +1279,7 @@ input[type="checkbox"]{width:14px;height:14px;accent-color:var(--green-accent);c
     <div class="chart-card" style="margin-top:26px">
       <div class="chart-hdr">
         <div>
-          <div class="chart-title">📈 Receitas vs Despesas — Últimos 12 meses</div>
+          <div class="chart-title">📈 Receitas vs Despesas — A partir de Jun/2026</div>
           <div class="chart-sub">Valores efetivamente pagos e recebidos por mês · linha laranja = resultado mensal</div>
         </div>
         <div class="chart-legend">
@@ -1295,8 +1295,8 @@ input[type="checkbox"]{width:14px;height:14px;accent-color:var(--green-accent);c
     <div class="chart-card" style="margin-top:16px">
       <div class="chart-hdr">
         <div>
-          <div class="chart-title">🔭 Projeção de Fluxo — Próximos 3 meses</div>
-          <div class="chart-sub">CP e CR com vencimento nos próximos meses · somente status pendente</div>
+          <div class="chart-title">🔭 Projeção de Fluxo — Próximos 6 meses</div>
+          <div class="chart-sub">CP e CR com vencimento nos próximos 6 meses · somente status pendente</div>
         </div>
         <div class="chart-legend">
           <div class="leg-item"><div class="leg-dot" style="background:#059669"></div>CR a receber</div>
@@ -2921,39 +2921,42 @@ function fcDashRender(){
   document.getElementById('dash-k-cr30').textContent=fmtBRL(crProx.reduce(function(s,r){return s+(parseFloat(r.valor)||0);},0));
   document.getElementById('dash-k-cr30-n').textContent=crProx.length+' conta(s)';
 
-  // ── GRÁFICO 12 MESES ──
+  // ── GRÁFICO HISTÓRICO (a partir de Jun/2026) ──
   var MLBL=['Jan','Fev','Mar','Abr','Mai','Jun','Jul','Ago','Set','Out','Nov','Dez'];
-  var months12=[];
-  for(var i=11;i>=0;i--){
-    var d=new Date(now.getFullYear(),now.getMonth()-i,1);
-    months12.push({y:d.getFullYear(),m:String(d.getMonth()+1).padStart(2,'0'),lbl:MLBL[d.getMonth()]+'/'+String(d.getFullYear()).slice(2)});
+  var histStart=new Date(2026,5,1); // junho 2026 = mês 5 (0-index)
+  var monthsHist=[];
+  var cur=new Date(histStart);
+  var nowMesRef=new Date(now.getFullYear(),now.getMonth(),1);
+  while(cur<=nowMesRef){
+    monthsHist.push({y:cur.getFullYear(),m:String(cur.getMonth()+1).padStart(2,'0'),lbl:MLBL[cur.getMonth()]+'/'+String(cur.getFullYear()).slice(2)});
+    cur.setMonth(cur.getMonth()+1);
   }
-  var crRec12=months12.map(function(mo){
+  var crRecHist=monthsHist.map(function(mo){
     var ini=mo.y+'-'+mo.m+'-01',fim=mo.y+'-'+mo.m+'-31';
     return _dashCr.filter(function(r){return r.status==='recebido'&&r.data_recebimento>=ini&&r.data_recebimento<=fim;}).reduce(function(s,r){return s+vRec(r);},0);
   });
-  var cpPago12=months12.map(function(mo){
+  var cpPagoHist=monthsHist.map(function(mo){
     var ini=mo.y+'-'+mo.m+'-01',fim=mo.y+'-'+mo.m+'-31';
     return _dashCp.filter(function(r){return r.status==='pago'&&r.data_pagamento>=ini&&r.data_pagamento<=fim;}).reduce(function(s,r){return s+vPago(r);},0);
   });
-  var res12=months12.map(function(_,i){return crRec12[i]-cpPago12[i];});
-  _fcDashChartHist(months12.map(function(m){return m.lbl;}),crRec12,cpPago12,res12);
+  var resHist=monthsHist.map(function(_,i){return crRecHist[i]-cpPagoHist[i];});
+  _fcDashChartHist(monthsHist.map(function(m){return m.lbl;}),crRecHist,cpPagoHist,resHist);
 
-  // ── GRÁFICO PROJEÇÃO 3 MESES ──
-  var months3=[];
-  for(var j=0;j<3;j++){
+  // ── GRÁFICO PROJEÇÃO (próximos 6 meses a partir do próximo mês) ──
+  var months6=[];
+  for(var j=1;j<=6;j++){
     var d3=new Date(now.getFullYear(),now.getMonth()+j,1);
-    months3.push({y:d3.getFullYear(),m:String(d3.getMonth()+1).padStart(2,'0'),lbl:MLBL[d3.getMonth()]+'/'+String(d3.getFullYear()).slice(2)});
+    months6.push({y:d3.getFullYear(),m:String(d3.getMonth()+1).padStart(2,'0'),lbl:MLBL[d3.getMonth()]+'/'+String(d3.getFullYear()).slice(2)});
   }
-  var crProj3=months3.map(function(mo){
+  var crProj3=months6.map(function(mo){
     var ini=mo.y+'-'+mo.m+'-01',fim=mo.y+'-'+mo.m+'-31';
     return _dashCr.filter(function(r){return r.status!=='recebido'&&r.vencimento&&r.vencimento>=ini&&r.vencimento<=fim;}).reduce(function(s,r){return s+(parseFloat(r.valor)||0);},0);
   });
-  var cpProj3=months3.map(function(mo){
+  var cpProj3=months6.map(function(mo){
     var ini=mo.y+'-'+mo.m+'-01',fim=mo.y+'-'+mo.m+'-31';
     return _dashCp.filter(function(r){return r.status!=='pago'&&r.vencimento&&r.vencimento>=ini&&r.vencimento<=fim;}).reduce(function(s,r){return s+(parseFloat(r.valor)||0);},0);
   });
-  _fcDashChartProj(months3.map(function(m){return m.lbl;}),crProj3,cpProj3);
+  _fcDashChartProj(months6.map(function(m){return m.lbl;}),crProj3,cpProj3);
 
   // ── TABELAS ──
   var cpPendAll=_dashCp.filter(function(r){return r.status==='pendente'||r.status==='vencido';}).sort(function(a,b){return (parseFloat(b.valor)||0)-(parseFloat(a.valor)||0);}).slice(0,10);
