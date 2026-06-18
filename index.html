@@ -1139,7 +1139,7 @@ input[type="checkbox"]{width:14px;height:14px;accent-color:var(--green-accent);c
         </div>
       </div>
       <div>
-        <p class="ov-sec">📋 Solicitações de Comissão — Esta Semana</p>
+        <p class="ov-sec">📋 Solicitações de Comissão — Este Mês</p>
         <div class="ov-grid2i">
           <div class="ov-card" style="border-top-color:var(--gold)">
             <div class="ov-card-lbl">Total Solicitado</div>
@@ -1149,7 +1149,7 @@ input[type="checkbox"]{width:14px;height:14px;accent-color:var(--green-accent);c
           <div class="ov-card" style="border-top-color:var(--brand)">
             <div class="ov-card-lbl">Contratos Solicitados</div>
             <div class="ov-card-val" id="ov-solic-items" style="color:var(--brand)">—</div>
-            <div class="ov-card-sub">contratos na semana</div>
+            <div class="ov-card-sub">contratos no mês</div>
           </div>
         </div>
       </div>
@@ -1184,7 +1184,7 @@ input[type="checkbox"]{width:14px;height:14px;accent-color:var(--green-accent);c
 
     <!-- ── COMISSÕES A PAGAR ── -->
     <div style="display:flex;align-items:center;gap:12px;margin-bottom:10px;flex-wrap:wrap">
-      <p class="ov-sec" style="margin-bottom:0">💰 Previsão de Comissões a Pagar — Esta Semana</p>
+      <p class="ov-sec" style="margin-bottom:0">💰 Previsão de Comissões a Pagar — Este Mês</p>
       <span id="ov-com-info" style="font-size:11px;color:var(--text-muted)"></span>
     </div>
     <div class="fin-table-card">
@@ -3228,7 +3228,7 @@ async function overviewLoad(){
     var results = await Promise.all([
       sb.from('contas_pagar').select('valor,vencimento,data_pagamento,conta_bancaria_id,status,categoria_nome,projeto_nome'),
       sb.from('contas_receber').select('valor,vencimento,data_recebimento,status,projeto_nome'),
-      sb.from('solicitacoes_comissao').select('*').gte('data_solicitacao',terFmt).lte('data_solicitacao',segFmt+'T23:59:59'),
+      sb.from('solicitacoes_comissao').select('*').gte('data_solicitacao',mesIni).lte('data_solicitacao',mesFim+'T23:59:59').limit(9999),
       sb.from('contas_bancarias').select('id,nome')
     ]);
     var _isTransf = function(x){ return (x.projeto_nome||'').toLowerCase().includes('transferência entre contas'); };
@@ -3332,7 +3332,7 @@ function ovRenderComissoes(){
   if(!tbody) return;
   if(!_ovComData||!_ovComData.totalItens){
     tbody.innerHTML='<tr><td colspan="4" style="text-align:center;padding:20px;color:var(--text-muted)">'
-      +(_ovComData?'Nenhuma solicitação esta semana.':'Carregando...')+'</td></tr>';
+      +(_ovComData?'Nenhuma solicitação este mês.':'Carregando...')+'</td></tr>';
     if(info) info.textContent=''; return;
   }
   if(info) info.textContent=_ovComData.totalItens+' contrato(s) em '+_ovComData.solicsCount+' solicitação(ões)';
