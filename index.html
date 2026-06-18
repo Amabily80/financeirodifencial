@@ -446,11 +446,15 @@ input[type="checkbox"]{width:14px;height:14px;accent-color:var(--green-accent);c
 .conc-kpi-input{border:1.5px solid var(--brand);border-radius:8px;padding:6px 10px;font-size:15px;font-weight:700;width:100%;text-align:right;color:var(--brand);background:#fff3e8;font-family:'DM Mono',monospace;box-sizing:border-box}
 .conc-diff-ok{color:#059669!important}.conc-diff-err{color:var(--red)!important}
 .conc-section-hdr{font-size:11px;font-weight:700;text-transform:uppercase;letter-spacing:.07em;color:var(--text-muted);display:flex;justify-content:space-between;align-items:center;margin:0}
-.conc-row{display:grid;grid-template-columns:28px 88px 1fr 120px 130px;gap:10px;align-items:center;padding:10px 14px;border-bottom:1px solid var(--border);font-size:13px;transition:background .1s}
-.conc-row:last-child{border-bottom:none}
+.conc-row-hdr{display:grid;grid-template-columns:28px 84px 1fr 100px 100px 120px 90px;gap:8px;align-items:center;padding:8px 14px;background:#f8fafc;font-size:10px;font-weight:700;text-transform:uppercase;letter-spacing:.05em;color:var(--text-muted);border-bottom:2px solid var(--border)}
+.conc-row{display:grid;grid-template-columns:28px 84px 1fr 100px 100px 120px 90px;gap:8px;align-items:center;padding:9px 14px;border-bottom:1px solid var(--border);font-size:13px;transition:background .1s}
 .conc-row:hover{background:rgba(0,0,0,.02)}
-.conc-row.conciliado{background:#f9fffe}
+.conc-row.conciliado{background:#f0fdf4}
+.conc-day-hdr{display:flex;justify-content:space-between;align-items:center;padding:7px 14px;background:#f1f5f9;border-top:2px solid #e2e8f0;border-bottom:1px solid var(--border);font-size:11px;font-weight:700;text-transform:uppercase;letter-spacing:.07em;color:#475569}
+.conc-day-hdr:first-child{border-top:none}
+.conc-day-total{display:grid;grid-template-columns:28px 84px 1fr 100px 100px 120px 90px;gap:8px;align-items:center;padding:8px 14px;background:#f8fafc;border-top:1px solid var(--border2);border-bottom:2px solid #e2e8f0;font-size:12px;font-weight:700;color:var(--navy)}
 .conc-badge-lock{font-size:10px;background:#dcfce7;color:#059669;border-radius:4px;padding:2px 7px;font-weight:600;white-space:nowrap;display:inline-block}
+.conc-fechado-banner{background:#fff8e1;border:1px solid #ffd54f;border-radius:10px;padding:14px 18px;margin-bottom:18px;font-size:13px;color:#7c5700;display:flex;align-items:center;gap:12px}
 .conc-fechado-banner{background:#fff8e1;border:1px solid #ffd54f;border-radius:10px;padding:14px 18px;margin-bottom:18px;font-size:13px;color:#7c5700;display:flex;align-items:center;gap:12px}
 
 /* ── IMPORTAÇÃO CNAB ── */
@@ -721,11 +725,15 @@ input[type="checkbox"]{width:14px;height:14px;accent-color:var(--green-accent);c
 .conc-kpi-input{border:1.5px solid var(--brand);border-radius:8px;padding:6px 10px;font-size:15px;font-weight:700;width:100%;text-align:right;color:var(--brand);background:#fff3e8;font-family:'DM Mono',monospace;box-sizing:border-box}
 .conc-diff-ok{color:#059669!important}.conc-diff-err{color:var(--red)!important}
 .conc-section-hdr{font-size:11px;font-weight:700;text-transform:uppercase;letter-spacing:.07em;color:var(--text-muted);display:flex;justify-content:space-between;align-items:center;margin:0}
-.conc-row{display:grid;grid-template-columns:28px 88px 1fr 120px 130px;gap:10px;align-items:center;padding:10px 14px;border-bottom:1px solid var(--border);font-size:13px;transition:background .1s}
-.conc-row:last-child{border-bottom:none}
+.conc-row-hdr{display:grid;grid-template-columns:28px 84px 1fr 100px 100px 120px 90px;gap:8px;align-items:center;padding:8px 14px;background:#f8fafc;font-size:10px;font-weight:700;text-transform:uppercase;letter-spacing:.05em;color:var(--text-muted);border-bottom:2px solid var(--border)}
+.conc-row{display:grid;grid-template-columns:28px 84px 1fr 100px 100px 120px 90px;gap:8px;align-items:center;padding:9px 14px;border-bottom:1px solid var(--border);font-size:13px;transition:background .1s}
 .conc-row:hover{background:rgba(0,0,0,.02)}
-.conc-row.conciliado{background:#f9fffe}
+.conc-row.conciliado{background:#f0fdf4}
+.conc-day-hdr{display:flex;justify-content:space-between;align-items:center;padding:7px 14px;background:#f1f5f9;border-top:2px solid #e2e8f0;border-bottom:1px solid var(--border);font-size:11px;font-weight:700;text-transform:uppercase;letter-spacing:.07em;color:#475569}
+.conc-day-hdr:first-child{border-top:none}
+.conc-day-total{display:grid;grid-template-columns:28px 84px 1fr 100px 100px 120px 90px;gap:8px;align-items:center;padding:8px 14px;background:#f8fafc;border-top:1px solid var(--border2);border-bottom:2px solid #e2e8f0;font-size:12px;font-weight:700;color:var(--navy)}
 .conc-badge-lock{font-size:10px;background:#dcfce7;color:#059669;border-radius:4px;padding:2px 7px;font-weight:600;white-space:nowrap;display:inline-block}
+.conc-fechado-banner{background:#fff8e1;border:1px solid #ffd54f;border-radius:10px;padding:14px 18px;margin-bottom:18px;font-size:13px;color:#7c5700;display:flex;align-items:center;gap:12px}
 .conc-fechado-banner{background:#fff8e1;border:1px solid #ffd54f;border-radius:10px;padding:14px 18px;margin-bottom:18px;font-size:13px;color:#7c5700;display:flex;align-items:center;gap:12px}
 
 /* ── IMPORTAÇÃO CNAB ── */
@@ -1840,28 +1848,20 @@ input[type="checkbox"]{width:14px;height:14px;accent-color:var(--green-accent);c
       <input type="file" id="conc-ofx-input" accept=".ofx,.OFX" style="display:none" onchange="conciliacaoHandleOFX(this.files[0]);this.value=''">
     </div>
 
-    <!-- ENTRADAS -->
+    <!-- EXTRATO UNIFICADO POR DIA -->
     <div style="background:var(--surface);border:1px solid var(--border2);border-radius:12px;overflow:hidden;margin-bottom:16px">
-      <div style="background:#f0fdf4;padding:11px 16px;border-bottom:1px solid var(--border)" class="conc-section-hdr">
-        <span>📥 ENTRADAS — Contas a Receber</span>
-        <span id="conc-sect-ent" style="font-weight:400;text-transform:none;font-size:12px;color:var(--text-muted)">—</span>
+      <div style="background:#f1f5f9;padding:11px 16px;border-bottom:1px solid var(--border)" class="conc-section-hdr">
+        <span>📋 EXTRATO — Lançamentos por dia</span>
+        <span id="conc-sect-total" style="font-weight:400;text-transform:none;font-size:12px;color:var(--text-muted)">—</span>
       </div>
-      <div class="conc-row" style="background:#fafafa;font-size:10px;font-weight:700;text-transform:uppercase;letter-spacing:.05em;color:var(--text-muted);border-bottom:2px solid var(--border)">
-        <span></span><span>Data</span><span>Cliente / Descrição</span><span style="text-align:right">Valor</span><span></span>
+      <div class="conc-row-hdr">
+        <span></span><span>Data</span><span>Cliente / Fornecedor</span>
+        <span style="text-align:right">Entrada</span>
+        <span style="text-align:right">Saída</span>
+        <span style="text-align:right">Saldo</span>
+        <span></span>
       </div>
-      <div id="conc-body-ent"><div style="padding:20px;text-align:center;font-size:13px;color:var(--text-muted)">Selecione uma conta e período.</div></div>
-    </div>
-
-    <!-- SAÍDAS -->
-    <div style="background:var(--surface);border:1px solid var(--border2);border-radius:12px;overflow:hidden;margin-bottom:16px">
-      <div style="background:#fff5f5;padding:11px 16px;border-bottom:1px solid var(--border)" class="conc-section-hdr">
-        <span>📤 SAÍDAS — Contas a Pagar</span>
-        <span id="conc-sect-sai" style="font-weight:400;text-transform:none;font-size:12px;color:var(--text-muted)">—</span>
-      </div>
-      <div class="conc-row" style="background:#fafafa;font-size:10px;font-weight:700;text-transform:uppercase;letter-spacing:.05em;color:var(--text-muted);border-bottom:2px solid var(--border)">
-        <span></span><span>Data</span><span>Fornecedor / Descrição</span><span style="text-align:right">Valor</span><span></span>
-      </div>
-      <div id="conc-body-sai"><div style="padding:20px;text-align:center;font-size:13px;color:var(--text-muted)">Selecione uma conta e período.</div></div>
+      <div id="conc-body-diario"><div style="padding:20px;text-align:center;font-size:13px;color:var(--text-muted)">Selecione uma conta e período.</div></div>
     </div>
 
     <!-- EXTRATO OFX SICOOB -->
@@ -8918,8 +8918,8 @@ async function conciliacaoFetch(){
   var contaId = sel.value;
   var periodo = periodoEl.value;
   if(!contaId || !periodo){
-    document.getElementById('conc-body-ent').innerHTML = '<div style="padding:20px;text-align:center;font-size:13px;color:var(--text-muted)">Selecione uma conta bancária e um período.</div>';
-    document.getElementById('conc-body-sai').innerHTML = '<div style="padding:20px;text-align:center;font-size:13px;color:var(--text-muted)">Selecione uma conta bancária e um período.</div>';
+    var bd = document.getElementById('conc-body-diario');
+    if(bd) bd.innerHTML = '<div style="padding:20px;text-align:center;font-size:13px;color:var(--text-muted)">Selecione uma conta bancária e um período.</div>';
     return;
   }
   var parts = periodo.split('-');
@@ -8933,24 +8933,44 @@ async function conciliacaoFetch(){
   var loadingEl = document.getElementById('conc-loading');
   if(loadingEl) loadingEl.style.display='inline';
   try{
-    var [rCP, rCR, rFech] = await Promise.all([
+    var [rCP, rCR, rFech, rHistCP, rHistCR] = await Promise.all([
       sb.from('contas_pagar')
-        .select('id,descricao,pessoa_nome,valor,valor_pago,data_pagamento,categoria_nome,projeto_nome,conciliado,data_conciliacao')
+        .select('id,descricao,pessoa_nome,valor,valor_pago,data_pagamento,categoria_nome,conciliado')
         .eq('status','pago').eq('conta_bancaria_id',contaId)
         .gte('data_pagamento',inicioMes).lte('data_pagamento',fimMes)
-        .order('data_pagamento'),
+        .order('data_pagamento').limit(9999),
       sb.from('contas_receber')
-        .select('id,descricao,pessoa_nome,valor,valor_recebido,data_recebimento,categoria_nome,projeto_nome,conciliado,data_conciliacao')
+        .select('id,descricao,pessoa_nome,valor,valor_recebido,data_recebimento,categoria_nome,conciliado')
         .eq('status','recebido').eq('conta_bancaria_id',contaId)
         .gte('data_recebimento',inicioMes).lte('data_recebimento',fimMes)
-        .order('data_recebimento'),
+        .order('data_recebimento').limit(9999),
       sb.from('periodos_fechados').select('id,fechado_em,fechado_por')
-        .eq('conta_bancaria_id',contaId).eq('ano',ano).eq('mes',mes).maybeSingle()
+        .eq('conta_bancaria_id',contaId).eq('ano',ano).eq('mes',mes).maybeSingle(),
+      // Histórico de CP antes do período para saldo inicial
+      sb.from('contas_pagar').select('valor,valor_pago,data_pagamento')
+        .eq('status','pago').eq('conta_bancaria_id',contaId)
+        .lt('data_pagamento',inicioMes).limit(9999),
+      sb.from('contas_receber').select('valor,valor_recebido,data_recebimento')
+        .eq('status','recebido').eq('conta_bancaria_id',contaId)
+        .lt('data_recebimento',inicioMes).limit(9999),
     ]);
     concState.cpRows = rCP.data||[];
     concState.crRows = rCR.data||[];
     concState.periodoFechado = !!(rFech.data);
     concState._fechadoInfo = rFech.data||null;
+
+    // Calcular saldo no início do período
+    var banco = concState.banco;
+    var saldoBase = parseFloat(banco&&banco.saldo_inicial)||0;
+    var dataRef = banco&&banco.data_saldo_inicial||null;
+    var vP=function(r){return parseFloat(r.valor_pago)||parseFloat(r.valor)||0;};
+    var vR=function(r){return parseFloat(r.valor_recebido)||parseFloat(r.valor)||0;};
+    var histCP=(rHistCP.data||[]).filter(function(r){return !dataRef||r.data_pagamento>=dataRef;});
+    var histCR=(rHistCR.data||[]).filter(function(r){return !dataRef||r.data_recebimento>=dataRef;});
+    concState.saldoPeriodoIni = saldoBase
+      + histCR.reduce(function(s,r){return s+vR(r);},0)
+      - histCP.reduce(function(s,r){return s+vP(r);},0);
+
     conciliacaoRender();
   }catch(e){
     toast('❌','Erro ao carregar conciliação: '+e.message,'error');
@@ -8960,19 +8980,18 @@ async function conciliacaoFetch(){
 }
 
 function conciliacaoRender(){
-  var banco = concState.banco;
-  var saldoIni = banco ? (parseFloat(banco.saldo_inicial)||0) : 0;
   function vP(p){ return parseFloat(p.valor_pago)||parseFloat(p.valor)||0; }
   function vR(r){ return parseFloat(r.valor_recebido)||parseFloat(r.valor)||0; }
+
+  // KPIs
+  var saldoIni = concState.saldoPeriodoIni !== undefined ? concState.saldoPeriodoIni : (parseFloat((concState.banco||{}).saldo_inicial)||0);
   var entConc = concState.crRows.filter(function(r){return r.conciliado;}).reduce(function(a,r){return a+vR(r);},0);
   var saiConc = concState.cpRows.filter(function(p){return p.conciliado;}).reduce(function(a,p){return a+vP(p);},0);
   var saldoSis = saldoIni + entConc - saiConc;
-
   document.getElementById('conc-k-saldo-ini').textContent  = fmtBRL(saldoIni);
   document.getElementById('conc-k-ent-concil').textContent = fmtBRL(entConc);
   document.getElementById('conc-k-sai-concil').textContent = fmtBRL(saiConc);
   document.getElementById('conc-k-saldo-sis').textContent  = fmtBRL(saldoSis);
-
   var extrato = parseFloat(document.getElementById('conc-extrato').value)||0;
   var diff = saldoSis - extrato;
   var diffEl = document.getElementById('conc-k-diff');
@@ -8984,67 +9003,105 @@ function conciliacaoRender(){
   if(concState.periodoFechado && concState._fechadoInfo){
     var fi = concState._fechadoInfo;
     var dataFech = fi.fechado_em ? fmtDateBR(fi.fechado_em.substring(0,10)) : '';
-    document.getElementById('conc-fechado-txt').textContent =
-      'Período fechado em '+dataFech+(fi.fechado_por?' por '+fi.fechado_por:'');
+    document.getElementById('conc-fechado-txt').textContent = 'Período fechado em '+dataFech+(fi.fechado_por?' por '+fi.fechado_por:'');
     banner.style.display='flex';
-  } else {
-    banner.style.display='none';
-  }
-
+  } else { banner.style.display='none'; }
   var actionsEl = document.getElementById('conc-actions');
   if(actionsEl) actionsEl.style.display = concState.periodoFechado ? 'none' : 'flex';
 
-  var entC = concState.crRows.filter(function(r){return r.conciliado;}).length;
-  var saiC = concState.cpRows.filter(function(p){return p.conciliado;}).length;
-  document.getElementById('conc-sect-ent').textContent = entC+'/'+concState.crRows.length+' conciliadas';
-  document.getElementById('conc-sect-sai').textContent = saiC+'/'+concState.cpRows.length+' conciliadas';
+  // Contador global
+  var totalConc = concState.crRows.filter(function(r){return r.conciliado;}).length
+                + concState.cpRows.filter(function(p){return p.conciliado;}).length;
+  var totalRows = concState.crRows.length + concState.cpRows.length;
+  var sectTotal = document.getElementById('conc-sect-total');
+  if(sectTotal) sectTotal.textContent = totalConc+'/'+totalRows+' conciliados';
 
   var fechado = concState.periodoFechado;
-
-  // Entradas
-  var bodyEnt = document.getElementById('conc-body-ent');
   var ofxStatusCr = _ofxRows.length ? _concSysOfxStatus('cr') : null;
-  if(concState.crRows.length){
-    bodyEnt.innerHTML = concState.crRows.map(function(r){
-      var v = vR(r);
-      var nome = r.pessoa_nome||r.descricao||'—';
-      var cat  = r.categoria_nome ? '<small style="color:var(--text-muted);margin-left:6px">'+r.categoria_nome+'</small>' : '';
-      var ofxBadge = ofxStatusCr ? _concOfxBadge(ofxStatusCr[r.id]) : '';
-      return '<div class="conc-row'+(r.conciliado?' conciliado':'')+'">'
-        +'<input type="checkbox"'+(r.conciliado?' checked':'')+' style="width:16px;height:16px;accent-color:#059669;cursor:'+(fechado?'default':'pointer')+'"'+(fechado?' disabled':'')+' onchange="conciliacaoToggle(\'contas_receber\',\''+r.id+'\',this.checked)">'
-        +'<span style="font-family:DM Mono,monospace;font-size:12px">'+fmtDateBR(r.data_recebimento)+'</span>'
-        +'<span style="overflow:hidden;text-overflow:ellipsis;white-space:nowrap" title="'+nome+'">'+nome+cat+'</span>'
-        +'<span style="text-align:right;font-family:DM Mono,monospace;font-weight:600;color:#059669">'+fmtBRL(v)+'</span>'
-        +'<span style="display:flex;flex-wrap:wrap;gap:4px;justify-content:flex-end;align-items:center">'+(r.conciliado?'<span class="conc-badge-lock">🔒 Conciliado</span>':'')+ofxBadge+'</span>'
-        +'</div>';
-    }).join('');
-  } else {
-    bodyEnt.innerHTML = '<div style="padding:16px;text-align:center;font-size:13px;color:var(--text-muted)">Nenhuma entrada neste período para esta conta.</div>';
+  var ofxStatusCp = _ofxRows.length ? _concSysOfxStatus('cp') : null;
+
+  // Mesclar CP + CR, marcar tipo, ordenar por data
+  var todas = [];
+  concState.crRows.forEach(function(r){
+    todas.push({tipo:'cr', data:r.data_recebimento, id:r.id, nome:r.pessoa_nome||r.descricao||'—', cat:r.categoria_nome||'', valor:vR(r), conciliado:r.conciliado, raw:r});
+  });
+  concState.cpRows.forEach(function(p){
+    todas.push({tipo:'cp', data:p.data_pagamento, id:p.id, nome:p.pessoa_nome||p.descricao||'—', cat:p.categoria_nome||'', valor:vP(p), conciliado:p.conciliado, raw:p});
+  });
+  todas.sort(function(a,b){ return (a.data||'').localeCompare(b.data||'') || (a.tipo==='cr'?-1:1); });
+
+  // Agrupar por dia
+  var dias = {};
+  var ordemDias = [];
+  todas.forEach(function(t){
+    var d = t.data||'?';
+    if(!dias[d]){ dias[d]=[]; ordemDias.push(d); }
+    dias[d].push(t);
+  });
+
+  if(!ordemDias.length){
+    document.getElementById('conc-body-diario').innerHTML = '<div style="padding:24px;text-align:center;font-size:13px;color:var(--text-muted)">Nenhum lançamento neste período para esta conta.</div>';
+    if(_ofxRows&&_ofxRows.length) conciliacaoRenderExtrato();
+    return;
   }
 
-  // Saídas
-  var bodySai = document.getElementById('conc-body-sai');
-  var ofxStatusCp = _ofxRows.length ? _concSysOfxStatus('cp') : null;
-  if(concState.cpRows.length){
-    bodySai.innerHTML = concState.cpRows.map(function(p){
-      var v = vP(p);
-      var nome = p.pessoa_nome||p.descricao||'—';
-      var cat  = p.categoria_nome ? '<small style="color:var(--text-muted);margin-left:6px">'+p.categoria_nome+'</small>' : '';
-      var ofxBadge = ofxStatusCp ? _concOfxBadge(ofxStatusCp[p.id]) : '';
-      return '<div class="conc-row'+(p.conciliado?' conciliado':'')+'">'
-        +'<input type="checkbox"'+(p.conciliado?' checked':'')+' style="width:16px;height:16px;accent-color:var(--red);cursor:'+(fechado?'default':'pointer')+'"'+(fechado?' disabled':'')+' onchange="conciliacaoToggle(\'contas_pagar\',\''+p.id+'\',this.checked)">'
-        +'<span style="font-family:DM Mono,monospace;font-size:12px">'+fmtDateBR(p.data_pagamento)+'</span>'
-        +'<span style="overflow:hidden;text-overflow:ellipsis;white-space:nowrap" title="'+nome+'">'+nome+cat+'</span>'
-        +'<span style="text-align:right;font-family:DM Mono,monospace;font-weight:600;color:var(--red)">'+fmtBRL(v)+'</span>'
-        +'<span style="display:flex;flex-wrap:wrap;gap:4px;justify-content:flex-end;align-items:center">'+(p.conciliado?'<span class="conc-badge-lock">🔒 Conciliado</span>':'')+ofxBadge+'</span>'
+  // Saldo corrente começa no saldo inicial do período
+  var saldoCorrente = saldoIni;
+  var html = '';
+
+  ordemDias.forEach(function(dia){
+    var linhas = dias[dia];
+    var saldoIniDia = saldoCorrente;
+    var entDia = 0, saiDia = 0;
+    linhas.forEach(function(t){ if(t.tipo==='cr') entDia+=t.valor; else saiDia+=t.valor; });
+
+    // Cabeçalho do dia
+    var dLabel = dia !== '?' ? fmtDateBR(dia) : '—';
+    html += '<div class="conc-day-hdr">'
+      +'<span>📅 '+dLabel+'</span>'
+      +'<span style="font-size:10px;font-weight:400;color:#94a3b8">Saldo inicial do dia: <strong style="color:var(--navy)">'+fmtBRL(saldoIniDia)+'</strong></span>'
+      +'</div>';
+
+    // Linhas do dia
+    linhas.forEach(function(t){
+      if(t.tipo==='cr') saldoCorrente += t.valor;
+      else saldoCorrente -= t.valor;
+
+      var catHtml = t.cat ? '<br><small style="color:var(--text-muted);font-size:10px">'+t.cat+'</small>' : '';
+      var ofxBadge = '';
+      if(t.tipo==='cr' && ofxStatusCr) ofxBadge = _concOfxBadge(ofxStatusCr[t.id]);
+      if(t.tipo==='cp' && ofxStatusCp) ofxBadge = _concOfxBadge(ofxStatusCp[t.id]);
+      var lockBadge = t.conciliado ? '<span class="conc-badge-lock">🔒</span>' : '';
+      var accentColor = t.tipo==='cr' ? '#059669' : '#dc2626';
+      var tabela = t.tipo==='cr' ? 'contas_receber' : 'contas_pagar';
+      var saldoColor = saldoCorrente>=0 ? 'var(--navy)' : '#dc2626';
+
+      html += '<div class="conc-row'+(t.conciliado?' conciliado':'')+'">'
+        +'<input type="checkbox"'+(t.conciliado?' checked':'')+' style="width:16px;height:16px;accent-color:'+accentColor+';cursor:'+(fechado?'default':'pointer')+'"'+(fechado?' disabled':'')+' onchange="conciliacaoToggle(\''+tabela+'\',\''+t.id+'\',this.checked)">'
+        +'<span style="font-family:DM Mono,monospace;font-size:11px;color:var(--text-muted)">'+dLabel+'</span>'
+        +'<span style="overflow:hidden;text-overflow:ellipsis;white-space:nowrap;font-size:12px" title="'+t.nome+'"><strong>'+t.nome+'</strong>'+catHtml+'</span>'
+        +(t.tipo==='cr'
+          ? '<span style="text-align:right;font-family:DM Mono,monospace;font-weight:700;color:#059669">+'+fmtBRL(t.valor)+'</span><span></span>'
+          : '<span></span><span style="text-align:right;font-family:DM Mono,monospace;font-weight:700;color:#dc2626">−'+fmtBRL(t.valor)+'</span>')
+        +'<span style="text-align:right;font-family:DM Mono,monospace;font-weight:700;color:'+saldoColor+'">'+fmtBRL(saldoCorrente)+'</span>'
+        +'<span style="display:flex;gap:4px;justify-content:flex-end;align-items:center">'+lockBadge+ofxBadge+'</span>'
         +'</div>';
-    }).join('');
-  } else {
-    bodySai.innerHTML = '<div style="padding:16px;text-align:center;font-size:13px;color:var(--text-muted)">Nenhuma saída neste período para esta conta.</div>';
-  }
-  // Re-renderiza fluxo diário se estiver aberto
-  var fluxoSec = document.getElementById('conc-fluxo-section');
-  if(fluxoSec && fluxoSec.style.display !== 'none') conciliacaoRenderFluxo();
+    });
+
+    // Rodapé do dia
+    var saldoFimDia = saldoCorrente;
+    var saldoDiaColor = saldoFimDia>=0 ? '#059669' : '#dc2626';
+    html += '<div class="conc-day-total">'
+      +'<span></span><span></span>'
+      +'<span style="font-size:11px;color:var(--text-muted)">'+linhas.length+' lançamento(s) · Ent: <span style="color:#059669">'+fmtBRL(entDia)+'</span> · Saí: <span style="color:#dc2626">'+fmtBRL(saiDia)+'</span></span>'
+      +'<span></span><span></span>'
+      +'<span style="text-align:right;color:'+saldoDiaColor+'">'+fmtBRL(saldoFimDia)+'</span>'
+      +'<span style="font-size:10px;color:var(--text-muted)">saldo final</span>'
+      +'</div>';
+  });
+
+  document.getElementById('conc-body-diario').innerHTML = html;
+
   // Re-renderiza extrato OFX se já importado
   if(_ofxRows && _ofxRows.length) conciliacaoRenderExtrato();
 }
