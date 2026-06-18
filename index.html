@@ -4019,7 +4019,7 @@ function authApplySession(session){
 
   if(isRestricted){
     // Ocultar abas financeiras (SC fica visível mas apenas a aba Realizadas)
-    ["overview","fc","relatorios","cp","cr","saldo","conciliacao","cnab"].forEach(function(t){
+    ["overview","fc","relatorios","cp","cr","saldo","conciliacao","cnab","fc-exec","dre","orcado"].forEach(function(t){
       var el=document.getElementById("tab-"+t); if(el) el.style.display="none";
     });
     // Mostrar SC mas esconder botão Solicitar e ir direto para Realizadas
@@ -4035,7 +4035,7 @@ function authApplySession(session){
     },100);
   } else if(isOperador){
     // Operador: apenas Relatórios, Contas a Pagar, Contas a Receber
-    ["overview","fc","sc","saldo","conciliacao","cnab","leads","comissoes"].forEach(function(t){
+    ["overview","fc","sc","saldo","conciliacao","cnab","leads","comissoes","fc-exec","dre","orcado"].forEach(function(t){
       var el=document.getElementById("tab-"+t); if(el) el.style.display="none";
     });
     ["relatorios","cp","cr"].forEach(function(t){
@@ -4047,7 +4047,7 @@ function authApplySession(session){
     setTimeout(function(){ if(typeof goTab==="function") goTab("relatorios"); },100);
   } else {
     // Acesso total — mostrar todas as abas
-    ["overview","fc","relatorios","cp","cr","saldo","conciliacao","cnab"].forEach(function(t){
+    ["overview","fc","relatorios","cp","cr","saldo","conciliacao","cnab","fc-exec","dre","orcado"].forEach(function(t){
       var el=document.getElementById("tab-"+t); if(el) el.style.removeProperty("display");
     });
     document.querySelectorAll(".cad-open-btn").forEach(function(el){el.style.display="flex";});
