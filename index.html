@@ -2551,7 +2551,6 @@ async function loadData(){
 
     allRows=parseAllRows(csv.value, dataRecMap);
     buildFcEmpFilter();
-    renderFC();
     const activeTab=document.querySelector('.nav-tab.active')?.id?.replace('tab-','');
     if(activeTab==='sc') scRender();
     const now=new Date().toLocaleTimeString('pt-BR',{hour:'2-digit',minute:'2-digit'});
