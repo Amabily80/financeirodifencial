@@ -2078,13 +2078,10 @@ input[type="checkbox"]{width:14px;height:14px;accent-color:var(--green-accent);c
   <div id="page-orcado" style="display:none;padding:24px">
     <div class="fin-page-hdr" style="margin-bottom:20px">
       <div>
-        <h2 class="fin-page-title">🎯 Orçado × Realizado</h2>
-        <p style="font-size:12px;color:var(--text-muted);margin-top:3px">Comparativo planejado vs executado por Centro de Custo</p>
+        <h2 class="fin-page-title">🎯 Projetado × Realizado</h2>
+        <p style="font-size:12px;color:var(--text-muted);margin-top:3px">Projetado = CP/CR com vencimento no mês &nbsp;·&nbsp; Realizado = efetivamente pago/recebido no mês</p>
       </div>
-      <div style="display:flex;gap:8px">
-        <button class="btn-secondary" onclick="orcSaveOrcado()">✏️ Editar Orçado</button>
-        <button class="btn-primary" onclick="orcLoad()">↺ Atualizar</button>
-      </div>
+      <button class="btn-primary" onclick="orcLoad()">↺ Atualizar</button>
     </div>
     <div style="display:flex;gap:12px;align-items:center;flex-wrap:wrap;margin-bottom:20px">
       <label style="font-size:12px;color:var(--text-muted);font-weight:600">Mês:</label>
@@ -2097,11 +2094,11 @@ input[type="checkbox"]{width:14px;height:14px;accent-color:var(--green-accent);c
       <select id="orc-ano" class="fc-select" onchange="orcLoad()"></select>
     </div>
     <div class="exec-kpi-grid">
-      <div class="exec-kpi"><div class="exec-kpi-lbl">Receita Orçada</div><div class="exec-kpi-val blue" id="orc-k-rec-orc">—</div></div>
+      <div class="exec-kpi"><div class="exec-kpi-lbl">Receita Projetada</div><div class="exec-kpi-val blue" id="orc-k-rec-orc">—</div></div>
       <div class="exec-kpi"><div class="exec-kpi-lbl">Receita Realizada</div><div class="exec-kpi-val" id="orc-k-rec-real">—</div></div>
-      <div class="exec-kpi"><div class="exec-kpi-lbl">Custo Orçado</div><div class="exec-kpi-val" style="color:#d97706" id="orc-k-cus-orc">—</div></div>
+      <div class="exec-kpi"><div class="exec-kpi-lbl">Custo Projetado</div><div class="exec-kpi-val" style="color:#d97706" id="orc-k-cus-orc">—</div></div>
       <div class="exec-kpi"><div class="exec-kpi-lbl">Custo Realizado</div><div class="exec-kpi-val red" id="orc-k-cus-real">—</div></div>
-      <div class="exec-kpi"><div class="exec-kpi-lbl">Resultado Orçado</div><div class="exec-kpi-val" id="orc-k-res-orc">—</div></div>
+      <div class="exec-kpi"><div class="exec-kpi-lbl">Resultado Projetado</div><div class="exec-kpi-val" id="orc-k-res-orc">—</div></div>
       <div class="exec-kpi"><div class="exec-kpi-lbl">Resultado Realizado</div><div class="exec-kpi-val" id="orc-k-res-real">—</div></div>
     </div>
     <div class="exec-table-wrap">
@@ -2117,31 +2114,10 @@ input[type="checkbox"]{width:14px;height:14px;accent-color:var(--green-accent);c
         <table class="exec-tbl">
           <thead><tr>
             <th style="text-align:left">Centro de Custo / Tipo</th>
-            <th>Orçado</th><th>Realizado</th><th>Variação R$</th><th>Variação %</th><th>Status</th>
+            <th>Projetado</th><th>Realizado</th><th>Variação R$</th><th>Variação %</th><th>Status</th>
           </tr></thead>
           <tbody id="orc-tbody"><tr><td colspan="6" style="text-align:center;padding:30px;color:var(--text-muted)">Clique em Atualizar para carregar.</td></tr></tbody>
         </table>
-      </div>
-    </div>
-    <div id="orc-edit-area" style="display:none;margin-top:20px">
-      <div class="exec-table-wrap">
-        <div class="exec-table-hdr">
-          <div class="exec-table-title">✏️ Editar Orçamento</div>
-          <div style="font-size:11px;color:var(--text-muted)" id="orc-edit-period">—</div>
-        </div>
-        <div style="overflow-x:auto">
-          <table class="exec-tbl">
-            <thead><tr>
-              <th style="text-align:left">Centro de Custo</th>
-              <th>Receita Orçada (R$)</th><th>Custo Orçado (R$)</th>
-            </tr></thead>
-            <tbody id="orc-edit-tbody"></tbody>
-          </table>
-        </div>
-        <div style="padding:12px 18px;display:flex;justify-content:flex-end;gap:8px;border-top:1px solid var(--border)">
-          <button class="btn-secondary" onclick="document.getElementById('orc-edit-area').style.display='none'">Cancelar</button>
-          <button class="btn-primary" onclick="orcSaveOrcadoConfirm()">💾 Salvar Orçamento</button>
-        </div>
       </div>
     </div>
   </div><!-- /page-orcado -->
@@ -7851,9 +7827,9 @@ function dreRender(mes,ano,acu){
 }
 
 // ═══════════════════════════════════════════════════
-// ORÇADO × REALIZADO
+// PROJETADO × REALIZADO
 // ═══════════════════════════════════════════════════
-var _orcCpData=[], _orcCrData=[], _orcBudgetData=[];
+var _orcCpOrc=[], _orcCrOrc=[], _orcCpReal=[], _orcCrReal=[];
 
 function _orcInitPeriod(){
   var now=new Date();
@@ -7874,132 +7850,91 @@ async function orcLoad(){
   var ano=document.getElementById('orc-ano').value;
   var ini=ano+'-'+mes+'-01', fim=ano+'-'+mes+'-31';
   try{
-    var [rCp,rCr,rOrc]=await Promise.all([
+    var [rCp,rCr]=await Promise.all([
       sb.from('contas_pagar').select('valor,valor_pago,data_pagamento,vencimento,status,categoria_id,categoria_nome').limit(9999),
       sb.from('contas_receber').select('valor,valor_recebido,data_recebimento,vencimento,status,categoria_id,categoria_nome').limit(9999),
-      sb.from('orcamentos').select('*').eq('ano',parseInt(ano)).eq('mes',parseInt(mes)),
     ]);
-    var filt=function(r,dt){return r.status!=='cancelado'&&dt&&dt>=ini&&dt<=fim;};
-    _orcCpData=(rCp.data||[]).filter(function(r){return filt(r,r.status==='pago'?r.data_pagamento:r.vencimento);});
-    _orcCrData=(rCr.data||[]).filter(function(r){return filt(r,r.status==='recebido'?r.data_recebimento:r.vencimento);});
-    _orcBudgetData=rOrc.data||[];
-    orcRender(mes,ano);
+    var cp=rCp.data||[], cr=rCr.data||[];
+    // Projetado = vencimento no período (exceto cancelados)
+    _orcCpOrc=cp.filter(function(r){return r.status!=='cancelado'&&r.vencimento&&r.vencimento>=ini&&r.vencimento<=fim;});
+    _orcCrOrc=cr.filter(function(r){return r.status!=='cancelado'&&r.vencimento&&r.vencimento>=ini&&r.vencimento<=fim;});
+    // Realizado = efetivamente pago/recebido no período
+    _orcCpReal=cp.filter(function(r){return r.status==='pago'&&r.data_pagamento&&r.data_pagamento>=ini&&r.data_pagamento<=fim;});
+    _orcCrReal=cr.filter(function(r){return r.status==='recebido'&&r.data_recebimento&&r.data_recebimento>=ini&&r.data_recebimento<=fim;});
+    orcRender();
   }catch(e){toast('❌','Erro: '+e.message,'error');}
 }
 
-function orcRender(mes,ano){
+function orcRender(){
   var ccMap=_dreCCMap();
   function getCC(r){return _dreGetCC(r,ccMap);}
-  var realRec={}, realCus={};
-  _orcCrData.forEach(function(r){
-    var cc=getCC(r);
-    realRec[cc]=(realRec[cc]||0)+(r.status==='recebido'?(parseFloat(r.valor_recebido)||parseFloat(r.valor)||0):(parseFloat(r.valor)||0));
-  });
-  _orcCpData.forEach(function(r){
-    var cc=getCC(r);
-    realCus[cc]=(realCus[cc]||0)+(r.status==='pago'?(parseFloat(r.valor_pago)||parseFloat(r.valor)||0):(parseFloat(r.valor)||0));
-  });
-  var orcMap={};
-  _orcBudgetData.forEach(function(b){orcMap[b.centro_custo_nome+'|'+b.tipo]=parseFloat(b.valor_orcado)||0;});
+
+  var projRec={}, projCus={}, realRec={}, realCus={};
+  _orcCrOrc.forEach(function(r){var cc=getCC(r); projRec[cc]=(projRec[cc]||0)+(parseFloat(r.valor)||0);});
+  _orcCpOrc.forEach(function(r){var cc=getCC(r); projCus[cc]=(projCus[cc]||0)+(parseFloat(r.valor)||0);});
+  _orcCrReal.forEach(function(r){var cc=getCC(r); realRec[cc]=(realRec[cc]||0)+(parseFloat(r.valor_recebido)||parseFloat(r.valor)||0);});
+  _orcCpReal.forEach(function(r){var cc=getCC(r); realCus[cc]=(realCus[cc]||0)+(parseFloat(r.valor_pago)||parseFloat(r.valor)||0);});
 
   var allCC=new Set();
-  (FS.refs.centrosCusto||[]).forEach(function(cc){allCC.add(cc.nome);});
-  Object.keys(realRec).concat(Object.keys(realCus)).forEach(function(k){allCC.add(k);});
-  _orcBudgetData.forEach(function(b){allCC.add(b.centro_custo_nome);});
+  [projRec,projCus,realRec,realCus].forEach(function(m){Object.keys(m).forEach(function(k){allCC.add(k);});});
   var ccs=Array.from(allCC).sort();
 
-  function ragStatus(orc,real,tipoMelhorMenos){
-    if(!orc&&!real)return'';
-    if(!orc)return'<span class="rag-red">Sem orçado</span>';
-    var pct=Math.abs((real-orc)/orc)*100;
-    var varOk=tipoMelhorMenos?(real<=orc):(real>=orc);
-    if(pct<=5)return'<span class="rag-dot green"></span><span class="rag-green">OK</span>';
+  function ragStatus(proj,real,melhorMenos){
+    if(!proj&&!real)return'';
+    if(!proj)return'<span class="rag-yellow">Não projetado</span>';
+    if(!real)return'<span class="rag-red">Não realizado</span>';
+    var pct=Math.abs((real-proj)/proj)*100;
+    if(pct<=5) return'<span class="rag-dot green"></span><span class="rag-green">OK</span>';
     if(pct<=15)return'<span class="rag-dot yellow"></span><span class="rag-yellow">Atenção</span>';
     return'<span class="rag-dot red"></span><span class="rag-red">Crítico</span>';
   }
 
-  var totOrcRec=0,totRealRec=0,totOrcCus=0,totRealCus=0;
+  var totProjRec=0,totRealRec=0,totProjCus=0,totRealCus=0;
   var rows=[];
   ccs.forEach(function(cc){
-    var oR=orcMap[cc+'|receita']||0, rR=realRec[cc]||0;
-    var oC=orcMap[cc+'|custo']||0, rC=realCus[cc]||0;
-    totOrcRec+=oR;totRealRec+=rR;totOrcCus+=oC;totRealCus+=rC;
-    if(!oR&&!rR&&!oC&&!rC)return;
-    if(oR||rR){
-      var vR=rR-oR, pR=oR?((rR-oR)/oR*100):null;
+    var pR=projRec[cc]||0, rR=realRec[cc]||0;
+    var pC=projCus[cc]||0, rC=realCus[cc]||0;
+    totProjRec+=pR; totRealRec+=rR; totProjCus+=pC; totRealCus+=rC;
+    if(!pR&&!rR&&!pC&&!rC)return;
+    if(pR||rR){
+      var vR=rR-pR, pctR=pR?((rR-pR)/pR*100):null;
       rows.push('<tr>'
         +'<td style="text-align:left">'+cc+' <small style="color:#059669;font-weight:600">Receita</small></td>'
-        +'<td>'+fmtBRL(oR)+'</td><td class="pos">'+fmtBRL(rR)+'</td>'
+        +'<td>'+fmtBRL(pR)+'</td><td class="pos">'+fmtBRL(rR)+'</td>'
         +'<td class="'+(vR>=0?'pos':'neg')+'">'+fmtBRL(vR)+'</td>'
-        +'<td class="'+(vR>=0?'pos':'neg')+'">'+(pR!==null?(vR>=0?'+':'')+pR.toFixed(1)+'%':'—')+'</td>'
-        +'<td>'+ragStatus(oR,rR,false)+'</td></tr>');
+        +'<td class="'+(vR>=0?'pos':'neg')+'">'+(pctR!==null?(vR>=0?'+':'')+pctR.toFixed(1)+'%':'—')+'</td>'
+        +'<td>'+ragStatus(pR,rR,false)+'</td></tr>');
     }
-    if(oC||rC){
-      var vC=rC-oC, pC=oC?((rC-oC)/oC*100):null;
+    if(pC||rC){
+      var vC=rC-pC, pctC=pC?((rC-pC)/pC*100):null;
       rows.push('<tr>'
         +'<td style="text-align:left">'+cc+' <small style="color:#dc2626;font-weight:600">Custo</small></td>'
-        +'<td>'+fmtBRL(oC)+'</td><td class="neg">'+fmtBRL(rC)+'</td>'
+        +'<td>'+fmtBRL(pC)+'</td><td class="neg">'+fmtBRL(rC)+'</td>'
         +'<td class="'+(vC<=0?'pos':'neg')+'">'+fmtBRL(vC)+'</td>'
-        +'<td class="'+(vC<=0?'pos':'neg')+'">'+(pC!==null?(vC>=0?'+':'')+pC.toFixed(1)+'%':'—')+'</td>'
-        +'<td>'+ragStatus(oC,rC,true)+'</td></tr>');
+        +'<td class="'+(vC<=0?'pos':'neg')+'">'+(pctC!==null?(vC>=0?'+':'')+pctC.toFixed(1)+'%':'—')+'</td>'
+        +'<td>'+ragStatus(pC,rC,true)+'</td></tr>');
     }
   });
-  if(!rows.length)rows.push('<tr><td colspan="6" style="text-align:center;padding:30px;color:var(--text-muted)">Nenhum dado. Cadastre Centros de Custo, vincule às categorias e registre o orçado.</td></tr>');
+  if(!rows.length)rows.push('<tr><td colspan="6" style="text-align:center;padding:30px;color:var(--text-muted)">Nenhum dado para o período selecionado.</td></tr>');
   rows.push('<tr class="total"><td style="text-align:left">TOTAL RESULTADO</td>'
-    +'<td>'+fmtBRL(totOrcRec-totOrcCus)+'</td>'
+    +'<td>'+fmtBRL(totProjRec-totProjCus)+'</td>'
     +'<td class="'+(totRealRec-totRealCus>=0?'pos':'neg')+'">'+fmtBRL(totRealRec-totRealCus)+'</td>'
     +'<td></td><td></td><td></td></tr>');
   document.getElementById('orc-tbody').innerHTML=rows.join('');
 
-  document.getElementById('orc-k-rec-orc').textContent=fmtBRL(totOrcRec);
+  document.getElementById('orc-k-rec-orc').textContent=fmtBRL(totProjRec);
   var rrEl=document.getElementById('orc-k-rec-real');
   rrEl.textContent=fmtBRL(totRealRec);
-  rrEl.className='exec-kpi-val '+(totRealRec>=totOrcRec?'green':'red');
-  document.getElementById('orc-k-cus-orc').textContent=fmtBRL(totOrcCus);
+  rrEl.className='exec-kpi-val '+(totRealRec>=totProjRec?'green':'red');
+  document.getElementById('orc-k-cus-orc').textContent=fmtBRL(totProjCus);
   var rcEl=document.getElementById('orc-k-cus-real');
   rcEl.textContent=fmtBRL(totRealCus);
-  rcEl.className='exec-kpi-val '+(totRealCus<=totOrcCus?'green':'red');
-  var resO=totOrcRec-totOrcCus, resR=totRealRec-totRealCus;
+  rcEl.className='exec-kpi-val '+(totRealCus<=totProjCus?'green':'red');
+  var resP=totProjRec-totProjCus, resR=totRealRec-totRealCus;
   var roEl=document.getElementById('orc-k-res-orc');
-  roEl.textContent=fmtBRL(resO); roEl.className='exec-kpi-val '+(resO>=0?'green':'red');
+  roEl.textContent=fmtBRL(resP); roEl.className='exec-kpi-val '+(resP>=0?'green':'red');
   var rrEl2=document.getElementById('orc-k-res-real');
   rrEl2.textContent=fmtBRL(resR); rrEl2.className='exec-kpi-val '+(resR>=0?'green':'red');
-}
-
-function orcSaveOrcado(){
-  _orcInitPeriod();
-  var ccs=FS.refs.centrosCusto||[];
-  if(!ccs.length){toast('⚠️','Cadastre Centros de Custo primeiro.','warn');return;}
-  var mes=document.getElementById('orc-mes').value, ano=document.getElementById('orc-ano').value;
-  document.getElementById('orc-edit-period').textContent=mes+'/'+ano;
-  var orcMap={};
-  _orcBudgetData.forEach(function(b){orcMap[b.centro_custo_nome+'|'+b.tipo]=parseFloat(b.valor_orcado)||0;});
-  document.getElementById('orc-edit-tbody').innerHTML=ccs.map(function(cc){
-    var oR=orcMap[cc.nome+'|receita']||'', oC=orcMap[cc.nome+'|custo']||'';
-    return '<tr><td style="text-align:left;font-weight:600">'+cc.nome+'</td>'
-      +'<td><input class="orc-input" type="number" step="0.01" data-cc="'+cc.nome+'" data-tipo="receita" data-ccid="'+cc.id+'" value="'+oR+'" placeholder="0,00"></td>'
-      +'<td><input class="orc-input" type="number" step="0.01" data-cc="'+cc.nome+'" data-tipo="custo" data-ccid="'+cc.id+'" value="'+oC+'" placeholder="0,00"></td>'
-    +'</tr>';
-  }).join('');
-  var editArea=document.getElementById('orc-edit-area');
-  editArea.style.display='';
-  editArea.scrollIntoView({behavior:'smooth'});
-}
-
-async function orcSaveOrcadoConfirm(){
-  var mes=parseInt(document.getElementById('orc-mes').value);
-  var ano=parseInt(document.getElementById('orc-ano').value);
-  var upserts=[];
-  document.querySelectorAll('#orc-edit-tbody input').forEach(function(inp){
-    upserts.push({ano:ano,mes:mes,centro_custo_nome:inp.dataset.cc,centro_custo_id:inp.dataset.ccid||null,tipo:inp.dataset.tipo,valor_orcado:parseFloat(inp.value)||0,updated_at:new Date().toISOString()});
-  });
-  try{
-    var {error}=await sb.from('orcamentos').upsert(upserts,{onConflict:'ano,mes,centro_custo_nome,tipo'});
-    if(error)throw error;
-    toast('✅','Orçamento salvo!','success');
-    document.getElementById('orc-edit-area').style.display='none';
-    await orcLoad();
-  }catch(e){toast('❌','Erro: '+e.message,'error');}
 }
 
 </script>
