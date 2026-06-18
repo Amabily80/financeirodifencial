@@ -2559,8 +2559,9 @@ async function loadData(){
     const infoEl=document.getElementById('sc-load-info');
     if(infoEl) infoEl.textContent=`${allRows.length} contratos carregados às ${now}`;
   }catch(e){
-    statusIcon.textContent='❌'; statusTxt.textContent='Erro ao carregar';
-    toast('❌','Falha ao carregar: '+e.message,'error');
+    console.error('[loadData]',e);
+    if(statusIcon) statusIcon.textContent='❌'; if(statusTxt) statusTxt.textContent='Erro ao carregar';
+    toast('❌','Falha ao carregar: '+e.message+' | '+((e.stack||'').split('\n')[1]||''),'error');
   }
   document.getElementById('lbar').classList.remove('on');
 }
