@@ -1030,8 +1030,8 @@ input[type="checkbox"]{width:14px;height:14px;accent-color:var(--green-accent);c
     <button class="nav-tab active" onclick="goTab('overview')" id="tab-overview" title="Visão Geral">
       <span class="ticon">🏠</span><span class="tlabel">Visão Geral</span>
     </button>
-    <button class="nav-tab" onclick="goTab('fc')" id="tab-fc" title="Fluxo de Caixa">
-      <span class="ticon">💰</span><span class="tlabel">Fluxo de Caixa</span>
+    <button class="nav-tab" onclick="goTab('fc')" id="tab-fc" title="Dashboard Financeiro">
+      <span class="ticon">📊</span><span class="tlabel">Dashboard</span>
     </button>
     <button class="nav-tab" onclick="goTab('sc')" id="tab-sc" title="Solicitação de Comissão">
       <span class="ticon">📋</span><span class="tlabel">Solicitação Comissão</span>
@@ -1203,122 +1203,132 @@ input[type="checkbox"]{width:14px;height:14px;accent-color:var(--green-accent);c
   <!-- ═══════════════════════════════════
        PAGE: FLUXO DE CAIXA
   ═══════════════════════════════════ -->
-  <div id="page-fc">
+  <div id="page-fc" style="padding:24px">
 
-    <!-- Filtros FC -->
-    <div class="fc-filters" id="fc-filter-row" style="flex-wrap:wrap;row-gap:8px">
-      <span style="font-size:11px;color:var(--text-muted);font-weight:600;text-transform:uppercase;letter-spacing:.08em">Período:</span>
-      <button class="pill-btn" onclick="setFcPeriod('this-month',this)">Este mês</button>
-      <button class="pill-btn" onclick="setFcPeriod('this-year',this)">Este ano</button>
-      <button class="pill-btn active" onclick="setFcPeriod('6',this)">±6 meses</button>
-      <button class="pill-btn" onclick="setFcPeriod('12',this)">12 meses</button>
-      <button class="pill-btn" onclick="setFcPeriod('all',this)">Todo período</button>
-      <span class="pill-sep">|</span>
-      <span style="font-size:11px;color:var(--text-muted);font-weight:600;text-transform:uppercase;letter-spacing:.08em">Visão:</span>
-      <button class="pill-btn active" id="fc-v-mensal" onclick="setFcView('mensal',this)">Mensal</button>
-      <button class="pill-btn" id="fc-v-semanal" onclick="setFcView('semanal',this)">Semanal</button>
-      <span class="pill-sep">|</span>
-      <span style="font-size:11px;color:var(--text-muted);font-weight:600;text-transform:uppercase;letter-spacing:.08em">Empreendimento:</span>
-      <select class="fc-select" id="fc-emp" onchange="renderFC()">
-        <option value="">Todos</option>
-      </select>
-    </div>
-
-    <!-- KPIs FC -->
-    <div class="kpi-grid">
-      <div class="kpi-card c1">
-        <div class="kpi-label">💰 Total Previsto</div>
-        <div class="kpi-value sm" id="fc-k-prev">—</div>
-        <div class="kpi-sub">realizado + a receber no período</div>
+    <!-- Header -->
+    <div class="fin-page-hdr" style="margin-bottom:20px">
+      <div>
+        <h2 class="fin-page-title">📊 Dashboard Financeiro</h2>
+        <p style="font-size:12px;color:var(--text-muted);margin-top:3px">Visão consolidada da empresa — receitas, despesas, caixa e alertas</p>
       </div>
-      <div class="kpi-card c2">
-        <div class="kpi-label">✅ Realizado</div>
-        <div class="kpi-value sm" id="fc-k-real">—</div>
-        <div class="kpi-sub" id="fc-k-real-sub">comissão efetivamente recebida</div>
-      </div>
-      <div class="kpi-card c3">
-        <div class="kpi-label">⏳ A Receber</div>
-        <div class="kpi-value sm" id="fc-k-arec">—</div>
-        <div class="kpi-sub">saldo pendente da construtora</div>
-      </div>
-      <div class="kpi-card c4">
-        <div class="kpi-label">📈 Taxa de Realização</div>
-        <div class="kpi-value" id="fc-k-taxa">—</div>
-        <div class="kpi-sub">do total previsto já recebido</div>
-        <div class="kpi-trend" id="fc-k-taxa-trend"></div>
+      <div style="display:flex;align-items:center;gap:12px">
+        <span id="dash-updated" style="font-size:11px;color:var(--text-muted)"></span>
+        <button class="btn-primary" onclick="fcDashLoad()">↺ Atualizar</button>
       </div>
     </div>
 
-    <!-- Chart -->
-    <div class="chart-card" id="fc-chart-card" style="display:none">
+    <!-- KPIs: Este mês -->
+    <p class="ov-sec" style="margin-bottom:12px">📅 Desempenho de <span id="dash-mes-label">—</span></p>
+    <div class="exec-kpi-grid" style="margin-bottom:6px">
+      <div class="exec-kpi" style="border-top-color:#059669">
+        <div class="exec-kpi-lbl">Receitas Recebidas</div>
+        <div class="exec-kpi-val" style="color:#059669" id="dash-k-rec">—</div>
+        <div class="exec-kpi-sub" id="dash-k-rec-n">0 recebimentos</div>
+      </div>
+      <div class="exec-kpi" style="border-top-color:#dc2626">
+        <div class="exec-kpi-lbl">Despesas Pagas</div>
+        <div class="exec-kpi-val red" id="dash-k-desp">—</div>
+        <div class="exec-kpi-sub" id="dash-k-desp-n">0 pagamentos</div>
+      </div>
+      <div class="exec-kpi">
+        <div class="exec-kpi-lbl">Resultado Líquido</div>
+        <div class="exec-kpi-val" id="dash-k-res">—</div>
+        <div class="exec-kpi-sub">receitas − despesas</div>
+      </div>
+      <div class="exec-kpi" style="border-top-color:#0284c7">
+        <div class="exec-kpi-lbl">Saldo em Caixa</div>
+        <div class="exec-kpi-val blue" id="dash-k-saldo">—</div>
+        <div class="exec-kpi-sub" id="dash-k-saldo-n">todas as contas</div>
+      </div>
+    </div>
+
+    <!-- KPIs: Alertas -->
+    <p class="ov-sec" style="margin-bottom:12px;margin-top:26px">⚠️ Alertas &amp; Projeção Imediata</p>
+    <div class="exec-kpi-grid" style="margin-bottom:6px">
+      <div class="exec-kpi" style="border-top-color:#dc2626">
+        <div class="exec-kpi-lbl">CP Vencidas</div>
+        <div class="exec-kpi-val red" id="dash-k-cpvenc">—</div>
+        <div class="exec-kpi-sub" id="dash-k-cpvenc-n">contas em atraso</div>
+      </div>
+      <div class="exec-kpi" style="border-top-color:#b45309">
+        <div class="exec-kpi-lbl">CR Vencidas</div>
+        <div class="exec-kpi-val" style="color:#b45309" id="dash-k-crvenc">—</div>
+        <div class="exec-kpi-sub" id="dash-k-crvenc-n">recebimentos em atraso</div>
+      </div>
+      <div class="exec-kpi" style="border-top-color:#0284c7">
+        <div class="exec-kpi-lbl">A pagar — próx. 30 dias</div>
+        <div class="exec-kpi-val" style="color:#0284c7" id="dash-k-cp30">—</div>
+        <div class="exec-kpi-sub" id="dash-k-cp30-n">contas pendentes</div>
+      </div>
+      <div class="exec-kpi" style="border-top-color:#059669">
+        <div class="exec-kpi-lbl">A receber — próx. 30 dias</div>
+        <div class="exec-kpi-val" style="color:#059669" id="dash-k-cr30">—</div>
+        <div class="exec-kpi-sub" id="dash-k-cr30-n">recebimentos previstos</div>
+      </div>
+    </div>
+
+    <!-- Chart 1: 12 meses histórico -->
+    <div class="chart-card" style="margin-top:26px">
       <div class="chart-hdr">
         <div>
-          <div class="chart-title">Recebimentos — Realizado vs. A Receber</div>
-          <div class="chart-sub">Agrupado pelo mês de referência da comissão (Data 10% ou 20%)</div>
+          <div class="chart-title">📈 Receitas vs Despesas — Últimos 12 meses</div>
+          <div class="chart-sub">Valores efetivamente pagos e recebidos por mês · linha laranja = resultado mensal</div>
         </div>
-        <div style="display:flex;flex-direction:column;align-items:flex-end;gap:10px">
-          <div class="chart-legend">
-            <div class="leg-item"><div class="leg-dot" style="background:#F47920"></div>Realizado</div>
-            <div class="leg-item"><div class="leg-dot" style="background:#b8943e"></div>A Receber</div>
-            <div class="leg-item"><div class="leg-dot" style="background:#2e7bb4;border-radius:50%"></div>Acumulado</div>
-          </div>
+        <div class="chart-legend">
+          <div class="leg-item"><div class="leg-dot" style="background:#059669"></div>Receitas</div>
+          <div class="leg-item"><div class="leg-dot" style="background:#dc2626"></div>Despesas</div>
+          <div class="leg-item"><div class="leg-dot" style="background:#F47920;border-radius:50%"></div>Resultado</div>
         </div>
       </div>
-      <div class="chart-wrap"><canvas id="fc-chart"></canvas></div>
+      <div class="chart-wrap"><canvas id="dash-chart-hist"></canvas></div>
     </div>
 
-    <!-- Two-col tables -->
-    <div class="two-col" id="fc-tables" style="display:none">
+    <!-- Chart 2: Projeção 3 meses -->
+    <div class="chart-card" style="margin-top:16px">
+      <div class="chart-hdr">
+        <div>
+          <div class="chart-title">🔭 Projeção de Fluxo — Próximos 3 meses</div>
+          <div class="chart-sub">CP e CR com vencimento nos próximos meses · somente status pendente</div>
+        </div>
+        <div class="chart-legend">
+          <div class="leg-item"><div class="leg-dot" style="background:#059669"></div>CR a receber</div>
+          <div class="leg-item"><div class="leg-dot" style="background:#dc2626"></div>CP a pagar</div>
+        </div>
+      </div>
+      <div class="chart-wrap" style="height:200px"><canvas id="dash-chart-proj"></canvas></div>
+    </div>
 
-      <!-- Monthly breakdown -->
+    <!-- Tabelas: maiores pendências -->
+    <div class="two-col" style="margin-top:20px">
       <div class="table-card">
         <div class="table-card-hdr">
-          <div class="table-card-title">📅 Breakdown Mensal</div>
-          <div style="font-size:11px;color:var(--text-muted)" id="fc-tbl-sub"></div>
+          <div class="table-card-title">💳 Maiores CP Pendentes</div>
         </div>
         <div class="table-scroll">
           <table>
             <thead><tr>
-              <th>Mês de Referência</th>
-              <th style="text-align:right">Clientes</th>
-              <th style="text-align:right">Realizado</th>
-              <th style="text-align:right">A Receber</th>
-              <th style="text-align:right">Total Mês</th>
-              <th>Realização</th>
+              <th>Fornecedor / Categoria</th>
+              <th style="text-align:right">Vencimento</th>
+              <th style="text-align:right">Valor</th>
             </tr></thead>
-            <tbody id="fc-tbody"></tbody>
+            <tbody id="dash-cp-tbody"><tr><td colspan="3" style="text-align:center;padding:20px;color:var(--text-muted)">Carregando...</td></tr></tbody>
           </table>
         </div>
       </div>
-
-      <!-- Emp breakdown -->
       <div class="table-card">
         <div class="table-card-hdr">
-          <div class="table-card-title">🏗️ Por Empreendimento</div>
-          <div style="font-size:11px;color:var(--text-muted)" id="fc-emp-sub"></div>
+          <div class="table-card-title">💰 Maiores CR Pendentes</div>
         </div>
         <div class="table-scroll">
           <table>
             <thead><tr>
-              <th>Empreendimento</th>
-              <th style="text-align:right">Clts</th>
-              <th style="text-align:right">Realizado</th>
-              <th style="text-align:right">A Receber</th>
-              <th>% do Total</th>
+              <th>Cliente / Origem</th>
+              <th style="text-align:right">Vencimento</th>
+              <th style="text-align:right">Valor</th>
             </tr></thead>
-            <tbody id="fc-emp-tbody"></tbody>
+            <tbody id="dash-cr-tbody"><tr><td colspan="3" style="text-align:center;padding:20px;color:var(--text-muted)">Carregando...</td></tr></tbody>
           </table>
         </div>
-      </div>
-
-    </div>
-
-    <!-- Empty FC -->
-    <div id="fc-empty">
-      <div class="empty">
-        <div class="icon">💰</div>
-        <h3>Fluxo de Caixa</h3>
-        <p>Carregue os dados da planilha para visualizar o fluxo de recebimentos de comissões por período.</p>
       </div>
     </div>
 
@@ -2439,7 +2449,7 @@ function goTab(id){
     document.getElementById('tab-'+p).classList.toggle('active',p===id);
   });
   if(id==='overview') overviewLoad();
-  if(id==='fc'&&allRows.length) renderFC();
+  if(id==='fc') fcDashLoad();
   if(id==='sc'){
     var _sess=authCurrentUser();
     var _isRestr=_sess&&!_sess.master&&_sess.role==='restricted';
@@ -2819,7 +2829,198 @@ function scApplyCal(){
 }
 
 // ═══════════════════════════════════════════════════════
-// FLUXO DE CAIXA
+// ═══════════════════════════════════════════════════════
+// DASHBOARD FINANCEIRO (CEO)
+// ═══════════════════════════════════════════════════════
+var _dashCp=[], _dashCr=[], _dashBanc=[];
+var _dashHistChart=null, _dashProjChart=null;
+
+async function fcDashLoad(){
+  if(!sb) return;
+  var upEl=document.getElementById('dash-updated');
+  if(upEl) upEl.textContent='Atualizando...';
+  try{
+    var [rCp,rCr,rBanc]=await Promise.all([
+      sb.from('contas_pagar').select('id,descricao,pessoa_nome,categoria_nome,valor,valor_pago,data_pagamento,vencimento,status,conta_bancaria_id').limit(9999),
+      sb.from('contas_receber').select('id,descricao,pessoa_nome,valor,valor_recebido,data_recebimento,vencimento,status,conta_bancaria_id').limit(9999),
+      sb.from('contas_bancarias').select('id,nome,saldo_inicial,data_saldo_inicial').eq('ativo',true),
+    ]);
+    _dashCp=(rCp.data||[]).filter(function(r){return r.status!=='cancelado';});
+    _dashCr=(rCr.data||[]).filter(function(r){return r.status!=='cancelado';});
+    _dashBanc=rBanc.data||[];
+    if(upEl) upEl.textContent='Atualizado às '+new Date().toLocaleTimeString('pt-BR',{hour:'2-digit',minute:'2-digit'});
+    fcDashRender();
+  }catch(e){ toast('❌','Erro ao carregar dashboard: '+e.message,'error'); }
+}
+
+function fcDashRender(){
+  var now=new Date();
+  var today=now.toISOString().split('T')[0];
+  var mesIni=now.getFullYear()+'-'+String(now.getMonth()+1).padStart(2,'0')+'-01';
+  var mesFim=new Date(now.getFullYear(),now.getMonth()+1,0).toISOString().split('T')[0];
+  var d30=new Date(now); d30.setDate(now.getDate()+30);
+  var d30str=d30.toISOString().split('T')[0];
+  var MESES=['Janeiro','Fevereiro','Março','Abril','Maio','Junho','Julho','Agosto','Setembro','Outubro','Novembro','Dezembro'];
+  var mesLbl=document.getElementById('dash-mes-label');
+  if(mesLbl) mesLbl.textContent=MESES[now.getMonth()]+' '+now.getFullYear();
+
+  var vPago=function(r){return parseFloat(r.valor_pago)||parseFloat(r.valor)||0;};
+  var vRec =function(r){return parseFloat(r.valor_recebido)||parseFloat(r.valor)||0;};
+
+  // ── MÊS ATUAL ──
+  var cpPagoMes=_dashCp.filter(function(r){return r.status==='pago'&&r.data_pagamento>=mesIni&&r.data_pagamento<=mesFim;});
+  var crRecMes =_dashCr.filter(function(r){return r.status==='recebido'&&r.data_recebimento>=mesIni&&r.data_recebimento<=mesFim;});
+  var totRecMes=crRecMes.reduce(function(s,r){return s+vRec(r);},0);
+  var totPagMes=cpPagoMes.reduce(function(s,r){return s+vPago(r);},0);
+  var resultado=totRecMes-totPagMes;
+
+  // ── SALDO EM CAIXA ──
+  var totalSaldo=0;
+  _dashBanc.forEach(function(b){
+    var dataRef=b.data_saldo_inicial||null;
+    var cpB=_dashCp.filter(function(r){return r.status==='pago'&&r.conta_bancaria_id===b.id&&(!dataRef||r.data_pagamento>=dataRef);});
+    var crB=_dashCr.filter(function(r){return r.status==='recebido'&&r.conta_bancaria_id===b.id&&(!dataRef||r.data_recebimento>=dataRef);});
+    totalSaldo+=(parseFloat(b.saldo_inicial)||0)+crB.reduce(function(s,r){return s+vRec(r);},0)-cpB.reduce(function(s,r){return s+vPago(r);},0);
+  });
+
+  // ── ALERTAS ──
+  var cpVenc=_dashCp.filter(function(r){return r.status==='vencido';});
+  var crVenc=_dashCr.filter(function(r){return r.status==='vencido';});
+  var cpProx=_dashCp.filter(function(r){return r.status==='pendente'&&r.vencimento>=today&&r.vencimento<=d30str;});
+  var crProx=_dashCr.filter(function(r){return r.status==='pendente'&&r.vencimento>=today&&r.vencimento<=d30str;});
+
+  // ── KPIs RENDER ──
+  document.getElementById('dash-k-rec').textContent=fmtBRL(totRecMes);
+  document.getElementById('dash-k-rec-n').textContent=crRecMes.length+' recebimento(s)';
+  document.getElementById('dash-k-desp').textContent=fmtBRL(totPagMes);
+  document.getElementById('dash-k-desp-n').textContent=cpPagoMes.length+' pagamento(s)';
+  var resEl=document.getElementById('dash-k-res');
+  resEl.textContent=fmtBRL(resultado);
+  resEl.style.color=resultado>=0?'#059669':'#dc2626';
+  document.getElementById('dash-k-saldo').textContent=fmtBRL(totalSaldo);
+  document.getElementById('dash-k-saldo-n').textContent=_dashBanc.length+' conta(s)';
+  document.getElementById('dash-k-cpvenc').textContent=fmtBRL(cpVenc.reduce(function(s,r){return s+(parseFloat(r.valor)||0);},0));
+  document.getElementById('dash-k-cpvenc-n').textContent=cpVenc.length+' conta(s) em atraso';
+  document.getElementById('dash-k-crvenc').textContent=fmtBRL(crVenc.reduce(function(s,r){return s+(parseFloat(r.valor)||0);},0));
+  document.getElementById('dash-k-crvenc-n').textContent=crVenc.length+' recebimento(s) em atraso';
+  document.getElementById('dash-k-cp30').textContent=fmtBRL(cpProx.reduce(function(s,r){return s+(parseFloat(r.valor)||0);},0));
+  document.getElementById('dash-k-cp30-n').textContent=cpProx.length+' conta(s)';
+  document.getElementById('dash-k-cr30').textContent=fmtBRL(crProx.reduce(function(s,r){return s+(parseFloat(r.valor)||0);},0));
+  document.getElementById('dash-k-cr30-n').textContent=crProx.length+' conta(s)';
+
+  // ── GRÁFICO 12 MESES ──
+  var MLBL=['Jan','Fev','Mar','Abr','Mai','Jun','Jul','Ago','Set','Out','Nov','Dez'];
+  var months12=[];
+  for(var i=11;i>=0;i--){
+    var d=new Date(now.getFullYear(),now.getMonth()-i,1);
+    months12.push({y:d.getFullYear(),m:String(d.getMonth()+1).padStart(2,'0'),lbl:MLBL[d.getMonth()]+'/'+String(d.getFullYear()).slice(2)});
+  }
+  var crRec12=months12.map(function(mo){
+    var ini=mo.y+'-'+mo.m+'-01',fim=mo.y+'-'+mo.m+'-31';
+    return _dashCr.filter(function(r){return r.status==='recebido'&&r.data_recebimento>=ini&&r.data_recebimento<=fim;}).reduce(function(s,r){return s+vRec(r);},0);
+  });
+  var cpPago12=months12.map(function(mo){
+    var ini=mo.y+'-'+mo.m+'-01',fim=mo.y+'-'+mo.m+'-31';
+    return _dashCp.filter(function(r){return r.status==='pago'&&r.data_pagamento>=ini&&r.data_pagamento<=fim;}).reduce(function(s,r){return s+vPago(r);},0);
+  });
+  var res12=months12.map(function(_,i){return crRec12[i]-cpPago12[i];});
+  _fcDashChartHist(months12.map(function(m){return m.lbl;}),crRec12,cpPago12,res12);
+
+  // ── GRÁFICO PROJEÇÃO 3 MESES ──
+  var months3=[];
+  for(var j=0;j<3;j++){
+    var d3=new Date(now.getFullYear(),now.getMonth()+j,1);
+    months3.push({y:d3.getFullYear(),m:String(d3.getMonth()+1).padStart(2,'0'),lbl:MLBL[d3.getMonth()]+'/'+String(d3.getFullYear()).slice(2)});
+  }
+  var crProj3=months3.map(function(mo){
+    var ini=mo.y+'-'+mo.m+'-01',fim=mo.y+'-'+mo.m+'-31';
+    return _dashCr.filter(function(r){return r.status!=='recebido'&&r.vencimento&&r.vencimento>=ini&&r.vencimento<=fim;}).reduce(function(s,r){return s+(parseFloat(r.valor)||0);},0);
+  });
+  var cpProj3=months3.map(function(mo){
+    var ini=mo.y+'-'+mo.m+'-01',fim=mo.y+'-'+mo.m+'-31';
+    return _dashCp.filter(function(r){return r.status!=='pago'&&r.vencimento&&r.vencimento>=ini&&r.vencimento<=fim;}).reduce(function(s,r){return s+(parseFloat(r.valor)||0);},0);
+  });
+  _fcDashChartProj(months3.map(function(m){return m.lbl;}),crProj3,cpProj3);
+
+  // ── TABELAS ──
+  var cpPendAll=_dashCp.filter(function(r){return r.status==='pendente'||r.status==='vencido';}).sort(function(a,b){return (parseFloat(b.valor)||0)-(parseFloat(a.valor)||0);}).slice(0,10);
+  var crPendAll=_dashCr.filter(function(r){return r.status==='pendente'||r.status==='vencido';}).sort(function(a,b){return (parseFloat(b.valor)||0)-(parseFloat(a.valor)||0);}).slice(0,10);
+
+  function fmtVenc(v){return v?(v.split('-').reverse().join('/')):'—';}
+  function isAtrasado(r){return r.status==='vencido'||r.vencimento<today;}
+
+  document.getElementById('dash-cp-tbody').innerHTML=cpPendAll.length?cpPendAll.map(function(r){
+    var atr=isAtrasado(r);
+    return '<tr>'
+      +'<td style="font-size:12px"><span style="font-weight:600">'+(r.pessoa_nome||r.descricao||'—')+'</span>'
+      +(r.categoria_nome?'<br><span style="font-size:10px;color:var(--text-muted)">'+r.categoria_nome+'</span>':'')+'</td>'
+      +'<td style="text-align:right;font-size:12px;'+(atr?'color:#dc2626;font-weight:600':'')+'">'+(atr?'⚠ ':'')+fmtVenc(r.vencimento)+'</td>'
+      +'<td class="mono neg" style="text-align:right;font-weight:600">'+fmtBRL(parseFloat(r.valor)||0)+'</td></tr>';
+  }).join(''):'<tr><td colspan="3" style="text-align:center;padding:20px;color:var(--text-muted)">Nenhuma pendência</td></tr>';
+
+  document.getElementById('dash-cr-tbody').innerHTML=crPendAll.length?crPendAll.map(function(r){
+    var atr=isAtrasado(r);
+    return '<tr>'
+      +'<td style="font-size:12px"><span style="font-weight:600">'+(r.pessoa_nome||r.descricao||'—')+'</span></td>'
+      +'<td style="text-align:right;font-size:12px;'+(atr?'color:#dc2626;font-weight:600':'')+'">'+(atr?'⚠ ':'')+fmtVenc(r.vencimento)+'</td>'
+      +'<td class="mono pos" style="text-align:right;font-weight:600">'+fmtBRL(parseFloat(r.valor)||0)+'</td></tr>';
+  }).join(''):'<tr><td colspan="3" style="text-align:center;padding:20px;color:var(--text-muted)">Nenhuma pendência</td></tr>';
+}
+
+function _fcDashChartHist(labels,crData,cpData,resData){
+  if(_dashHistChart){_dashHistChart.destroy();_dashHistChart=null;}
+  var ctx=document.getElementById('dash-chart-hist');
+  if(!ctx)return;
+  _dashHistChart=new Chart(ctx.getContext('2d'),{
+    data:{labels:labels,datasets:[
+      {type:'bar',label:'Receitas',data:crData,backgroundColor:'rgba(5,150,105,0.75)',borderColor:'#059669',borderWidth:1,borderRadius:4,order:2},
+      {type:'bar',label:'Despesas',data:cpData,backgroundColor:'rgba(220,38,38,0.7)',borderColor:'#dc2626',borderWidth:1,borderRadius:4,order:2},
+      {type:'line',label:'Resultado',data:resData,borderColor:'#F47920',backgroundColor:'rgba(244,121,32,0.06)',borderWidth:2.5,pointRadius:3,pointBackgroundColor:'#F47920',fill:true,tension:0.35,order:1},
+    ]},
+    options:{
+      responsive:true,maintainAspectRatio:false,
+      interaction:{mode:'index',intersect:false},
+      plugins:{
+        legend:{display:false},
+        tooltip:{backgroundColor:'#fff',borderColor:'#e2e8f0',borderWidth:1,titleColor:'#1e293b',bodyColor:'#64748b',padding:12,
+          callbacks:{label:function(c){return ' '+c.dataset.label+': '+fmtBRL(c.parsed.y);},
+            footer:function(items){var t=items.find(function(i){return i.dataset.label==='Resultado';});return t?'Resultado: '+fmtBRL(t.parsed.y):'';}}}
+      },
+      scales:{
+        x:{grid:{display:false},ticks:{font:{size:11},color:'#94a3b8'}},
+        y:{grid:{color:'rgba(0,0,0,0.04)'},ticks:{font:{size:11},color:'#94a3b8',callback:function(v){return fmtShort(v);}},position:'left'},
+      }
+    }
+  });
+}
+
+function _fcDashChartProj(labels,crData,cpData){
+  if(_dashProjChart){_dashProjChart.destroy();_dashProjChart=null;}
+  var ctx=document.getElementById('dash-chart-proj');
+  if(!ctx)return;
+  _dashProjChart=new Chart(ctx.getContext('2d'),{
+    data:{labels:labels,datasets:[
+      {type:'bar',label:'CR a receber',data:crData,backgroundColor:'rgba(5,150,105,0.7)',borderColor:'#059669',borderWidth:1,borderRadius:6},
+      {type:'bar',label:'CP a pagar',data:cpData,backgroundColor:'rgba(220,38,38,0.65)',borderColor:'#dc2626',borderWidth:1,borderRadius:6},
+    ]},
+    options:{
+      responsive:true,maintainAspectRatio:false,
+      interaction:{mode:'index',intersect:false},
+      plugins:{
+        legend:{display:false},
+        tooltip:{backgroundColor:'#fff',borderColor:'#e2e8f0',borderWidth:1,titleColor:'#1e293b',bodyColor:'#64748b',padding:12,
+          callbacks:{label:function(c){return ' '+c.dataset.label+': '+fmtBRL(c.parsed.y);}}}
+      },
+      scales:{
+        x:{grid:{display:false},ticks:{font:{size:12},color:'#64748b',font:{weight:'600'}}},
+        y:{grid:{color:'rgba(0,0,0,0.04)'},ticks:{font:{size:11},color:'#94a3b8',callback:function(v){return fmtShort(v);}}}
+      }
+    }
+  });
+}
+
+// ═══════════════════════════════════════════════════════
+// FLUXO DE CAIXA (comissões — legado)
 // ═══════════════════════════════════════════════════════
 function setFcPeriod(p,el){
   fcPeriodo=p;
