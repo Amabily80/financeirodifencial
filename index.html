@@ -5125,15 +5125,70 @@ function cadRenderCentrosCusto(){
   list.innerHTML=ccs.map(function(cc){
     var badge='<span class="cc-badge '+(tipoMap[cc.tipo]||'')+'">'+cc.tipo+'</span>';
     var cats=(FS.refs.categorias||[]).filter(function(c){return c.centro_custo_id===cc.id;});
-    var sub=cats.length?cats.map(function(c){return c.nome;}).join(', '):'Nenhuma categoria vinculada';
-    return '<div class="cad-list-item">'
+    var sub=cats.length?cats.map(function(c){return c.nome;}).join(', '):'<em style="color:var(--text-muted)">Nenhuma categoria vinculada — clique em 🔗 para vincular</em>';
+    return '<div style="border:1px solid var(--border2);border-radius:8px;overflow:hidden;background:var(--surface);margin-bottom:6px">'
+      +'<div style="display:flex;align-items:center;padding:10px 14px;gap:10px">'
       +'<div style="flex:1"><div class="cad-list-item-name">'+cc.nome+badge+'</div>'
-      +'<div class="cad-list-item-sub" style="font-size:11px">'+sub+'</div></div>'
+      +'<div class="cad-list-item-sub" style="font-size:11px;margin-top:2px">'+sub+'</div></div>'
       +'<div style="display:flex;gap:4px">'
+      +'<button class="cad-list-item-del" title="Vincular categorias" style="color:#7c3aed;border-color:rgba(124,58,237,.3)" onclick="cadCCToggleLinks(\''+cc.id+'\')">🔗</button>'
       +'<button class="cad-list-item-del" style="color:var(--brand);border-color:rgba(244,121,32,.3)" onclick="cadEditCentroCusto(\''+cc.id+'\')">&#9998;</button>'
       +'<button class="cad-list-item-del" onclick="cadDeleteCentroCusto(\''+cc.id+'\')">&#x1F5D1;</button>'
-      +'</div></div>';
+      +'</div></div>'
+      +'<div id="cc-links-'+cc.id+'" style="display:none;border-top:1px solid var(--border);padding:14px;background:var(--surface2)">'
+      +cadCCLinksHTML(cc)
+      +'</div>'
+    +'</div>';
   }).join('');
+}
+
+function cadCCLinksHTML(cc){
+  var allCats=FS.refs.categorias||[];
+  if(!allCats.length) return '<div style="font-size:12px;color:var(--text-muted)">Nenhuma categoria cadastrada. Cadastre categorias primeiro.</div>';
+  var rows=allCats.map(function(c){
+    var checked=c.centro_custo_id===cc.id?' checked':'';
+    var tipoLabel='<small style="color:var(--text-muted)">('+c.tipo+')</small>';
+    var jaOutroCc=c.centro_custo_id&&c.centro_custo_id!==cc.id?'<small style="color:#d97706"> — vinculada a: '+c.centro_custo_nome+'</small>':'';
+    return '<label style="display:flex;align-items:center;gap:8px;padding:5px 0;cursor:pointer;font-size:13px">'
+      +'<input type="checkbox" data-catid="'+c.id+'" data-catnome="'+c.nome+'"'+checked+' style="width:15px;height:15px;cursor:pointer">'
+      +c.nome+' '+tipoLabel+jaOutroCc
+    +'</label>';
+  }).join('');
+  return '<div style="font-size:11px;font-weight:700;text-transform:uppercase;letter-spacing:.06em;color:var(--text-muted);margin-bottom:8px">Categorias vinculadas a este CC:</div>'
+    +'<div style="max-height:220px;overflow-y:auto;margin-bottom:10px">'+rows+'</div>'
+    +'<div style="display:flex;gap:8px">'
+    +'<button class="btn-primary" style="font-size:12px;padding:6px 14px" onclick="cadCCSaveLinks(\''+cc.id+'\',\''+cc.nome+'\')">💾 Salvar vínculos</button>'
+    +'<button class="btn-secondary" style="font-size:12px;padding:6px 14px" onclick="cadCCToggleLinks(\''+cc.id+'\')">Fechar</button>'
+    +'</div>';
+}
+
+function cadCCToggleLinks(ccId){
+  var el=document.getElementById('cc-links-'+ccId); if(!el) return;
+  el.style.display=el.style.display==='none'?'':' none';
+  el.style.display=el.style.display.trim()?'':'block';
+}
+
+async function cadCCSaveLinks(ccId,ccNome){
+  var panel=document.getElementById('cc-links-'+ccId); if(!panel) return;
+  var checkboxes=panel.querySelectorAll('input[type=checkbox]');
+  var toLink=[], toUnlink=[];
+  checkboxes.forEach(function(cb){
+    if(cb.checked) toLink.push({id:cb.dataset.catid, nome:cb.dataset.catnome});
+    else toUnlink.push(cb.dataset.catid);
+  });
+  try{
+    var ops=[];
+    if(toLink.length){
+      ops.push(sb.from('categorias').update({centro_custo_id:ccId,centro_custo_nome:ccNome}).in('id',toLink.map(function(c){return c.id;})));
+    }
+    if(toUnlink.length){
+      // Só desvincula as que estavam vinculadas a ESTE CC (não toca nas de outros CCs)
+      ops.push(sb.from('categorias').update({centro_custo_id:null,centro_custo_nome:null}).in('id',toUnlink).eq('centro_custo_id',ccId));
+    }
+    await Promise.all(ops);
+    toast('✅','Vínculos salvos!','success');
+    await loadRefs();
+  }catch(e){toast('❌','Erro: '+e.message,'error');}
 }
 async function cadSaveCentroCusto(){
   var nome=document.getElementById('cad-cc-nome').value.trim();
@@ -6622,15 +6677,70 @@ function cadRenderCentrosCusto(){
   list.innerHTML=ccs.map(function(cc){
     var badge='<span class="cc-badge '+(tipoMap[cc.tipo]||'')+'">'+cc.tipo+'</span>';
     var cats=(FS.refs.categorias||[]).filter(function(c){return c.centro_custo_id===cc.id;});
-    var sub=cats.length?cats.map(function(c){return c.nome;}).join(', '):'Nenhuma categoria vinculada';
-    return '<div class="cad-list-item">'
+    var sub=cats.length?cats.map(function(c){return c.nome;}).join(', '):'<em style="color:var(--text-muted)">Nenhuma categoria vinculada — clique em 🔗 para vincular</em>';
+    return '<div style="border:1px solid var(--border2);border-radius:8px;overflow:hidden;background:var(--surface);margin-bottom:6px">'
+      +'<div style="display:flex;align-items:center;padding:10px 14px;gap:10px">'
       +'<div style="flex:1"><div class="cad-list-item-name">'+cc.nome+badge+'</div>'
-      +'<div class="cad-list-item-sub" style="font-size:11px">'+sub+'</div></div>'
+      +'<div class="cad-list-item-sub" style="font-size:11px;margin-top:2px">'+sub+'</div></div>'
       +'<div style="display:flex;gap:4px">'
+      +'<button class="cad-list-item-del" title="Vincular categorias" style="color:#7c3aed;border-color:rgba(124,58,237,.3)" onclick="cadCCToggleLinks(\''+cc.id+'\')">🔗</button>'
       +'<button class="cad-list-item-del" style="color:var(--brand);border-color:rgba(244,121,32,.3)" onclick="cadEditCentroCusto(\''+cc.id+'\')">&#9998;</button>'
       +'<button class="cad-list-item-del" onclick="cadDeleteCentroCusto(\''+cc.id+'\')">&#x1F5D1;</button>'
-      +'</div></div>';
+      +'</div></div>'
+      +'<div id="cc-links-'+cc.id+'" style="display:none;border-top:1px solid var(--border);padding:14px;background:var(--surface2)">'
+      +cadCCLinksHTML(cc)
+      +'</div>'
+    +'</div>';
   }).join('');
+}
+
+function cadCCLinksHTML(cc){
+  var allCats=FS.refs.categorias||[];
+  if(!allCats.length) return '<div style="font-size:12px;color:var(--text-muted)">Nenhuma categoria cadastrada. Cadastre categorias primeiro.</div>';
+  var rows=allCats.map(function(c){
+    var checked=c.centro_custo_id===cc.id?' checked':'';
+    var tipoLabel='<small style="color:var(--text-muted)">('+c.tipo+')</small>';
+    var jaOutroCc=c.centro_custo_id&&c.centro_custo_id!==cc.id?'<small style="color:#d97706"> — vinculada a: '+c.centro_custo_nome+'</small>':'';
+    return '<label style="display:flex;align-items:center;gap:8px;padding:5px 0;cursor:pointer;font-size:13px">'
+      +'<input type="checkbox" data-catid="'+c.id+'" data-catnome="'+c.nome+'"'+checked+' style="width:15px;height:15px;cursor:pointer">'
+      +c.nome+' '+tipoLabel+jaOutroCc
+    +'</label>';
+  }).join('');
+  return '<div style="font-size:11px;font-weight:700;text-transform:uppercase;letter-spacing:.06em;color:var(--text-muted);margin-bottom:8px">Categorias vinculadas a este CC:</div>'
+    +'<div style="max-height:220px;overflow-y:auto;margin-bottom:10px">'+rows+'</div>'
+    +'<div style="display:flex;gap:8px">'
+    +'<button class="btn-primary" style="font-size:12px;padding:6px 14px" onclick="cadCCSaveLinks(\''+cc.id+'\',\''+cc.nome+'\')">💾 Salvar vínculos</button>'
+    +'<button class="btn-secondary" style="font-size:12px;padding:6px 14px" onclick="cadCCToggleLinks(\''+cc.id+'\')">Fechar</button>'
+    +'</div>';
+}
+
+function cadCCToggleLinks(ccId){
+  var el=document.getElementById('cc-links-'+ccId); if(!el) return;
+  el.style.display=el.style.display==='none'?'':' none';
+  el.style.display=el.style.display.trim()?'':'block';
+}
+
+async function cadCCSaveLinks(ccId,ccNome){
+  var panel=document.getElementById('cc-links-'+ccId); if(!panel) return;
+  var checkboxes=panel.querySelectorAll('input[type=checkbox]');
+  var toLink=[], toUnlink=[];
+  checkboxes.forEach(function(cb){
+    if(cb.checked) toLink.push({id:cb.dataset.catid, nome:cb.dataset.catnome});
+    else toUnlink.push(cb.dataset.catid);
+  });
+  try{
+    var ops=[];
+    if(toLink.length){
+      ops.push(sb.from('categorias').update({centro_custo_id:ccId,centro_custo_nome:ccNome}).in('id',toLink.map(function(c){return c.id;})));
+    }
+    if(toUnlink.length){
+      // Só desvincula as que estavam vinculadas a ESTE CC (não toca nas de outros CCs)
+      ops.push(sb.from('categorias').update({centro_custo_id:null,centro_custo_nome:null}).in('id',toUnlink).eq('centro_custo_id',ccId));
+    }
+    await Promise.all(ops);
+    toast('✅','Vínculos salvos!','success');
+    await loadRefs();
+  }catch(e){toast('❌','Erro: '+e.message,'error');}
 }
 async function cadSaveCentroCusto(){
   var nome=document.getElementById('cad-cc-nome').value.trim();
