@@ -3056,6 +3056,7 @@ function setFcView(v,el){
 function buildFcEmpFilter(){
   const emps=[...new Set(allRows.map(r=>r.emp))].sort();
   const sel=document.getElementById('fc-emp');
+  if(!sel) return;
   sel.innerHTML='<option value="">Todos</option>';
   emps.forEach(e=>{const o=document.createElement('option');o.value=e;o.textContent=e;sel.appendChild(o);});
 }
