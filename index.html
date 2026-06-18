@@ -491,6 +491,8 @@ input[type="checkbox"]{width:14px;height:14px;accent-color:var(--green-accent);c
 .cad-list-item-del{background:none;border:1px solid var(--border2);border-radius:5px;padding:3px 8px;font-size:11px;color:var(--red);cursor:pointer;transition:all .15s;font-family:'DM Sans',sans-serif}
 .cad-list-item-del:hover{background:var(--red-bg);border-color:rgba(192,57,43,.3)}
 .cad-inactive{opacity:.5}
+.cc-badge{display:inline-block;font-size:9px;font-weight:700;padding:1px 7px;border-radius:4px;background:#e0f2fe;color:#0369a1;margin-left:6px;vertical-align:middle}
+.cc-tipo-receita{background:#dcfce7;color:#15803d}.cc-tipo-custo{background:#fee2e2;color:#b91c1c}.cc-tipo-ambos{background:#f1f5f9;color:#475569}
 .cad-overlay-bg{display:none;position:fixed;inset:0;background:rgba(0,0,0,.2);z-index:499}
 .cad-overlay-bg.open{display:block}
 
@@ -737,6 +739,8 @@ input[type="checkbox"]{width:14px;height:14px;accent-color:var(--green-accent);c
 .cad-list-item-del{background:none;border:1px solid var(--border2);border-radius:5px;padding:3px 8px;font-size:11px;color:var(--red);cursor:pointer;transition:all .15s;font-family:'DM Sans',sans-serif}
 .cad-list-item-del:hover{background:var(--red-bg);border-color:rgba(192,57,43,.3)}
 .cad-inactive{opacity:.5}
+.cc-badge{display:inline-block;font-size:9px;font-weight:700;padding:1px 7px;border-radius:4px;background:#e0f2fe;color:#0369a1;margin-left:6px;vertical-align:middle}
+.cc-tipo-receita{background:#dcfce7;color:#15803d}.cc-tipo-custo{background:#fee2e2;color:#b91c1c}.cc-tipo-ambos{background:#f1f5f9;color:#475569}
 .cad-overlay-bg{display:none;position:fixed;inset:0;background:rgba(0,0,0,.2);z-index:499}
 .cad-overlay-bg.open{display:block}
 
@@ -3916,7 +3920,7 @@ var FS = {
   editId: null,
   cpRows: [],
   crRows: [],
-  refs: { pessoas:[], categorias:[], bancarias:[], projetos:[] }
+  refs: { pessoas:[], categorias:[], bancarias:[], projetos:[], centrosCusto:[] }
 };
 
 // ── FORMATADORES ──
@@ -3948,21 +3952,25 @@ function projBadge(nome){
 async function loadRefs(){
   if(!sb) return;
   try{
-    var [rPessoas, rCats, rBanc, rProj] = await Promise.all([
+    var [rPessoas, rCats, rBanc, rProj, rCC] = await Promise.all([
       sb.from('pessoas').select('*').eq('ativo',true).order('nome'),
       sb.from('categorias').select('*').eq('ativo',true).order('nome'),
       sb.from('contas_bancarias').select('*').eq('ativo',true).order('nome'),
       sb.from('projetos').select('*').eq('ativo',true).order('nome'),
+      sb.from('centros_custo').select('*').eq('ativo',true).order('nome'),
     ]);
-    FS.refs.pessoas   = rPessoas.data  || [];
-    FS.refs.categorias= rCats.data     || [];
-    FS.refs.bancarias = rBanc.data     || [];
-    FS.refs.projetos  = rProj.data     || [];
+    FS.refs.pessoas      = rPessoas.data  || [];
+    FS.refs.categorias   = rCats.data     || [];
+    FS.refs.bancarias    = rBanc.data     || [];
+    FS.refs.projetos     = rProj.data     || [];
+    FS.refs.centrosCusto = rCC.data       || [];
     fillProjDropdowns();
     fillCatDropdowns();
+    _cadFillCCDropdown();
     cadRenderPessoas();
     cadRenderCategorias();
     cadRenderBancarias();
+    cadRenderCentrosCusto();
   }catch(e){
     toast('❌','Erro ao carregar refs: '+e.message,'error');
   }
@@ -4729,9 +4737,10 @@ function cadClose(){
 }
 
 function cadTab(t){
-  ['pessoas','categorias','bancarias'].forEach(function(x){
+  ['pessoas','categorias','bancarias','centros-custo'].forEach(function(x){
     document.getElementById('cadtab-'+x).classList.toggle('active',x===t);
-    document.getElementById('cadpane-'+x).classList.toggle('active',x===t);
+    var pane=document.getElementById('cadpane-'+x);
+    if(pane){ pane.style.display=(x===t)?'block':'none'; pane.classList.toggle('active',x===t); }
   });
 }
 
@@ -4785,12 +4794,16 @@ function cadRenderPessoas(){
 async function cadSaveCategoria(){
   var nome = document.getElementById('cad-c-nome').value.trim();
   if(!nome){ toast('⚠️','Informe o nome.','warn'); return; }
-  var data = { nome:nome, tipo:document.getElementById('cad-c-tipo').value, ativo:true };
+  var ccEl=document.getElementById('cad-c-cc');
+  var ccId=ccEl?ccEl.value||null:null;
+  var ccNome=ccId?(FS.refs.centrosCusto.find(function(x){return x.id===ccId;})||{}).nome||null:null;
+  var data = { nome:nome, tipo:document.getElementById('cad-c-tipo').value, ativo:true, centro_custo_id:ccId, centro_custo_nome:ccNome };
   try{
     var {error} = await sb.from('categorias').insert([data]);
     if(error) throw error;
     toast('✅','Categoria criada!','success');
     document.getElementById('cad-c-nome').value='';
+    if(ccEl) ccEl.value='';
     await loadRefs();
   }catch(e){ toast('❌','Erro: '+e.message,'error'); }
 }
@@ -4809,8 +4822,9 @@ function cadRenderCategorias(){
   var list = document.getElementById('cad-categorias-list'); if(!list) return;
   if(!FS.refs.categorias.length){ list.innerHTML='<div style="font-size:12px;color:var(--text-dim);padding:8px">Nenhuma categoria cadastrada.</div>'; return; }
   list.innerHTML = FS.refs.categorias.map(function(c){
+    var ccBadge=c.centro_custo_nome?'<span class="cc-badge">'+c.centro_custo_nome+'</span>':'';
     return '<div class="cad-list-item">'
-      +'<div style="flex:1"><div class="cad-list-item-name">'+c.nome+'</div>'
+      +'<div style="flex:1"><div class="cad-list-item-name">'+c.nome+ccBadge+'</div>'
       +'<div class="cad-list-item-sub">'+c.tipo+'</div></div>'
       +'<div style="display:flex;gap:4px">'
       +'<button class="cad-list-item-del" style="color:var(--brand);border-color:rgba(244,121,32,.3)" onclick="cadEditCategoria(\''+c.id+'\')">&#9998;</button>'
@@ -4866,6 +4880,89 @@ function cadRenderBancarias(){
       +'</div>'
     +'</div>';
   }).join('');
+}
+
+// ── CRUD CENTROS DE CUSTO ──
+function _cadFillCCDropdown(){
+  var ccs=FS.refs.centrosCusto||[];
+  document.querySelectorAll('#cad-c-cc').forEach(function(el){
+    var cur=el.value;
+    el.innerHTML='<option value="">Nenhum</option>';
+    ccs.forEach(function(cc){ el.innerHTML+='<option value="'+cc.id+'">'+cc.nome+'</option>'; });
+    el.value=cur;
+  });
+}
+function cadRenderCentrosCusto(){
+  var list=document.getElementById('cad-centros-custo-list'); if(!list) return;
+  var ccs=FS.refs.centrosCusto||[];
+  if(!ccs.length){ list.innerHTML='<div style="font-size:12px;color:var(--text-dim);padding:8px">Nenhum centro de custo cadastrado.</div>'; return; }
+  var tipoMap={custo:'cc-tipo-custo',receita:'cc-tipo-receita',ambos:'cc-tipo-ambos'};
+  list.innerHTML=ccs.map(function(cc){
+    var badge='<span class="cc-badge '+(tipoMap[cc.tipo]||'')+'">'+cc.tipo+'</span>';
+    var cats=(FS.refs.categorias||[]).filter(function(c){return c.centro_custo_id===cc.id;});
+    var sub=cats.length?cats.map(function(c){return c.nome;}).join(', '):'Nenhuma categoria vinculada';
+    return '<div class="cad-list-item">'
+      +'<div style="flex:1"><div class="cad-list-item-name">'+cc.nome+badge+'</div>'
+      +'<div class="cad-list-item-sub" style="font-size:11px">'+sub+'</div></div>'
+      +'<div style="display:flex;gap:4px">'
+      +'<button class="cad-list-item-del" style="color:var(--brand);border-color:rgba(244,121,32,.3)" onclick="cadEditCentroCusto(\''+cc.id+'\')">&#9998;</button>'
+      +'<button class="cad-list-item-del" onclick="cadDeleteCentroCusto(\''+cc.id+'\')">&#x1F5D1;</button>'
+      +'</div></div>';
+  }).join('');
+}
+async function cadSaveCentroCusto(){
+  var nome=document.getElementById('cad-cc-nome').value.trim();
+  if(!nome){ toast('⚠️','Informe o nome.','warn'); return; }
+  var data={nome:nome,tipo:document.getElementById('cad-cc-tipo').value,descricao:document.getElementById('cad-cc-descricao').value.trim()||null,ativo:true};
+  try{
+    var {error}=await sb.from('centros_custo').insert([data]);
+    if(error) throw error;
+    toast('✅','Centro de custo criado!','success');
+    ['cad-cc-nome','cad-cc-descricao'].forEach(function(id){document.getElementById(id).value='';});
+    await loadRefs();
+  }catch(e){ toast('❌','Erro: '+e.message,'error'); }
+}
+var _cadEditCC={id:null};
+function cadEditCentroCusto(id){
+  var cc=(FS.refs.centrosCusto||[]).find(function(x){return x.id===id;}); if(!cc) return;
+  _cadEditCC.id=id;
+  document.getElementById('cad-cc-nome').value=cc.nome||'';
+  document.getElementById('cad-cc-tipo').value=cc.tipo||'custo';
+  document.getElementById('cad-cc-descricao').value=cc.descricao||'';
+  var h=document.querySelector('#cadpane-centros-custo .cad-inline-form h4');
+  var btn=document.querySelector('#cadpane-centros-custo .cad-save-btn');
+  if(h) h.innerHTML='Editar Centro de Custo <button onclick="_cadResetCC()" style="font-size:10px;margin-left:8px;background:var(--surface2);border:1px solid var(--border2);border-radius:4px;padding:2px 7px;cursor:pointer;color:var(--text-muted)">Cancelar</button>';
+  if(btn){ btn.textContent='Atualizar'; btn.onclick=function(){cadUpdateCentroCusto();}; }
+  document.querySelector('#cadpane-centros-custo .cad-inline-form').scrollIntoView({behavior:'smooth'});
+}
+async function cadUpdateCentroCusto(){
+  if(!_cadEditCC.id) return;
+  var nome=document.getElementById('cad-cc-nome').value.trim();
+  if(!nome){ toast('⚠️','Informe o nome.','warn'); return; }
+  try{
+    var {error}=await sb.from('centros_custo').update({nome:nome,tipo:document.getElementById('cad-cc-tipo').value,descricao:document.getElementById('cad-cc-descricao').value.trim()||null}).eq('id',_cadEditCC.id);
+    if(error) throw error;
+    toast('✅','Centro de custo atualizado!','success');
+    _cadResetCC(); await loadRefs();
+  }catch(e){ toast('❌','Erro: '+e.message,'error'); }
+}
+function _cadResetCC(){
+  var h=document.querySelector('#cadpane-centros-custo .cad-inline-form h4');
+  var btn=document.querySelector('#cadpane-centros-custo .cad-save-btn');
+  if(h) h.textContent='Novo Centro de Custo';
+  if(btn){ btn.textContent='Salvar Centro de Custo'; btn.onclick=function(){cadSaveCentroCusto();}; }
+  ['cad-cc-nome','cad-cc-descricao'].forEach(function(id){document.getElementById(id).value='';});
+  document.getElementById('cad-cc-tipo').value='custo';
+  _cadEditCC.id=null;
+}
+async function cadDeleteCentroCusto(id){
+  if(!confirm('Desativar este centro de custo?')) return;
+  try{
+    var {error}=await sb.from('centros_custo').update({ativo:false}).eq('id',id);
+    if(error) throw error;
+    toast('✅','Centro de custo desativado.','success');
+    await loadRefs();
+  }catch(e){ toast('❌','Erro: '+e.message,'error'); }
 }
 
 // ══════════════════════════════════════
@@ -5353,7 +5450,7 @@ var FS = {
   editId: null,
   cpRows: [],
   crRows: [],
-  refs: { pessoas:[], categorias:[], bancarias:[], projetos:[] }
+  refs: { pessoas:[], categorias:[], bancarias:[], projetos:[], centrosCusto:[] }
 };
 
 // ── FORMATADORES ──
@@ -5385,21 +5482,25 @@ function projBadge(nome){
 async function loadRefs(){
   if(!sb) return;
   try{
-    var [rPessoas, rCats, rBanc, rProj] = await Promise.all([
+    var [rPessoas, rCats, rBanc, rProj, rCC] = await Promise.all([
       sb.from('pessoas').select('*').eq('ativo',true).order('nome'),
       sb.from('categorias').select('*').eq('ativo',true).order('nome'),
       sb.from('contas_bancarias').select('*').eq('ativo',true).order('nome'),
       sb.from('projetos').select('*').eq('ativo',true).order('nome'),
+      sb.from('centros_custo').select('*').eq('ativo',true).order('nome'),
     ]);
-    FS.refs.pessoas   = rPessoas.data  || [];
-    FS.refs.categorias= rCats.data     || [];
-    FS.refs.bancarias = rBanc.data     || [];
-    FS.refs.projetos  = rProj.data     || [];
+    FS.refs.pessoas      = rPessoas.data  || [];
+    FS.refs.categorias   = rCats.data     || [];
+    FS.refs.bancarias    = rBanc.data     || [];
+    FS.refs.projetos     = rProj.data     || [];
+    FS.refs.centrosCusto = rCC.data       || [];
     fillProjDropdowns();
     fillCatDropdowns();
+    _cadFillCCDropdown();
     cadRenderPessoas();
     cadRenderCategorias();
     cadRenderBancarias();
+    cadRenderCentrosCusto();
   }catch(e){
     toast('❌','Erro ao carregar refs: '+e.message,'error');
   }
@@ -6021,9 +6122,10 @@ function cadClose(){
 }
 
 function cadTab(t){
-  ['pessoas','categorias','bancarias'].forEach(function(x){
+  ['pessoas','categorias','bancarias','centros-custo'].forEach(function(x){
     document.getElementById('cadtab-'+x).classList.toggle('active',x===t);
-    document.getElementById('cadpane-'+x).classList.toggle('active',x===t);
+    var pane=document.getElementById('cadpane-'+x);
+    if(pane){ pane.style.display=(x===t)?'block':'none'; pane.classList.toggle('active',x===t); }
   });
 }
 
@@ -6077,12 +6179,16 @@ function cadRenderPessoas(){
 async function cadSaveCategoria(){
   var nome = document.getElementById('cad-c-nome').value.trim();
   if(!nome){ toast('⚠️','Informe o nome.','warn'); return; }
-  var data = { nome:nome, tipo:document.getElementById('cad-c-tipo').value, ativo:true };
+  var ccEl=document.getElementById('cad-c-cc');
+  var ccId=ccEl?ccEl.value||null:null;
+  var ccNome=ccId?(FS.refs.centrosCusto.find(function(x){return x.id===ccId;})||{}).nome||null:null;
+  var data = { nome:nome, tipo:document.getElementById('cad-c-tipo').value, ativo:true, centro_custo_id:ccId, centro_custo_nome:ccNome };
   try{
     var {error} = await sb.from('categorias').insert([data]);
     if(error) throw error;
     toast('✅','Categoria criada!','success');
     document.getElementById('cad-c-nome').value='';
+    if(ccEl) ccEl.value='';
     await loadRefs();
   }catch(e){ toast('❌','Erro: '+e.message,'error'); }
 }
@@ -6101,8 +6207,9 @@ function cadRenderCategorias(){
   var list = document.getElementById('cad-categorias-list'); if(!list) return;
   if(!FS.refs.categorias.length){ list.innerHTML='<div style="font-size:12px;color:var(--text-dim);padding:8px">Nenhuma categoria cadastrada.</div>'; return; }
   list.innerHTML = FS.refs.categorias.map(function(c){
+    var ccBadge=c.centro_custo_nome?'<span class="cc-badge">'+c.centro_custo_nome+'</span>':'';
     return '<div class="cad-list-item">'
-      +'<div style="flex:1"><div class="cad-list-item-name">'+c.nome+'</div>'
+      +'<div style="flex:1"><div class="cad-list-item-name">'+c.nome+ccBadge+'</div>'
       +'<div class="cad-list-item-sub">'+c.tipo+'</div></div>'
       +'<div style="display:flex;gap:4px">'
       +'<button class="cad-list-item-del" style="color:var(--brand);border-color:rgba(244,121,32,.3)" onclick="cadEditCategoria(\''+c.id+'\')">&#9998;</button>'
@@ -6214,6 +6321,7 @@ function cadEditCategoria(id){
   _cadEditMode={type:'categoria',id:id};
   document.getElementById('cad-c-nome').value=c.nome||'';
   document.getElementById('cad-c-tipo').value=c.tipo||'pagar';
+  var ccEl=document.getElementById('cad-c-cc'); if(ccEl) ccEl.value=c.centro_custo_id||'';
   var h=document.querySelector('#cadpane-categorias .cad-inline-form h4');
   var b=document.querySelector('#cadpane-categorias .cad-save-btn');
   if(h) h.innerHTML='Editar Categoria <button onclick="_cadResetCategoria()" style="font-size:10px;margin-left:8px;background:var(--surface2);border:1px solid var(--border2);border-radius:4px;padding:2px 7px;cursor:pointer;color:var(--text-muted)">Cancelar</button>';
@@ -6225,7 +6333,10 @@ async function cadUpdateCategoria(){
   var nome=document.getElementById('cad-c-nome').value.trim();
   if(!nome){ toast('⚠️','Informe o nome.','warn'); return; }
   try{
-    var {error}=await sb.from('categorias').update({nome:nome,tipo:document.getElementById('cad-c-tipo').value}).eq('id',_cadEditMode.id);
+    var ccEl2=document.getElementById('cad-c-cc');
+    var ccId2=ccEl2?ccEl2.value||null:null;
+    var ccNome2=ccId2?(FS.refs.centrosCusto.find(function(x){return x.id===ccId2;})||{}).nome||null:null;
+    var {error}=await sb.from('categorias').update({nome:nome,tipo:document.getElementById('cad-c-tipo').value,centro_custo_id:ccId2,centro_custo_nome:ccNome2}).eq('id',_cadEditMode.id);
     if(error) throw error;
     toast('✅','Categoria atualizada!','success');
     _cadResetCategoria(); await loadRefs();
@@ -6265,6 +6376,89 @@ async function cadUpdateBancaria(){
     if(error) throw error;
     toast('✅','Conta bancária atualizada!','success');
     _cadResetBancaria(); await loadRefs();
+  }catch(e){ toast('❌','Erro: '+e.message,'error'); }
+}
+
+// ── CRUD CENTROS DE CUSTO ──
+function _cadFillCCDropdown(){
+  var ccs=FS.refs.centrosCusto||[];
+  document.querySelectorAll('#cad-c-cc').forEach(function(el){
+    var cur=el.value;
+    el.innerHTML='<option value="">Nenhum</option>';
+    ccs.forEach(function(cc){ el.innerHTML+='<option value="'+cc.id+'">'+cc.nome+'</option>'; });
+    el.value=cur;
+  });
+}
+function cadRenderCentrosCusto(){
+  var list=document.getElementById('cad-centros-custo-list'); if(!list) return;
+  var ccs=FS.refs.centrosCusto||[];
+  if(!ccs.length){ list.innerHTML='<div style="font-size:12px;color:var(--text-dim);padding:8px">Nenhum centro de custo cadastrado.</div>'; return; }
+  var tipoMap={custo:'cc-tipo-custo',receita:'cc-tipo-receita',ambos:'cc-tipo-ambos'};
+  list.innerHTML=ccs.map(function(cc){
+    var badge='<span class="cc-badge '+(tipoMap[cc.tipo]||'')+'">'+cc.tipo+'</span>';
+    var cats=(FS.refs.categorias||[]).filter(function(c){return c.centro_custo_id===cc.id;});
+    var sub=cats.length?cats.map(function(c){return c.nome;}).join(', '):'Nenhuma categoria vinculada';
+    return '<div class="cad-list-item">'
+      +'<div style="flex:1"><div class="cad-list-item-name">'+cc.nome+badge+'</div>'
+      +'<div class="cad-list-item-sub" style="font-size:11px">'+sub+'</div></div>'
+      +'<div style="display:flex;gap:4px">'
+      +'<button class="cad-list-item-del" style="color:var(--brand);border-color:rgba(244,121,32,.3)" onclick="cadEditCentroCusto(\''+cc.id+'\')">&#9998;</button>'
+      +'<button class="cad-list-item-del" onclick="cadDeleteCentroCusto(\''+cc.id+'\')">&#x1F5D1;</button>'
+      +'</div></div>';
+  }).join('');
+}
+async function cadSaveCentroCusto(){
+  var nome=document.getElementById('cad-cc-nome').value.trim();
+  if(!nome){ toast('⚠️','Informe o nome.','warn'); return; }
+  var data={nome:nome,tipo:document.getElementById('cad-cc-tipo').value,descricao:document.getElementById('cad-cc-descricao').value.trim()||null,ativo:true};
+  try{
+    var {error}=await sb.from('centros_custo').insert([data]);
+    if(error) throw error;
+    toast('✅','Centro de custo criado!','success');
+    ['cad-cc-nome','cad-cc-descricao'].forEach(function(id){document.getElementById(id).value='';});
+    await loadRefs();
+  }catch(e){ toast('❌','Erro: '+e.message,'error'); }
+}
+var _cadEditCC={id:null};
+function cadEditCentroCusto(id){
+  var cc=(FS.refs.centrosCusto||[]).find(function(x){return x.id===id;}); if(!cc) return;
+  _cadEditCC.id=id;
+  document.getElementById('cad-cc-nome').value=cc.nome||'';
+  document.getElementById('cad-cc-tipo').value=cc.tipo||'custo';
+  document.getElementById('cad-cc-descricao').value=cc.descricao||'';
+  var h=document.querySelector('#cadpane-centros-custo .cad-inline-form h4');
+  var btn=document.querySelector('#cadpane-centros-custo .cad-save-btn');
+  if(h) h.innerHTML='Editar Centro de Custo <button onclick="_cadResetCC()" style="font-size:10px;margin-left:8px;background:var(--surface2);border:1px solid var(--border2);border-radius:4px;padding:2px 7px;cursor:pointer;color:var(--text-muted)">Cancelar</button>';
+  if(btn){ btn.textContent='Atualizar'; btn.onclick=function(){cadUpdateCentroCusto();}; }
+  document.querySelector('#cadpane-centros-custo .cad-inline-form').scrollIntoView({behavior:'smooth'});
+}
+async function cadUpdateCentroCusto(){
+  if(!_cadEditCC.id) return;
+  var nome=document.getElementById('cad-cc-nome').value.trim();
+  if(!nome){ toast('⚠️','Informe o nome.','warn'); return; }
+  try{
+    var {error}=await sb.from('centros_custo').update({nome:nome,tipo:document.getElementById('cad-cc-tipo').value,descricao:document.getElementById('cad-cc-descricao').value.trim()||null}).eq('id',_cadEditCC.id);
+    if(error) throw error;
+    toast('✅','Centro de custo atualizado!','success');
+    _cadResetCC(); await loadRefs();
+  }catch(e){ toast('❌','Erro: '+e.message,'error'); }
+}
+function _cadResetCC(){
+  var h=document.querySelector('#cadpane-centros-custo .cad-inline-form h4');
+  var btn=document.querySelector('#cadpane-centros-custo .cad-save-btn');
+  if(h) h.textContent='Novo Centro de Custo';
+  if(btn){ btn.textContent='Salvar Centro de Custo'; btn.onclick=function(){cadSaveCentroCusto();}; }
+  ['cad-cc-nome','cad-cc-descricao'].forEach(function(id){document.getElementById(id).value='';});
+  document.getElementById('cad-cc-tipo').value='custo';
+  _cadEditCC.id=null;
+}
+async function cadDeleteCentroCusto(id){
+  if(!confirm('Desativar este centro de custo?')) return;
+  try{
+    var {error}=await sb.from('centros_custo').update({ativo:false}).eq('id',id);
+    if(error) throw error;
+    toast('✅','Centro de custo desativado.','success');
+    await loadRefs();
   }catch(e){ toast('❌','Erro: '+e.message,'error'); }
 }
 
@@ -7072,6 +7266,7 @@ function comExportPDF() {
     <button class="cad-tab active" onclick="cadTab('pessoas')" id="cadtab-pessoas">Pessoas</button>
     <button class="cad-tab" onclick="cadTab('categorias')" id="cadtab-categorias">Categorias</button>
     <button class="cad-tab" onclick="cadTab('bancarias')" id="cadtab-bancarias">Contas Banc.</button>
+    <button class="cad-tab" onclick="cadTab('centros-custo')" id="cadtab-centros-custo">Centros de Custo</button>
   </div>
   <div class="cad-panel-body">
 
@@ -7114,6 +7309,9 @@ function comExportPDF() {
               <option value="ambos">Ambos</option>
             </select>
           </div>
+          <div class="cad-field"><label>Centro de Custo</label>
+            <select id="cad-c-cc"><option value="">Nenhum</option></select>
+          </div>
         </div>
         <button class="cad-save-btn" onclick="cadSaveCategoria()">Salvar Categoria</button>
       </div>
@@ -7135,6 +7333,26 @@ function comExportPDF() {
         <button class="cad-save-btn" onclick="cadSaveBancaria()">Salvar Conta</button>
       </div>
       <div class="cad-list" id="cad-bancarias-list"></div>
+    </div>
+
+    <!-- CENTROS DE CUSTO -->
+    <div class="cad-section-pane" id="cadpane-centros-custo" style="display:none">
+      <div class="cad-inline-form">
+        <h4>Novo Centro de Custo</h4>
+        <div class="cad-form-grid">
+          <div class="cad-field"><label>Nome *</label><input type="text" id="cad-cc-nome" placeholder="Ex: Administrativo, Operacional..."></div>
+          <div class="cad-field"><label>Tipo</label>
+            <select id="cad-cc-tipo">
+              <option value="custo">Custo</option>
+              <option value="receita">Receita</option>
+              <option value="ambos">Ambos</option>
+            </select>
+          </div>
+          <div class="cad-field"><label>Descrição</label><input type="text" id="cad-cc-descricao" placeholder="Descrição opcional..."></div>
+        </div>
+        <button class="cad-save-btn" onclick="cadSaveCentroCusto()">Salvar Centro de Custo</button>
+      </div>
+      <div class="cad-list" id="cad-centros-custo-list"></div>
     </div>
 
   </div><!-- /cad-panel-body -->
@@ -7245,6 +7463,7 @@ function comExportPDF() {
     <button class="cad-tab active" onclick="cadTab('pessoas')" id="cadtab-pessoas">Pessoas</button>
     <button class="cad-tab" onclick="cadTab('categorias')" id="cadtab-categorias">Categorias</button>
     <button class="cad-tab" onclick="cadTab('bancarias')" id="cadtab-bancarias">Contas Banc.</button>
+    <button class="cad-tab" onclick="cadTab('centros-custo')" id="cadtab-centros-custo">Centros de Custo</button>
   </div>
   <div class="cad-panel-body">
 
@@ -7287,6 +7506,9 @@ function comExportPDF() {
               <option value="ambos">Ambos</option>
             </select>
           </div>
+          <div class="cad-field"><label>Centro de Custo</label>
+            <select id="cad-c-cc"><option value="">Nenhum</option></select>
+          </div>
         </div>
         <button class="cad-save-btn" onclick="cadSaveCategoria()">Salvar Categoria</button>
       </div>
@@ -7308,6 +7530,26 @@ function comExportPDF() {
         <button class="cad-save-btn" onclick="cadSaveBancaria()">Salvar Conta</button>
       </div>
       <div class="cad-list" id="cad-bancarias-list"></div>
+    </div>
+
+    <!-- CENTROS DE CUSTO -->
+    <div class="cad-section-pane" id="cadpane-centros-custo" style="display:none">
+      <div class="cad-inline-form">
+        <h4>Novo Centro de Custo</h4>
+        <div class="cad-form-grid">
+          <div class="cad-field"><label>Nome *</label><input type="text" id="cad-cc-nome" placeholder="Ex: Administrativo, Operacional..."></div>
+          <div class="cad-field"><label>Tipo</label>
+            <select id="cad-cc-tipo">
+              <option value="custo">Custo</option>
+              <option value="receita">Receita</option>
+              <option value="ambos">Ambos</option>
+            </select>
+          </div>
+          <div class="cad-field"><label>Descrição</label><input type="text" id="cad-cc-descricao" placeholder="Descrição opcional..."></div>
+        </div>
+        <button class="cad-save-btn" onclick="cadSaveCentroCusto()">Salvar Centro de Custo</button>
+      </div>
+      <div class="cad-list" id="cad-centros-custo-list"></div>
     </div>
 
   </div><!-- /cad-panel-body -->
