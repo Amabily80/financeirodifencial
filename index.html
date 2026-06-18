@@ -493,6 +493,33 @@ input[type="checkbox"]{width:14px;height:14px;accent-color:var(--green-accent);c
 .cad-inactive{opacity:.5}
 .cc-badge{display:inline-block;font-size:9px;font-weight:700;padding:1px 7px;border-radius:4px;background:#e0f2fe;color:#0369a1;margin-left:6px;vertical-align:middle}
 .cc-tipo-receita{background:#dcfce7;color:#15803d}.cc-tipo-custo{background:#fee2e2;color:#b91c1c}.cc-tipo-ambos{background:#f1f5f9;color:#475569}
+.exec-kpi-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(155px,1fr));gap:14px;margin-bottom:22px}
+.exec-kpi{background:var(--surface);border:1px solid var(--border2);border-radius:12px;padding:16px 18px}
+.exec-kpi-lbl{font-size:10px;font-weight:700;text-transform:uppercase;letter-spacing:.06em;color:var(--text-muted);margin-bottom:6px}
+.exec-kpi-val{font-size:19px;font-weight:700;color:var(--navy)}
+.exec-kpi-val.green{color:#059669}.exec-kpi-val.red{color:#dc2626}.exec-kpi-val.blue{color:#2563eb}
+.exec-table-wrap{background:var(--surface);border:1px solid var(--border2);border-radius:12px;overflow:hidden;margin-bottom:20px}
+.exec-table-hdr{padding:14px 18px;border-bottom:1px solid var(--border);display:flex;justify-content:space-between;align-items:center}
+.exec-table-title{font-size:13px;font-weight:700;color:var(--navy)}
+.exec-tbl{width:100%;border-collapse:collapse;font-size:13px}
+.exec-tbl th{padding:10px 14px;background:var(--surface2);font-size:10px;font-weight:700;text-transform:uppercase;letter-spacing:.06em;color:var(--text-muted);text-align:right;border-bottom:1px solid var(--border)}
+.exec-tbl th:first-child{text-align:left}
+.exec-tbl td{padding:10px 14px;border-bottom:1px solid var(--border);text-align:right}
+.exec-tbl td:first-child{text-align:left;font-weight:500}
+.exec-tbl tr:last-child td{border-bottom:none}
+.exec-tbl tr.total td{font-weight:700;background:var(--surface2);border-top:2px solid var(--border2)}
+.exec-tbl .pos{color:#059669}.exec-tbl .neg{color:#dc2626}
+.dre-section{margin-bottom:4px}
+.dre-section-hdr{padding:10px 14px;background:var(--navy);color:#fff;font-size:11px;font-weight:700;text-transform:uppercase;letter-spacing:.07em;display:flex;justify-content:space-between}
+.dre-section-hdr.receita{background:#059669}.dre-section-hdr.custo{background:#dc2626}.dre-section-hdr.resultado{background:var(--brand)}
+.dre-row{padding:9px 14px;border-bottom:1px solid var(--border);display:flex;justify-content:space-between;font-size:13px;align-items:center}
+.dre-row:hover{background:rgba(0,0,0,.02)}
+.dre-total{padding:11px 14px;display:flex;justify-content:space-between;font-size:14px;font-weight:700;background:var(--surface2)}
+.rag-green{color:#059669;font-weight:700}.rag-yellow{color:#d97706;font-weight:700}.rag-red{color:#dc2626;font-weight:700}
+.rag-dot{display:inline-block;width:9px;height:9px;border-radius:50%;margin-right:5px;vertical-align:middle}
+.rag-dot.green{background:#059669}.rag-dot.yellow{background:#d97706}.rag-dot.red{background:#dc2626}
+.orc-input{width:100%;border:1px solid var(--border2);border-radius:6px;padding:5px 8px;font-size:13px;text-align:right;background:var(--surface);color:var(--navy)}
+.orc-input:focus{outline:none;border-color:var(--brand)}
 .cad-overlay-bg{display:none;position:fixed;inset:0;background:rgba(0,0,0,.2);z-index:499}
 .cad-overlay-bg.open{display:block}
 
@@ -741,6 +768,33 @@ input[type="checkbox"]{width:14px;height:14px;accent-color:var(--green-accent);c
 .cad-inactive{opacity:.5}
 .cc-badge{display:inline-block;font-size:9px;font-weight:700;padding:1px 7px;border-radius:4px;background:#e0f2fe;color:#0369a1;margin-left:6px;vertical-align:middle}
 .cc-tipo-receita{background:#dcfce7;color:#15803d}.cc-tipo-custo{background:#fee2e2;color:#b91c1c}.cc-tipo-ambos{background:#f1f5f9;color:#475569}
+.exec-kpi-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(155px,1fr));gap:14px;margin-bottom:22px}
+.exec-kpi{background:var(--surface);border:1px solid var(--border2);border-radius:12px;padding:16px 18px}
+.exec-kpi-lbl{font-size:10px;font-weight:700;text-transform:uppercase;letter-spacing:.06em;color:var(--text-muted);margin-bottom:6px}
+.exec-kpi-val{font-size:19px;font-weight:700;color:var(--navy)}
+.exec-kpi-val.green{color:#059669}.exec-kpi-val.red{color:#dc2626}.exec-kpi-val.blue{color:#2563eb}
+.exec-table-wrap{background:var(--surface);border:1px solid var(--border2);border-radius:12px;overflow:hidden;margin-bottom:20px}
+.exec-table-hdr{padding:14px 18px;border-bottom:1px solid var(--border);display:flex;justify-content:space-between;align-items:center}
+.exec-table-title{font-size:13px;font-weight:700;color:var(--navy)}
+.exec-tbl{width:100%;border-collapse:collapse;font-size:13px}
+.exec-tbl th{padding:10px 14px;background:var(--surface2);font-size:10px;font-weight:700;text-transform:uppercase;letter-spacing:.06em;color:var(--text-muted);text-align:right;border-bottom:1px solid var(--border)}
+.exec-tbl th:first-child{text-align:left}
+.exec-tbl td{padding:10px 14px;border-bottom:1px solid var(--border);text-align:right}
+.exec-tbl td:first-child{text-align:left;font-weight:500}
+.exec-tbl tr:last-child td{border-bottom:none}
+.exec-tbl tr.total td{font-weight:700;background:var(--surface2);border-top:2px solid var(--border2)}
+.exec-tbl .pos{color:#059669}.exec-tbl .neg{color:#dc2626}
+.dre-section{margin-bottom:4px}
+.dre-section-hdr{padding:10px 14px;background:var(--navy);color:#fff;font-size:11px;font-weight:700;text-transform:uppercase;letter-spacing:.07em;display:flex;justify-content:space-between}
+.dre-section-hdr.receita{background:#059669}.dre-section-hdr.custo{background:#dc2626}.dre-section-hdr.resultado{background:var(--brand)}
+.dre-row{padding:9px 14px;border-bottom:1px solid var(--border);display:flex;justify-content:space-between;font-size:13px;align-items:center}
+.dre-row:hover{background:rgba(0,0,0,.02)}
+.dre-total{padding:11px 14px;display:flex;justify-content:space-between;font-size:14px;font-weight:700;background:var(--surface2)}
+.rag-green{color:#059669;font-weight:700}.rag-yellow{color:#d97706;font-weight:700}.rag-red{color:#dc2626;font-weight:700}
+.rag-dot{display:inline-block;width:9px;height:9px;border-radius:50%;margin-right:5px;vertical-align:middle}
+.rag-dot.green{background:#059669}.rag-dot.yellow{background:#d97706}.rag-dot.red{background:#dc2626}
+.orc-input{width:100%;border:1px solid var(--border2);border-radius:6px;padding:5px 8px;font-size:13px;text-align:right;background:var(--surface);color:var(--navy)}
+.orc-input:focus{outline:none;border-color:var(--brand)}
 .cad-overlay-bg{display:none;position:fixed;inset:0;background:rgba(0,0,0,.2);z-index:499}
 .cad-overlay-bg.open{display:block}
 
@@ -975,6 +1029,9 @@ input[type="checkbox"]{width:14px;height:14px;accent-color:var(--green-accent);c
     <button class="nav-tab" onclick="goTab('cnab')" id="tab-cnab">📂 CNAB</button>
     <button class="nav-tab" onclick="goTab('leads')" id="tab-leads">📊 Leads</button>
     <button class="nav-tab" onclick="goTab('comissoes')" id="tab-comissoes">🏆 Comissões</button>
+    <button class="nav-tab" onclick="goTab('fc-exec')" id="tab-fc-exec">📊 FC Executivo</button>
+    <button class="nav-tab" onclick="goTab('dre')" id="tab-dre">📋 DRE</button>
+    <button class="nav-tab" onclick="goTab('orcado')" id="tab-orcado">🎯 Orçado×Real.</button>
   </div>
 </nav>
 
@@ -1882,6 +1939,168 @@ input[type="checkbox"]{width:14px;height:14px;accent-color:var(--green-accent);c
   </div><!-- /page-comissoes -->
 
   <!-- ═══════════════════════════════════
+       PAGE: FC EXECUTIVO
+  ═══════════════════════════════════ -->
+  <div id="page-fc-exec" style="display:none;padding:24px">
+    <div class="fin-page-hdr" style="margin-bottom:20px">
+      <div>
+        <h2 class="fin-page-title">📊 FC Executivo</h2>
+        <p style="font-size:12px;color:var(--text-muted);margin-top:3px">Fluxo de caixa consolidado — CP + CR + Provisão de Comissões</p>
+      </div>
+      <button class="btn-primary" onclick="fcExecLoad()">↺ Atualizar</button>
+    </div>
+    <div class="fc-filters" style="flex-wrap:wrap;row-gap:8px;margin-bottom:16px">
+      <span style="font-size:11px;color:var(--text-muted);font-weight:600;text-transform:uppercase;letter-spacing:.08em">Período:</span>
+      <button class="pill-btn" onclick="fcExecSetPeriod(3,this)">3 meses</button>
+      <button class="pill-btn active" onclick="fcExecSetPeriod(6,this)">6 meses</button>
+      <button class="pill-btn" onclick="fcExecSetPeriod(12,this)">12 meses</button>
+      <button class="pill-btn" onclick="fcExecSetPeriod(24,this)">24 meses</button>
+      <span class="pill-sep">|</span>
+      <button class="pill-btn active" id="fce-v-tudo" onclick="fcExecSetTipo('tudo',this)">Tudo</button>
+      <button class="pill-btn" id="fce-v-pago" onclick="fcExecSetTipo('pago',this)">Só realizados</button>
+    </div>
+    <div class="exec-kpi-grid">
+      <div class="exec-kpi"><div class="exec-kpi-lbl">Entradas (CR)</div><div class="exec-kpi-val blue" id="fce-k-entradas">—</div></div>
+      <div class="exec-kpi"><div class="exec-kpi-lbl">Saídas (CP)</div><div class="exec-kpi-val red" id="fce-k-saidas">—</div></div>
+      <div class="exec-kpi"><div class="exec-kpi-lbl">Prov. Comissões</div><div class="exec-kpi-val" style="color:#d97706" id="fce-k-provcom">—</div></div>
+      <div class="exec-kpi"><div class="exec-kpi-lbl">Saldo Líquido</div><div class="exec-kpi-val" id="fce-k-saldo">—</div></div>
+    </div>
+    <div class="exec-table-wrap">
+      <div class="exec-table-hdr">
+        <div class="exec-table-title">🔭 Projeção — próximos dias (pendentes)</div>
+      </div>
+      <table class="exec-tbl">
+        <thead><tr>
+          <th style="text-align:left">Horizonte</th>
+          <th>Entradas previstas</th><th>Saídas previstas</th><th>Saldo projetado</th>
+        </tr></thead>
+        <tbody id="fce-proj-tbody"><tr><td colspan="4" style="text-align:center;padding:20px;color:var(--text-muted)">Clique em Atualizar.</td></tr></tbody>
+      </table>
+    </div>
+    <div class="exec-table-wrap">
+      <div class="exec-table-hdr">
+        <div class="exec-table-title">📅 Breakdown Mensal</div>
+        <div id="fce-sub" style="font-size:11px;color:var(--text-muted)"></div>
+      </div>
+      <div style="overflow-x:auto">
+        <table class="exec-tbl">
+          <thead><tr>
+            <th style="text-align:left">Mês</th>
+            <th>Entradas CR</th><th>Saídas CP</th><th>Prov. Comissões</th><th>Saldo Mês</th><th>Saldo Acum.</th>
+          </tr></thead>
+          <tbody id="fce-tbody"><tr><td colspan="6" style="text-align:center;padding:30px;color:var(--text-muted)">Clique em Atualizar para carregar os dados.</td></tr></tbody>
+        </table>
+      </div>
+    </div>
+  </div><!-- /page-fc-exec -->
+
+  <!-- ═══════════════════════════════════
+       PAGE: DRE
+  ═══════════════════════════════════ -->
+  <div id="page-dre" style="display:none;padding:24px">
+    <div class="fin-page-hdr" style="margin-bottom:20px">
+      <div>
+        <h2 class="fin-page-title">📋 DRE</h2>
+        <p style="font-size:12px;color:var(--text-muted);margin-top:3px">Demonstrativo de Resultado por Centro de Custo</p>
+      </div>
+      <button class="btn-primary" onclick="dreLoad()">↺ Atualizar</button>
+    </div>
+    <div style="display:flex;gap:12px;align-items:center;flex-wrap:wrap;margin-bottom:20px">
+      <label style="font-size:12px;color:var(--text-muted);font-weight:600">Mês:</label>
+      <select id="dre-mes" class="fc-select" onchange="dreLoad()">
+        <option value="01">Janeiro</option><option value="02">Fevereiro</option><option value="03">Março</option>
+        <option value="04">Abril</option><option value="05">Maio</option><option value="06">Junho</option>
+        <option value="07">Julho</option><option value="08">Agosto</option><option value="09">Setembro</option>
+        <option value="10">Outubro</option><option value="11">Novembro</option><option value="12">Dezembro</option>
+      </select>
+      <select id="dre-ano" class="fc-select" onchange="dreLoad()"></select>
+      <label style="display:flex;align-items:center;gap:6px;font-size:12px;color:var(--text-muted);cursor:pointer">
+        <input type="checkbox" id="dre-acumulado" onchange="dreLoad()"> Acumulado (Jan → mês selecionado)
+      </label>
+    </div>
+    <div class="exec-table-wrap">
+      <div class="exec-table-hdr">
+        <div class="exec-table-title" id="dre-periodo-titulo">—</div>
+      </div>
+      <div id="dre-body"><div style="padding:30px;text-align:center;color:var(--text-muted)">Clique em Atualizar para carregar o DRE.</div></div>
+    </div>
+  </div><!-- /page-dre -->
+
+  <!-- ═══════════════════════════════════
+       PAGE: ORÇADO × REALIZADO
+  ═══════════════════════════════════ -->
+  <div id="page-orcado" style="display:none;padding:24px">
+    <div class="fin-page-hdr" style="margin-bottom:20px">
+      <div>
+        <h2 class="fin-page-title">🎯 Orçado × Realizado</h2>
+        <p style="font-size:12px;color:var(--text-muted);margin-top:3px">Comparativo planejado vs executado por Centro de Custo</p>
+      </div>
+      <div style="display:flex;gap:8px">
+        <button class="btn-secondary" onclick="orcSaveOrcado()">✏️ Editar Orçado</button>
+        <button class="btn-primary" onclick="orcLoad()">↺ Atualizar</button>
+      </div>
+    </div>
+    <div style="display:flex;gap:12px;align-items:center;flex-wrap:wrap;margin-bottom:20px">
+      <label style="font-size:12px;color:var(--text-muted);font-weight:600">Mês:</label>
+      <select id="orc-mes" class="fc-select" onchange="orcLoad()">
+        <option value="01">Janeiro</option><option value="02">Fevereiro</option><option value="03">Março</option>
+        <option value="04">Abril</option><option value="05">Maio</option><option value="06">Junho</option>
+        <option value="07">Julho</option><option value="08">Agosto</option><option value="09">Setembro</option>
+        <option value="10">Outubro</option><option value="11">Novembro</option><option value="12">Dezembro</option>
+      </select>
+      <select id="orc-ano" class="fc-select" onchange="orcLoad()"></select>
+    </div>
+    <div class="exec-kpi-grid">
+      <div class="exec-kpi"><div class="exec-kpi-lbl">Receita Orçada</div><div class="exec-kpi-val blue" id="orc-k-rec-orc">—</div></div>
+      <div class="exec-kpi"><div class="exec-kpi-lbl">Receita Realizada</div><div class="exec-kpi-val" id="orc-k-rec-real">—</div></div>
+      <div class="exec-kpi"><div class="exec-kpi-lbl">Custo Orçado</div><div class="exec-kpi-val" style="color:#d97706" id="orc-k-cus-orc">—</div></div>
+      <div class="exec-kpi"><div class="exec-kpi-lbl">Custo Realizado</div><div class="exec-kpi-val red" id="orc-k-cus-real">—</div></div>
+      <div class="exec-kpi"><div class="exec-kpi-lbl">Resultado Orçado</div><div class="exec-kpi-val" id="orc-k-res-orc">—</div></div>
+      <div class="exec-kpi"><div class="exec-kpi-lbl">Resultado Realizado</div><div class="exec-kpi-val" id="orc-k-res-real">—</div></div>
+    </div>
+    <div class="exec-table-wrap">
+      <div class="exec-table-hdr">
+        <div class="exec-table-title">📊 Detalhamento por Centro de Custo</div>
+        <div style="font-size:11px;color:var(--text-muted)">
+          <span class="rag-dot green"></span>≤5% &nbsp;
+          <span class="rag-dot yellow"></span>5–15% &nbsp;
+          <span class="rag-dot red"></span>>15%
+        </div>
+      </div>
+      <div style="overflow-x:auto">
+        <table class="exec-tbl">
+          <thead><tr>
+            <th style="text-align:left">Centro de Custo / Tipo</th>
+            <th>Orçado</th><th>Realizado</th><th>Variação R$</th><th>Variação %</th><th>Status</th>
+          </tr></thead>
+          <tbody id="orc-tbody"><tr><td colspan="6" style="text-align:center;padding:30px;color:var(--text-muted)">Clique em Atualizar para carregar.</td></tr></tbody>
+        </table>
+      </div>
+    </div>
+    <div id="orc-edit-area" style="display:none;margin-top:20px">
+      <div class="exec-table-wrap">
+        <div class="exec-table-hdr">
+          <div class="exec-table-title">✏️ Editar Orçamento</div>
+          <div style="font-size:11px;color:var(--text-muted)" id="orc-edit-period">—</div>
+        </div>
+        <div style="overflow-x:auto">
+          <table class="exec-tbl">
+            <thead><tr>
+              <th style="text-align:left">Centro de Custo</th>
+              <th>Receita Orçada (R$)</th><th>Custo Orçado (R$)</th>
+            </tr></thead>
+            <tbody id="orc-edit-tbody"></tbody>
+          </table>
+        </div>
+        <div style="padding:12px 18px;display:flex;justify-content:flex-end;gap:8px;border-top:1px solid var(--border)">
+          <button class="btn-secondary" onclick="document.getElementById('orc-edit-area').style.display='none'">Cancelar</button>
+          <button class="btn-primary" onclick="orcSaveOrcadoConfirm()">💾 Salvar Orçamento</button>
+        </div>
+      </div>
+    </div>
+  </div><!-- /page-orcado -->
+
+  <!-- ═══════════════════════════════════
        PAGE: IMPORTAÇÃO CNAB
   ═══════════════════════════════════ -->
   <div id="page-cnab" style="display:none;padding:24px">
@@ -2176,7 +2395,7 @@ window.addEventListener('DOMContentLoaded',()=>{
   loadData();
 });
 
-const PAGES=['overview','fc','sc','relatorios','cp','cr','saldo','conciliacao','cnab','leads','comissoes'];
+const PAGES=['overview','fc','sc','relatorios','cp','cr','saldo','conciliacao','cnab','leads','comissoes','fc-exec','dre','orcado'];
 function goTab(id){
   PAGES.forEach(p=>{
     document.getElementById('page-'+p).style.display=p===id?'':'none';
@@ -2198,6 +2417,9 @@ function goTab(id){
   if(id==='cnab') cnabLoad();
   if(id==='leads') leadsLoad();
   if(id==='comissoes') comLoad();
+  if(id==='fc-exec') fcExecLoad();
+  if(id==='dre'){ _dreInitPeriod(); dreLoad(); }
+  if(id==='orcado'){ _orcInitPeriod(); orcLoad(); }
 }
 
 // ═══════════════════════════════════════════════════════
@@ -7210,6 +7432,389 @@ function comExportPDF() {
     + '</body></html>');
   win.document.close();
   setTimeout(function() { win.print(); }, 600);
+}
+
+// ═══════════════════════════════════════════════════
+// FC EXECUTIVO
+// ═══════════════════════════════════════════════════
+var _fceMonths=6, _fceTipo='tudo';
+var _fceCpData=[], _fceCrData=[], _fceScData=[];
+
+function fcExecSetPeriod(n,el){
+  _fceMonths=n;
+  document.querySelectorAll('[onclick*="fcExecSetPeriod"]').forEach(function(b){b.classList.remove('active');});
+  if(el) el.classList.add('active');
+  fcExecRender();
+}
+function fcExecSetTipo(t,el){
+  _fceTipo=t;
+  document.querySelectorAll('[onclick*="fcExecSetTipo"]').forEach(function(b){b.classList.remove('active');});
+  if(el) el.classList.add('active');
+  fcExecRender();
+}
+
+async function fcExecLoad(){
+  if(!sb){toast('⚠️','Supabase não conectado','warn');return;}
+  try{
+    var [rCp,rCr,rSc]=await Promise.all([
+      sb.from('contas_pagar').select('id,valor,valor_pago,vencimento,data_pagamento,status,categoria_id,categoria_nome').limit(9999),
+      sb.from('contas_receber').select('id,valor,valor_recebido,vencimento,data_recebimento,status,categoria_id,categoria_nome').limit(9999),
+      sb.from('solicitacoes_comissao').select('data_solicitacao,itens').limit(9999),
+    ]);
+    _fceCpData=rCp.data||[];
+    _fceCrData=rCr.data||[];
+    _fceScData=rSc.data||[];
+    fcExecRender();
+  }catch(e){toast('❌','Erro: '+e.message,'error');}
+}
+
+function _fceCalcScProv(itens){
+  var cor=0,base=0;
+  (itens||[]).forEach(function(it){
+    var v=parseFloat(it.valor)||0;
+    if(it.perc===6){cor+=v*0.02;base+=v;}
+    else if(it.perc===3&&!it.jaRecebeuPrimeiros3){cor+=v*0.01;base+=v;}
+    else{cor+=v*0.01;}
+  });
+  return cor+base*(0.00235+0.00165+0.001+0.006);
+}
+
+function _mesLabel(mk){
+  var mn=['Jan','Fev','Mar','Abr','Mai','Jun','Jul','Ago','Set','Out','Nov','Dez'];
+  var p=mk.split('-');return mn[parseInt(p[1])-1]+'/'+p[0];
+}
+
+function fcExecRender(){
+  if(!_fceCpData.length&&!_fceCrData.length&&!_fceScData.length)return;
+  var hoje=new Date();
+  var ini=new Date(hoje.getFullYear(),hoje.getMonth()-Math.floor(_fceMonths/2),1);
+  var meses=[];
+  for(var i=0;i<_fceMonths;i++){
+    var d=new Date(ini.getFullYear(),ini.getMonth()+i,1);
+    meses.push(d.getFullYear()+'-'+String(d.getMonth()+1).padStart(2,'0'));
+  }
+  var map={};
+  meses.forEach(function(m){map[m]={ent:0,sai:0,prov:0};});
+
+  _fceCrData.forEach(function(r){
+    if(_fceTipo==='pago'&&r.status!=='recebido')return;
+    if(r.status==='cancelado')return;
+    var dt=r.status==='recebido'?r.data_recebimento:r.vencimento; if(!dt)return;
+    var mk=dt.substring(0,7); if(!map[mk])return;
+    map[mk].ent+=(r.status==='recebido'?(parseFloat(r.valor_recebido)||parseFloat(r.valor)||0):(parseFloat(r.valor)||0));
+  });
+  _fceCpData.forEach(function(r){
+    if(_fceTipo==='pago'&&r.status!=='pago')return;
+    if(r.status==='cancelado')return;
+    var dt=r.status==='pago'?r.data_pagamento:r.vencimento; if(!dt)return;
+    var mk=dt.substring(0,7); if(!map[mk])return;
+    map[mk].sai+=(r.status==='pago'?(parseFloat(r.valor_pago)||parseFloat(r.valor)||0):(parseFloat(r.valor)||0));
+  });
+  _fceScData.forEach(function(s){
+    if(!s.data_solicitacao)return;
+    var mk=s.data_solicitacao.substring(0,7); if(!map[mk])return;
+    map[mk].prov+=_fceCalcScProv(Array.isArray(s.itens)?s.itens:[]);
+  });
+
+  var totEnt=0,totSai=0,totProv=0;
+  meses.forEach(function(m){totEnt+=map[m].ent;totSai+=map[m].sai;totProv+=map[m].prov;});
+  var totSaldo=totEnt-totSai-totProv;
+
+  document.getElementById('fce-k-entradas').textContent=fmtBRL(totEnt);
+  document.getElementById('fce-k-saidas').textContent=fmtBRL(totSai);
+  document.getElementById('fce-k-provcom').textContent=fmtBRL(totProv);
+  var sEl=document.getElementById('fce-k-saldo');
+  sEl.textContent=fmtBRL(totSaldo);
+  sEl.className='exec-kpi-val '+(totSaldo>=0?'green':'red');
+
+  var acc=0, hojeKey=hoje.toISOString().substring(0,7);
+  document.getElementById('fce-sub').textContent=_fceMonths+' meses';
+  document.getElementById('fce-tbody').innerHTML=meses.map(function(m){
+    var d=map[m], sal=d.ent-d.sai-d.prov; acc+=sal;
+    var isFut=m>hojeKey, isNow=m===hojeKey;
+    var lbl=_mesLabel(m)+(isNow?' <small style="color:var(--brand)">(atual)</small>':isFut?' <small style="color:var(--text-muted)">(prev.)</small>':'');
+    var rs=isNow?'background:rgba(244,121,32,.04)':'';
+    return '<tr style="'+rs+'"><td style="text-align:left">'+lbl+'</td>'
+      +'<td class="pos">'+fmtBRL(d.ent)+'</td>'
+      +'<td class="neg">'+fmtBRL(d.sai)+'</td>'
+      +'<td style="color:#d97706">'+fmtBRL(d.prov)+'</td>'
+      +'<td class="'+(sal>=0?'pos':'neg')+'">'+fmtBRL(sal)+'</td>'
+      +'<td class="'+(acc>=0?'pos':'neg')+'">'+fmtBRL(acc)+'</td></tr>';
+  }).join('');
+
+  var hojeStr=hoje.toISOString().split('T')[0];
+  document.getElementById('fce-proj-tbody').innerHTML=[30,60,90].map(function(dias){
+    var lim=new Date(hoje); lim.setDate(lim.getDate()+dias);
+    var limStr=lim.toISOString().split('T')[0];
+    var pe=0,ps=0;
+    _fceCrData.forEach(function(r){
+      if(r.status==='recebido'||r.status==='cancelado')return;
+      if(!r.vencimento||r.vencimento<hojeStr||r.vencimento>limStr)return;
+      pe+=parseFloat(r.valor)||0;
+    });
+    _fceCpData.forEach(function(r){
+      if(r.status==='pago'||r.status==='cancelado')return;
+      if(!r.vencimento||r.vencimento<hojeStr||r.vencimento>limStr)return;
+      ps+=parseFloat(r.valor)||0;
+    });
+    var psal=pe-ps;
+    return '<tr><td style="text-align:left;font-weight:600">Próximos '+dias+' dias</td>'
+      +'<td class="pos">'+fmtBRL(pe)+'</td>'
+      +'<td class="neg">'+fmtBRL(ps)+'</td>'
+      +'<td class="'+(psal>=0?'pos':'neg')+'">'+fmtBRL(psal)+'</td></tr>';
+  }).join('');
+}
+
+// ═══════════════════════════════════════════════════
+// DRE
+// ═══════════════════════════════════════════════════
+var _dreCpData=[], _dreCrData=[], _dreScData=[];
+
+function _dreInitPeriod(){
+  var now=new Date();
+  var aEl=document.getElementById('dre-ano'); if(!aEl)return;
+  if(!aEl.options.length){
+    for(var y=now.getFullYear();y>=now.getFullYear()-4;y--)
+      aEl.innerHTML+='<option value="'+y+'">'+y+'</option>';
+  }
+  if(!aEl.dataset.init){aEl.value=String(now.getFullYear());aEl.dataset.init='1';}
+  var mEl=document.getElementById('dre-mes');
+  if(mEl&&!mEl.dataset.init){mEl.value=String(now.getMonth()+1).padStart(2,'0');mEl.dataset.init='1';}
+}
+
+async function dreLoad(){
+  _dreInitPeriod();
+  if(!sb)return;
+  var mes=document.getElementById('dre-mes').value;
+  var ano=document.getElementById('dre-ano').value;
+  var acu=document.getElementById('dre-acumulado').checked;
+  var ini=ano+'-'+(acu?'01':mes)+'-01';
+  var fim=ano+'-'+mes+'-31';
+  try{
+    var [rCp,rCr,rSc]=await Promise.all([
+      sb.from('contas_pagar').select('valor,valor_pago,data_pagamento,vencimento,status,categoria_id,categoria_nome').limit(9999),
+      sb.from('contas_receber').select('valor,valor_recebido,data_recebimento,vencimento,status,categoria_id,categoria_nome').limit(9999),
+      sb.from('solicitacoes_comissao').select('data_solicitacao,itens').gte('data_solicitacao',ini).lte('data_solicitacao',fim+'T23:59:59').limit(9999),
+    ]);
+    var filt=function(r,dt){return r.status!=='cancelado'&&dt&&dt>=ini&&dt<=fim;};
+    _dreCpData=(rCp.data||[]).filter(function(r){return filt(r,r.status==='pago'?r.data_pagamento:r.vencimento);});
+    _dreCrData=(rCr.data||[]).filter(function(r){return filt(r,r.status==='recebido'?r.data_recebimento:r.vencimento);});
+    _dreScData=rSc.data||[];
+    dreRender(mes,ano,acu);
+  }catch(e){toast('❌','Erro: '+e.message,'error');}
+}
+
+function _dreCCMap(){
+  var m={};
+  (FS.refs.categorias||[]).forEach(function(c){
+    var cc=c.centro_custo_nome||'Sem Centro de Custo';
+    if(c.id) m['id:'+c.id]=cc;
+    m[c.nome]=cc;
+  });
+  return m;
+}
+function _dreGetCC(r,m){
+  if(r.categoria_id&&m['id:'+r.categoria_id])return m['id:'+r.categoria_id];
+  if(r.categoria_nome&&m[r.categoria_nome])return m[r.categoria_nome];
+  return r.categoria_nome||'Sem Categoria';
+}
+
+function dreRender(mes,ano,acu){
+  var ccMap=_dreCCMap();
+  var recGrp={}, cusGrp={};
+  _dreCrData.forEach(function(r){
+    var cc=_dreGetCC(r,ccMap);
+    recGrp[cc]=(recGrp[cc]||0)+(r.status==='recebido'?(parseFloat(r.valor_recebido)||parseFloat(r.valor)||0):(parseFloat(r.valor)||0));
+  });
+  _dreCpData.forEach(function(r){
+    var cc=_dreGetCC(r,ccMap);
+    cusGrp[cc]=(cusGrp[cc]||0)+(r.status==='pago'?(parseFloat(r.valor_pago)||parseFloat(r.valor)||0):(parseFloat(r.valor)||0));
+  });
+  var provTotal=0;
+  _dreScData.forEach(function(s){provTotal+=_fceCalcScProv(Array.isArray(s.itens)?s.itens:[]);});
+
+  var totRec=Object.values(recGrp).reduce(function(s,v){return s+v;},0);
+  var totCusBruto=Object.values(cusGrp).reduce(function(s,v){return s+v;},0);
+  var totCus=totCusBruto+provTotal;
+  var res=totRec-totCus, mg=totRec>0?res/totRec*100:0;
+
+  var mNomes=['Janeiro','Fevereiro','Março','Abril','Maio','Junho','Julho','Agosto','Setembro','Outubro','Novembro','Dezembro'];
+  document.getElementById('dre-periodo-titulo').textContent='DRE — '+(acu?'Jan → ':'')+mNomes[parseInt(mes)-1]+'/'+ano;
+
+  function grpRows(grp,cls){
+    var ks=Object.keys(grp).sort();
+    if(!ks.length)return'<div class="dre-row" style="color:var(--text-muted)"><span>Nenhum lançamento no período</span><span>—</span></div>';
+    return ks.map(function(k){return'<div class="dre-row"><span>'+k+'</span><span class="'+cls+'">'+fmtBRL(grp[k])+'</span></div>';}).join('');
+  }
+
+  document.getElementById('dre-body').innerHTML=
+    '<div class="dre-section">'
+    +'<div class="dre-section-hdr receita"><span>RECEITAS — Contas a Receber</span><span>'+fmtBRL(totRec)+'</span></div>'
+    +grpRows(recGrp,'pos')
+    +'<div class="dre-total"><span>Total Receitas</span><span class="pos">'+fmtBRL(totRec)+'</span></div>'
+    +'</div>'
+    +'<div class="dre-section" style="margin-top:4px">'
+    +'<div class="dre-section-hdr custo"><span>CUSTOS — Contas a Pagar</span><span>'+fmtBRL(totCus)+'</span></div>'
+    +grpRows(cusGrp,'neg')
+    +(provTotal>0?'<div class="dre-row"><span>Provisão Comissões (SC)</span><span style="color:#d97706">'+fmtBRL(provTotal)+'</span></div>':'')
+    +'<div class="dre-total"><span>Total Custos</span><span class="neg">'+fmtBRL(totCus)+'</span></div>'
+    +'</div>'
+    +'<div class="dre-section" style="margin-top:4px">'
+    +'<div class="dre-section-hdr resultado"><span>RESULTADO</span><span>'+(res>=0?'+':'')+fmtBRL(res)+'</span></div>'
+    +'<div class="dre-row"><span>Margem líquida</span><span class="'+(res>=0?'pos':'neg')+'">'+mg.toFixed(1)+'%</span></div>'
+    +'</div>';
+}
+
+// ═══════════════════════════════════════════════════
+// ORÇADO × REALIZADO
+// ═══════════════════════════════════════════════════
+var _orcCpData=[], _orcCrData=[], _orcBudgetData=[];
+
+function _orcInitPeriod(){
+  var now=new Date();
+  var aEl=document.getElementById('orc-ano'); if(!aEl)return;
+  if(!aEl.options.length){
+    for(var y=now.getFullYear();y>=now.getFullYear()-4;y--)
+      aEl.innerHTML+='<option value="'+y+'">'+y+'</option>';
+  }
+  if(!aEl.dataset.init){aEl.value=String(now.getFullYear());aEl.dataset.init='1';}
+  var mEl=document.getElementById('orc-mes');
+  if(mEl&&!mEl.dataset.init){mEl.value=String(now.getMonth()+1).padStart(2,'0');mEl.dataset.init='1';}
+}
+
+async function orcLoad(){
+  _orcInitPeriod();
+  if(!sb)return;
+  var mes=document.getElementById('orc-mes').value;
+  var ano=document.getElementById('orc-ano').value;
+  var ini=ano+'-'+mes+'-01', fim=ano+'-'+mes+'-31';
+  try{
+    var [rCp,rCr,rOrc]=await Promise.all([
+      sb.from('contas_pagar').select('valor,valor_pago,data_pagamento,vencimento,status,categoria_id,categoria_nome').limit(9999),
+      sb.from('contas_receber').select('valor,valor_recebido,data_recebimento,vencimento,status,categoria_id,categoria_nome').limit(9999),
+      sb.from('orcamentos').select('*').eq('ano',parseInt(ano)).eq('mes',parseInt(mes)),
+    ]);
+    var filt=function(r,dt){return r.status!=='cancelado'&&dt&&dt>=ini&&dt<=fim;};
+    _orcCpData=(rCp.data||[]).filter(function(r){return filt(r,r.status==='pago'?r.data_pagamento:r.vencimento);});
+    _orcCrData=(rCr.data||[]).filter(function(r){return filt(r,r.status==='recebido'?r.data_recebimento:r.vencimento);});
+    _orcBudgetData=rOrc.data||[];
+    orcRender(mes,ano);
+  }catch(e){toast('❌','Erro: '+e.message,'error');}
+}
+
+function orcRender(mes,ano){
+  var ccMap=_dreCCMap();
+  function getCC(r){return _dreGetCC(r,ccMap);}
+  var realRec={}, realCus={};
+  _orcCrData.forEach(function(r){
+    var cc=getCC(r);
+    realRec[cc]=(realRec[cc]||0)+(r.status==='recebido'?(parseFloat(r.valor_recebido)||parseFloat(r.valor)||0):(parseFloat(r.valor)||0));
+  });
+  _orcCpData.forEach(function(r){
+    var cc=getCC(r);
+    realCus[cc]=(realCus[cc]||0)+(r.status==='pago'?(parseFloat(r.valor_pago)||parseFloat(r.valor)||0):(parseFloat(r.valor)||0));
+  });
+  var orcMap={};
+  _orcBudgetData.forEach(function(b){orcMap[b.centro_custo_nome+'|'+b.tipo]=parseFloat(b.valor_orcado)||0;});
+
+  var allCC=new Set();
+  (FS.refs.centrosCusto||[]).forEach(function(cc){allCC.add(cc.nome);});
+  Object.keys(realRec).concat(Object.keys(realCus)).forEach(function(k){allCC.add(k);});
+  _orcBudgetData.forEach(function(b){allCC.add(b.centro_custo_nome);});
+  var ccs=Array.from(allCC).sort();
+
+  function ragStatus(orc,real,tipoMelhorMenos){
+    if(!orc&&!real)return'';
+    if(!orc)return'<span class="rag-red">Sem orçado</span>';
+    var pct=Math.abs((real-orc)/orc)*100;
+    var varOk=tipoMelhorMenos?(real<=orc):(real>=orc);
+    if(pct<=5)return'<span class="rag-dot green"></span><span class="rag-green">OK</span>';
+    if(pct<=15)return'<span class="rag-dot yellow"></span><span class="rag-yellow">Atenção</span>';
+    return'<span class="rag-dot red"></span><span class="rag-red">Crítico</span>';
+  }
+
+  var totOrcRec=0,totRealRec=0,totOrcCus=0,totRealCus=0;
+  var rows=[];
+  ccs.forEach(function(cc){
+    var oR=orcMap[cc+'|receita']||0, rR=realRec[cc]||0;
+    var oC=orcMap[cc+'|custo']||0, rC=realCus[cc]||0;
+    totOrcRec+=oR;totRealRec+=rR;totOrcCus+=oC;totRealCus+=rC;
+    if(!oR&&!rR&&!oC&&!rC)return;
+    if(oR||rR){
+      var vR=rR-oR, pR=oR?((rR-oR)/oR*100):null;
+      rows.push('<tr>'
+        +'<td style="text-align:left">'+cc+' <small style="color:#059669;font-weight:600">Receita</small></td>'
+        +'<td>'+fmtBRL(oR)+'</td><td class="pos">'+fmtBRL(rR)+'</td>'
+        +'<td class="'+(vR>=0?'pos':'neg')+'">'+fmtBRL(vR)+'</td>'
+        +'<td class="'+(vR>=0?'pos':'neg')+'">'+(pR!==null?(vR>=0?'+':'')+pR.toFixed(1)+'%':'—')+'</td>'
+        +'<td>'+ragStatus(oR,rR,false)+'</td></tr>');
+    }
+    if(oC||rC){
+      var vC=rC-oC, pC=oC?((rC-oC)/oC*100):null;
+      rows.push('<tr>'
+        +'<td style="text-align:left">'+cc+' <small style="color:#dc2626;font-weight:600">Custo</small></td>'
+        +'<td>'+fmtBRL(oC)+'</td><td class="neg">'+fmtBRL(rC)+'</td>'
+        +'<td class="'+(vC<=0?'pos':'neg')+'">'+fmtBRL(vC)+'</td>'
+        +'<td class="'+(vC<=0?'pos':'neg')+'">'+(pC!==null?(vC>=0?'+':'')+pC.toFixed(1)+'%':'—')+'</td>'
+        +'<td>'+ragStatus(oC,rC,true)+'</td></tr>');
+    }
+  });
+  if(!rows.length)rows.push('<tr><td colspan="6" style="text-align:center;padding:30px;color:var(--text-muted)">Nenhum dado. Cadastre Centros de Custo, vincule às categorias e registre o orçado.</td></tr>');
+  rows.push('<tr class="total"><td style="text-align:left">TOTAL RESULTADO</td>'
+    +'<td>'+fmtBRL(totOrcRec-totOrcCus)+'</td>'
+    +'<td class="'+(totRealRec-totRealCus>=0?'pos':'neg')+'">'+fmtBRL(totRealRec-totRealCus)+'</td>'
+    +'<td></td><td></td><td></td></tr>');
+  document.getElementById('orc-tbody').innerHTML=rows.join('');
+
+  document.getElementById('orc-k-rec-orc').textContent=fmtBRL(totOrcRec);
+  var rrEl=document.getElementById('orc-k-rec-real');
+  rrEl.textContent=fmtBRL(totRealRec);
+  rrEl.className='exec-kpi-val '+(totRealRec>=totOrcRec?'green':'red');
+  document.getElementById('orc-k-cus-orc').textContent=fmtBRL(totOrcCus);
+  var rcEl=document.getElementById('orc-k-cus-real');
+  rcEl.textContent=fmtBRL(totRealCus);
+  rcEl.className='exec-kpi-val '+(totRealCus<=totOrcCus?'green':'red');
+  var resO=totOrcRec-totOrcCus, resR=totRealRec-totRealCus;
+  var roEl=document.getElementById('orc-k-res-orc');
+  roEl.textContent=fmtBRL(resO); roEl.className='exec-kpi-val '+(resO>=0?'green':'red');
+  var rrEl2=document.getElementById('orc-k-res-real');
+  rrEl2.textContent=fmtBRL(resR); rrEl2.className='exec-kpi-val '+(resR>=0?'green':'red');
+}
+
+function orcSaveOrcado(){
+  _orcInitPeriod();
+  var ccs=FS.refs.centrosCusto||[];
+  if(!ccs.length){toast('⚠️','Cadastre Centros de Custo primeiro.','warn');return;}
+  var mes=document.getElementById('orc-mes').value, ano=document.getElementById('orc-ano').value;
+  document.getElementById('orc-edit-period').textContent=mes+'/'+ano;
+  var orcMap={};
+  _orcBudgetData.forEach(function(b){orcMap[b.centro_custo_nome+'|'+b.tipo]=parseFloat(b.valor_orcado)||0;});
+  document.getElementById('orc-edit-tbody').innerHTML=ccs.map(function(cc){
+    var oR=orcMap[cc.nome+'|receita']||'', oC=orcMap[cc.nome+'|custo']||'';
+    return '<tr><td style="text-align:left;font-weight:600">'+cc.nome+'</td>'
+      +'<td><input class="orc-input" type="number" step="0.01" data-cc="'+cc.nome+'" data-tipo="receita" data-ccid="'+cc.id+'" value="'+oR+'" placeholder="0,00"></td>'
+      +'<td><input class="orc-input" type="number" step="0.01" data-cc="'+cc.nome+'" data-tipo="custo" data-ccid="'+cc.id+'" value="'+oC+'" placeholder="0,00"></td>'
+    +'</tr>';
+  }).join('');
+  var editArea=document.getElementById('orc-edit-area');
+  editArea.style.display='';
+  editArea.scrollIntoView({behavior:'smooth'});
+}
+
+async function orcSaveOrcadoConfirm(){
+  var mes=parseInt(document.getElementById('orc-mes').value);
+  var ano=parseInt(document.getElementById('orc-ano').value);
+  var upserts=[];
+  document.querySelectorAll('#orc-edit-tbody input').forEach(function(inp){
+    upserts.push({ano:ano,mes:mes,centro_custo_nome:inp.dataset.cc,centro_custo_id:inp.dataset.ccid||null,tipo:inp.dataset.tipo,valor_orcado:parseFloat(inp.value)||0,updated_at:new Date().toISOString()});
+  });
+  try{
+    var {error}=await sb.from('orcamentos').upsert(upserts,{onConflict:'ano,mes,centro_custo_nome,tipo'});
+    if(error)throw error;
+    toast('✅','Orçamento salvo!','success');
+    document.getElementById('orc-edit-area').style.display='none';
+    await orcLoad();
+  }catch(e){toast('❌','Erro: '+e.message,'error');}
 }
 
 </script>
