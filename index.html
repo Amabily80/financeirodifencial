@@ -2086,13 +2086,26 @@ input[type="checkbox"]{width:14px;height:14px;accent-color:var(--green-accent);c
        PAGE: ORÇADO × REALIZADO
   ═══════════════════════════════════ -->
   <div id="page-orcado" style="display:none;padding:24px">
-    <div class="fin-page-hdr" style="margin-bottom:20px">
+    <div class="fin-page-hdr" style="margin-bottom:16px">
       <div>
         <h2 class="fin-page-title">🎯 Projetado × Realizado</h2>
         <p style="font-size:12px;color:var(--text-muted);margin-top:3px">Projetado = CP/CR com vencimento no mês &nbsp;·&nbsp; Realizado = efetivamente pago/recebido no mês</p>
       </div>
-      <button class="btn-primary" onclick="orcLoad()">↺ Atualizar</button>
+      <div style="display:flex;gap:8px;align-items:center;flex-wrap:wrap">
+        <button class="btn-secondary" id="orc-btn-plan" onclick="orcFecharPlanejamento()" style="display:none">🔒 Fixar Planejamento</button>
+        <button class="btn-secondary" id="orc-btn-reabrir" onclick="orcReabrirPlanejamento()" style="display:none;background:#fff3e8;color:var(--brand);border-color:var(--brand)">🔓 Reabrir</button>
+        <button class="btn-secondary" id="orc-btn-realizado" onclick="orcFecharRealizado()" style="display:none">✅ Fechar Realizado</button>
+        <button class="btn-primary" onclick="orcLoad()">↺ Atualizar</button>
+      </div>
     </div>
+
+    <!-- Status bar -->
+    <div id="orc-status-bar" style="display:flex;gap:12px;align-items:center;flex-wrap:wrap;margin-bottom:16px;padding:10px 16px;background:var(--surface);border:1px solid var(--border2);border-radius:10px;font-size:12px">
+      <span id="orc-status-plan" style="color:var(--text-muted)">⚡ Planejamento: carregando...</span>
+      <span style="color:var(--border2)">|</span>
+      <span id="orc-status-real" style="color:var(--text-muted)">📊 Realizado: ao vivo</span>
+    </div>
+
     <div style="display:flex;gap:12px;align-items:center;flex-wrap:wrap;margin-bottom:20px">
       <label style="font-size:12px;color:var(--text-muted);font-weight:600">Mês:</label>
       <select id="orc-mes" class="fc-select" onchange="orcLoad()">
@@ -8030,7 +8043,7 @@ function dreRender(mes,ano,acu){
 // ═══════════════════════════════════════════════════
 // PROJETADO × REALIZADO
 // ═══════════════════════════════════════════════════
-var _orcCpOrc=[], _orcCrOrc=[], _orcCpReal=[], _orcCrReal=[];
+var _orcCpOrc=[], _orcCrOrc=[], _orcCpReal=[], _orcCrReal=[], _orcSnapshot=[], _orcRealizadoFechado=false;
 
 function _orcInitPeriod(){
   var now=new Date();
@@ -8051,31 +8064,92 @@ async function orcLoad(){
   var ano=document.getElementById('orc-ano').value;
   var ini=ano+'-'+mes+'-01', fim=ano+'-'+mes+'-31';
   try{
-    var [rCp,rCr]=await Promise.all([
+    var [rCp,rCr,rSnap]=await Promise.all([
       sb.from('contas_pagar').select('valor,valor_pago,data_pagamento,vencimento,status,categoria_id,categoria_nome').limit(9999),
       sb.from('contas_receber').select('valor,valor_recebido,data_recebimento,vencimento,status,categoria_id,categoria_nome').limit(9999),
+      sb.from('orcamentos').select('*').eq('ano',parseInt(ano)).eq('mes',parseInt(mes)),
     ]);
     var cp=rCp.data||[], cr=rCr.data||[];
-    // Projetado = vencimento no período (exceto cancelados)
+    _orcSnapshot=rSnap.data||[];
     _orcCpOrc=cp.filter(function(r){return r.status!=='cancelado'&&r.vencimento&&r.vencimento>=ini&&r.vencimento<=fim;});
     _orcCrOrc=cr.filter(function(r){return r.status!=='cancelado'&&r.vencimento&&r.vencimento>=ini&&r.vencimento<=fim;});
-    // Realizado = efetivamente pago/recebido no período
     _orcCpReal=cp.filter(function(r){return r.status==='pago'&&r.data_pagamento&&r.data_pagamento>=ini&&r.data_pagamento<=fim;});
     _orcCrReal=cr.filter(function(r){return r.status==='recebido'&&r.data_recebimento&&r.data_recebimento>=ini&&r.data_recebimento<=fim;});
-    orcRender();
+    // Verifica se "Realizado" também está fechado (tipo='realizado_fechado' no snapshot)
+    _orcRealizadoFechado=_orcSnapshot.some(function(s){return s.tipo==='realizado_fechado';});
+    orcRender(mes,ano);
   }catch(e){toast('❌','Erro: '+e.message,'error');}
 }
 
-function orcRender(){
+function orcRender(mes,ano){
   var ccMap=_dreCCMap();
   function getCC(r){return _dreGetCC(r,ccMap);}
 
-  var projRec={}, projCus={}, realRec={}, realCus={};
-  _orcCrOrc.forEach(function(r){var cc=getCC(r); projRec[cc]=(projRec[cc]||0)+(parseFloat(r.valor)||0);});
-  _orcCpOrc.forEach(function(r){var cc=getCC(r); projCus[cc]=(projCus[cc]||0)+(parseFloat(r.valor)||0);});
-  _orcCrReal.forEach(function(r){var cc=getCC(r); realRec[cc]=(realRec[cc]||0)+(parseFloat(r.valor_recebido)||parseFloat(r.valor)||0);});
-  _orcCpReal.forEach(function(r){var cc=getCC(r); realCus[cc]=(realCus[cc]||0)+(parseFloat(r.valor_pago)||parseFloat(r.valor)||0);});
+  var planejamentoFixado=_orcSnapshot.some(function(s){return s.tipo==='receita'||s.tipo==='custo';});
+  var snapData=_orcSnapshot.filter(function(s){return s.tipo==='receita'||s.tipo==='custo';});
 
+  // Projetado: usa snapshot se fixado, senão ao vivo
+  var projRec={}, projCus={};
+  if(planejamentoFixado){
+    snapData.forEach(function(s){
+      if(s.tipo==='receita') projRec[s.centro_custo_nome]=(projRec[s.centro_custo_nome]||0)+(parseFloat(s.valor_orcado)||0);
+      else projCus[s.centro_custo_nome]=(projCus[s.centro_custo_nome]||0)+(parseFloat(s.valor_orcado)||0);
+    });
+  } else {
+    _orcCrOrc.forEach(function(r){var cc=getCC(r); projRec[cc]=(projRec[cc]||0)+(parseFloat(r.valor)||0);});
+    _orcCpOrc.forEach(function(r){var cc=getCC(r); projCus[cc]=(projCus[cc]||0)+(parseFloat(r.valor)||0);});
+  }
+
+  // Realizado: se fechado usa snapshot; senão ao vivo
+  var realRec={}, realCus={};
+  var snapReal=_orcSnapshot.filter(function(s){return s.tipo==='receita_real'||s.tipo==='custo_real';});
+  if(_orcRealizadoFechado&&snapReal.length){
+    snapReal.forEach(function(s){
+      if(s.tipo==='receita_real') realRec[s.centro_custo_nome]=(realRec[s.centro_custo_nome]||0)+(parseFloat(s.valor_orcado)||0);
+      else realCus[s.centro_custo_nome]=(realCus[s.centro_custo_nome]||0)+(parseFloat(s.valor_orcado)||0);
+    });
+  } else {
+    _orcCrReal.forEach(function(r){var cc=getCC(r); realRec[cc]=(realRec[cc]||0)+(parseFloat(r.valor_recebido)||parseFloat(r.valor)||0);});
+    _orcCpReal.forEach(function(r){var cc=getCC(r); realCus[cc]=(realCus[cc]||0)+(parseFloat(r.valor_pago)||parseFloat(r.valor)||0);});
+  }
+
+  // Status bar e botões
+  var now=new Date();
+  var anoN=parseInt(ano), mesN=parseInt(mes);
+  var mesPassou=(anoN<now.getFullYear())||(anoN===now.getFullYear()&&mesN<now.getMonth()+1);
+  var snapUpdatedAt=planejamentoFixado?(snapData[0].updated_at||''):null;
+  var snapDate=snapUpdatedAt?new Date(snapUpdatedAt).toLocaleDateString('pt-BR'):null;
+
+  var sPlan=document.getElementById('orc-status-plan');
+  var sReal=document.getElementById('orc-status-real');
+  var btnPlan=document.getElementById('orc-btn-plan');
+  var btnReab=document.getElementById('orc-btn-reabrir');
+  var btnReal=document.getElementById('orc-btn-realizado');
+  if(sPlan){
+    if(planejamentoFixado){
+      sPlan.innerHTML='🔒 <strong>Planejamento fixado</strong>'+(snapDate?' em '+snapDate:'');
+      sPlan.style.color='#059669';
+      if(btnPlan) btnPlan.style.display='none';
+      if(btnReab) btnReab.style.display='';
+    } else {
+      sPlan.innerHTML='⚡ Planejamento <strong>ao vivo</strong> — clique em "Fixar" para congelar';
+      sPlan.style.color='#d97706';
+      if(btnPlan) btnPlan.style.display='';
+      if(btnReab) btnReab.style.display='none';
+    }
+  }
+  if(sReal){
+    if(_orcRealizadoFechado){
+      sReal.innerHTML='🔒 <strong>Realizado fechado</strong>';
+      sReal.style.color='#059669';
+    } else {
+      sReal.innerHTML='📊 Realizado <strong>ao vivo</strong>'+(mesPassou?' — mês encerrado, clique para fechar':'');
+      sReal.style.color=mesPassou?'#d97706':'var(--text-muted)';
+    }
+    if(btnReal) btnReal.style.display=(mesPassou&&!_orcRealizadoFechado)?'':'none';
+  }
+
+  // Render tabela
   var allCC=new Set();
   [projRec,projCus,realRec,realCus].forEach(function(m){Object.keys(m).forEach(function(k){allCC.add(k);});});
   var ccs=Array.from(allCC).sort();
@@ -8136,6 +8210,61 @@ function orcRender(){
   roEl.textContent=fmtBRL(resP); roEl.className='exec-kpi-val '+(resP>=0?'green':'red');
   var rrEl2=document.getElementById('orc-k-res-real');
   rrEl2.textContent=fmtBRL(resR); rrEl2.className='exec-kpi-val '+(resR>=0?'green':'red');
+}
+
+async function orcFecharPlanejamento(){
+  if(!confirm('Fixar o planejamento de '+document.getElementById('orc-mes').options[document.getElementById('orc-mes').selectedIndex].text+'/'+document.getElementById('orc-ano').value+'?\n\nOs valores projetados atuais serão congelados e não mudarão mais automaticamente.')) return;
+  var ccMap=_dreCCMap();
+  function getCC(r){return _dreGetCC(r,ccMap);}
+  var projRec={}, projCus={};
+  _orcCrOrc.forEach(function(r){var cc=getCC(r); projRec[cc]=(projRec[cc]||0)+(parseFloat(r.valor)||0);});
+  _orcCpOrc.forEach(function(r){var cc=getCC(r); projCus[cc]=(projCus[cc]||0)+(parseFloat(r.valor)||0);});
+  var mes=parseInt(document.getElementById('orc-mes').value);
+  var ano=parseInt(document.getElementById('orc-ano').value);
+  var ts=new Date().toISOString();
+  var upserts=[];
+  Object.keys(projRec).forEach(function(cc){upserts.push({ano:ano,mes:mes,centro_custo_nome:cc,tipo:'receita',valor_orcado:projRec[cc],updated_at:ts});});
+  Object.keys(projCus).forEach(function(cc){upserts.push({ano:ano,mes:mes,centro_custo_nome:cc,tipo:'custo',valor_orcado:projCus[cc],updated_at:ts});});
+  if(!upserts.length){toast('⚠️','Nenhum dado projetado para fixar.','warn');return;}
+  try{
+    var {error}=await sb.from('orcamentos').upsert(upserts,{onConflict:'ano,mes,centro_custo_nome,tipo'});
+    if(error)throw error;
+    toast('🔒','Planejamento fixado com sucesso!','success');
+    await orcLoad();
+  }catch(e){toast('❌','Erro: '+e.message,'error');}
+}
+
+async function orcReabrirPlanejamento(){
+  if(!confirm('Reabrir o planejamento? Os valores voltarão a ser calculados ao vivo do fluxo de caixa.')) return;
+  var mes=parseInt(document.getElementById('orc-mes').value);
+  var ano=parseInt(document.getElementById('orc-ano').value);
+  try{
+    var {error}=await sb.from('orcamentos').delete().eq('ano',ano).eq('mes',mes).in('tipo',['receita','custo']);
+    if(error)throw error;
+    toast('🔓','Planejamento reaberto.','success');
+    await orcLoad();
+  }catch(e){toast('❌','Erro: '+e.message,'error');}
+}
+
+async function orcFecharRealizado(){
+  if(!confirm('Fechar o Realizado? Os valores efetivamente pagos/recebidos serão congelados para histórico.')) return;
+  var ccMap=_dreCCMap();
+  function getCC(r){return _dreGetCC(r,ccMap);}
+  var realRec={}, realCus={};
+  _orcCrReal.forEach(function(r){var cc=getCC(r); realRec[cc]=(realRec[cc]||0)+(parseFloat(r.valor_recebido)||parseFloat(r.valor)||0);});
+  _orcCpReal.forEach(function(r){var cc=getCC(r); realCus[cc]=(realCus[cc]||0)+(parseFloat(r.valor_pago)||parseFloat(r.valor)||0);});
+  var mes=parseInt(document.getElementById('orc-mes').value);
+  var ano=parseInt(document.getElementById('orc-ano').value);
+  var ts=new Date().toISOString();
+  var upserts=[{ano:ano,mes:mes,centro_custo_nome:'_fechamento',tipo:'realizado_fechado',valor_orcado:0,updated_at:ts}];
+  Object.keys(realRec).forEach(function(cc){upserts.push({ano:ano,mes:mes,centro_custo_nome:cc,tipo:'receita_real',valor_orcado:realRec[cc],updated_at:ts});});
+  Object.keys(realCus).forEach(function(cc){upserts.push({ano:ano,mes:mes,centro_custo_nome:cc,tipo:'custo_real',valor_orcado:realCus[cc],updated_at:ts});});
+  try{
+    var {error}=await sb.from('orcamentos').upsert(upserts,{onConflict:'ano,mes,centro_custo_nome,tipo'});
+    if(error)throw error;
+    toast('✅','Realizado fechado e salvo!','success');
+    await orcLoad();
+  }catch(e){toast('❌','Erro: '+e.message,'error');}
 }
 
 </script>
