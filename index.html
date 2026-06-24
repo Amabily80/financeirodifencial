@@ -389,8 +389,11 @@ input[type="checkbox"]{width:14px;height:14px;accent-color:var(--green-accent);c
 .fin-table-wrap{overflow-x:auto}
 .fin-table{width:100%;border-collapse:collapse;font-size:12.5px}
 .fin-table thead tr{background:linear-gradient(90deg,var(--navy),var(--navy2))}
-.fin-table th{padding:10px 13px;text-align:left;font-size:10px;font-weight:600;letter-spacing:.1em;text-transform:uppercase;color:rgba(255,255,255,.75);white-space:nowrap;cursor:pointer;user-select:none}
-.fin-table th:hover{color:var(--gold2)}
+.fin-table th{padding:10px 13px;text-align:left;font-size:10px;font-weight:600;letter-spacing:.1em;text-transform:uppercase;color:rgba(255,255,255,.75);white-space:nowrap;cursor:default;user-select:none}
+.fin-table th.th-sort{cursor:pointer}
+.fin-table th.th-sort:hover{color:var(--gold2)}
+.fin-table th.sorted-asc::after{content:' ▲';color:var(--gold2);font-size:9px}
+.fin-table th.sorted-desc::after{content:' ▼';color:var(--gold2);font-size:9px}
 .fin-table td{padding:10px 13px;border-bottom:1px solid var(--border);white-space:nowrap;vertical-align:middle}
 .fin-table tbody tr:hover td{background:#fafbff}
 .fin-table tbody tr:last-child td{border-bottom:none}
@@ -668,8 +671,11 @@ input[type="checkbox"]{width:14px;height:14px;accent-color:var(--green-accent);c
 .fin-table-wrap{overflow-x:auto}
 .fin-table{width:100%;border-collapse:collapse;font-size:12.5px}
 .fin-table thead tr{background:linear-gradient(90deg,var(--navy),var(--navy2))}
-.fin-table th{padding:10px 13px;text-align:left;font-size:10px;font-weight:600;letter-spacing:.1em;text-transform:uppercase;color:rgba(255,255,255,.75);white-space:nowrap;cursor:pointer;user-select:none}
-.fin-table th:hover{color:var(--gold2)}
+.fin-table th{padding:10px 13px;text-align:left;font-size:10px;font-weight:600;letter-spacing:.1em;text-transform:uppercase;color:rgba(255,255,255,.75);white-space:nowrap;cursor:default;user-select:none}
+.fin-table th.th-sort{cursor:pointer}
+.fin-table th.th-sort:hover{color:var(--gold2)}
+.fin-table th.sorted-asc::after{content:' ▲';color:var(--gold2);font-size:9px}
+.fin-table th.sorted-desc::after{content:' ▼';color:var(--gold2);font-size:9px}
 .fin-table td{padding:10px 13px;border-bottom:1px solid var(--border);white-space:nowrap;vertical-align:middle}
 .fin-table tbody tr:hover td{background:#fafbff}
 .fin-table tbody tr:last-child td{border-bottom:none}
@@ -1623,11 +1629,11 @@ input[type="checkbox"]{width:14px;height:14px;accent-color:var(--green-accent);c
           <thead>
             <tr>
               <th style="width:40px;text-align:center"><input type="checkbox" id="cp-chk-all" onchange="cpToggleAll(this)" style="width:15px;height:15px;cursor:pointer;accent-color:#F47920" title="Selecionar todos"></th>
-              <th style="min-width:160px">Fornecedor</th>
+              <th style="min-width:160px" class="th-sort" id="cp-th-pessoa" onclick="cpSetSort('pessoa_nome')">Fornecedor</th>
               <th style="min-width:130px">Categoria</th>
-              <th style="width:110px;text-align:right">Valor</th>
-              <th style="width:100px">Vencimento</th>
-              <th style="width:100px">Data Pgto</th>
+              <th style="width:110px;text-align:right" class="th-sort" id="cp-th-valor" onclick="cpSetSort('valor')">Valor</th>
+              <th style="width:100px" class="th-sort" id="cp-th-venc" onclick="cpSetSort('vencimento')">Vencimento</th>
+              <th style="width:100px" class="th-sort" id="cp-th-pgto" onclick="cpSetSort('data_pagamento')">Data Pgto</th>
               <th style="width:100px">Status</th>
               <th style="min-width:180px">Descri&#231;&#227;o</th>
               <th style="width:130px">A&#231;&#245;es</th>
@@ -1709,11 +1715,11 @@ input[type="checkbox"]{width:14px;height:14px;accent-color:var(--green-accent);c
           <thead>
             <tr>
               <th style="width:40px;text-align:center"><input type="checkbox" id="cr-chk-all" onchange="crToggleAll(this)" style="width:15px;height:15px;cursor:pointer;accent-color:#F47920" title="Selecionar todos"></th>
-              <th style="min-width:160px">Cliente</th>
+              <th style="min-width:160px" class="th-sort" id="cr-th-pessoa" onclick="crSetSort('pessoa_nome')">Cliente</th>
               <th style="min-width:130px">Categoria</th>
-              <th style="width:110px;text-align:right">Valor</th>
-              <th style="width:100px">Vencimento</th>
-              <th style="width:110px">Data Receb.</th>
+              <th style="width:110px;text-align:right" class="th-sort" id="cr-th-valor" onclick="crSetSort('valor')">Valor</th>
+              <th style="width:100px" class="th-sort" id="cr-th-venc" onclick="crSetSort('vencimento')">Vencimento</th>
+              <th style="width:110px" class="th-sort" id="cr-th-receb" onclick="crSetSort('data_recebimento')">Data Receb.</th>
               <th style="width:100px">Status</th>
               <th style="min-width:180px">Descri&#231;&#227;o</th>
               <th style="width:130px">A&#231;&#245;es</th>
@@ -4522,6 +4528,50 @@ async function updateVencidos(){
 }
 
 // ══════════════════════════════════════
+// ORDENAÇÃO CP / CR
+// ══════════════════════════════════════
+var cpSortCol='vencimento', cpSortDir='asc';
+var crSortCol='vencimento', crSortDir='asc';
+
+function _sortRows(rows, col, dir){
+  return rows.slice().sort(function(a,b){
+    var av=a[col], bv=b[col];
+    if(av==null) av=''; if(bv==null) bv='';
+    if(col==='valor'||col==='valor_pago'||col==='valor_recebido'){
+      av=parseFloat(av)||0; bv=parseFloat(bv)||0;
+    } else {
+      av=String(av).toLowerCase(); bv=String(bv).toLowerCase();
+    }
+    var cmp=av<bv?-1:av>bv?1:0;
+    return dir==='asc'?cmp:-cmp;
+  });
+}
+
+function _updateSortHeaders(prefix, col, dir){
+  var map={};
+  if(prefix==='cp') map={pessoa_nome:'pessoa',valor:'valor',vencimento:'venc',data_pagamento:'pgto'};
+  else              map={pessoa_nome:'pessoa',valor:'valor',vencimento:'venc',data_recebimento:'receb'};
+  Object.keys(map).forEach(function(c){
+    var el=document.getElementById(prefix+'-th-'+map[c]);
+    if(!el) return;
+    el.classList.remove('sorted-asc','sorted-desc');
+    if(c===col) el.classList.add(dir==='asc'?'sorted-asc':'sorted-desc');
+  });
+}
+
+function cpSetSort(col){
+  cpSortDir=(cpSortCol===col&&cpSortDir==='asc')?'desc':'asc';
+  cpSortCol=col;
+  cpRender();
+}
+
+function crSetSort(col){
+  crSortDir=(crSortCol===col&&crSortDir==='asc')?'desc':'asc';
+  crSortCol=col;
+  crRender();
+}
+
+// ══════════════════════════════════════
 // CONTAS A PAGAR
 // ══════════════════════════════════════
 async function cpLoad(){
@@ -4561,8 +4611,12 @@ function cpRender(){
     if(!search) return true;
     return (r.descricao||'').toLowerCase().includes(search)
       || (r.pessoa_nome||'').toLowerCase().includes(search)
-      || (r.categoria_nome||'').toLowerCase().includes(search);
+      || (r.categoria_nome||'').toLowerCase().includes(search)
+      || fmtBRL(r.valor).includes(search)
+      || fmtBRL(r.valor_pago).includes(search);
   });
+  rows = _sortRows(rows, cpSortCol, cpSortDir);
+  _updateSortHeaders('cp', cpSortCol, cpSortDir);
 
   // KPIs
   var hoje = new Date(); hoje.setHours(0,0,0,0);
@@ -4800,8 +4854,12 @@ function crRender(){
     if(!search) return true;
     return (r.descricao||'').toLowerCase().includes(search)
       || (r.pessoa_nome||'').toLowerCase().includes(search)
-      || (r.categoria_nome||'').toLowerCase().includes(search);
+      || (r.categoria_nome||'').toLowerCase().includes(search)
+      || fmtBRL(r.valor).includes(search)
+      || fmtBRL(r.valor_recebido).includes(search);
   });
+  rows = _sortRows(rows, crSortCol, crSortDir);
+  _updateSortHeaders('cr', crSortCol, crSortDir);
 
   // KPIs
   var hoje = new Date(); hoje.setHours(0,0,0,0);
@@ -6104,6 +6162,50 @@ async function updateVencidos(){
       .eq('status','pendente')
       .lt('vencimento', hoje);
   }catch(e){ console.warn('updateVencidos:', e.message); }
+}
+
+// ══════════════════════════════════════
+// ORDENAÇÃO CP / CR
+// ══════════════════════════════════════
+var cpSortCol='vencimento', cpSortDir='asc';
+var crSortCol='vencimento', crSortDir='asc';
+
+function _sortRows(rows, col, dir){
+  return rows.slice().sort(function(a,b){
+    var av=a[col], bv=b[col];
+    if(av==null) av=''; if(bv==null) bv='';
+    if(col==='valor'||col==='valor_pago'||col==='valor_recebido'){
+      av=parseFloat(av)||0; bv=parseFloat(bv)||0;
+    } else {
+      av=String(av).toLowerCase(); bv=String(bv).toLowerCase();
+    }
+    var cmp=av<bv?-1:av>bv?1:0;
+    return dir==='asc'?cmp:-cmp;
+  });
+}
+
+function _updateSortHeaders(prefix, col, dir){
+  var map={};
+  if(prefix==='cp') map={pessoa_nome:'pessoa',valor:'valor',vencimento:'venc',data_pagamento:'pgto'};
+  else              map={pessoa_nome:'pessoa',valor:'valor',vencimento:'venc',data_recebimento:'receb'};
+  Object.keys(map).forEach(function(c){
+    var el=document.getElementById(prefix+'-th-'+map[c]);
+    if(!el) return;
+    el.classList.remove('sorted-asc','sorted-desc');
+    if(c===col) el.classList.add(dir==='asc'?'sorted-asc':'sorted-desc');
+  });
+}
+
+function cpSetSort(col){
+  cpSortDir=(cpSortCol===col&&cpSortDir==='asc')?'desc':'asc';
+  cpSortCol=col;
+  cpRender();
+}
+
+function crSetSort(col){
+  crSortDir=(crSortCol===col&&crSortDir==='asc')?'desc':'asc';
+  crSortCol=col;
+  crRender();
 }
 
 // ══════════════════════════════════════
