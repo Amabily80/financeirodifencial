@@ -4688,6 +4688,7 @@ function cpOpenNew(){
   fillPessoaDropdown('fornecedor');
   fillCatDropdownFor('pagar');
   fillContaDropdown();
+  _finSetStatusOpts('cp');
 }
 
 async function cpOpenEdit(id){
@@ -4726,6 +4727,12 @@ async function cpOpenEdit(id){
   document.getElementById('fm-obs').value       = r.observacoes||'';
   document.getElementById('fm-parcela-atual').value   = r.parcela_atual||1;
   document.getElementById('fm-total-parcelas').value  = r.total_parcelas||1;
+  _finSetStatusOpts('cp');
+  var _st=document.getElementById('fm-status'); if(_st){ _st.value=r.status||'pendente'; finStatusChange(); }
+  if(r.status==='pago'){
+    var _dp=document.getElementById('fm-data-pgto'); if(_dp) _dp.value=r.data_pagamento||'';
+    var _vp=document.getElementById('fm-valor-pago'); if(_vp) _vp.value=r.valor_pago||'';
+  }
 }
 
 // Calcula a próxima data de vencimento de uma parcela conforme a frequência escolhida
@@ -4930,6 +4937,7 @@ function crOpenNew(){
   fillPessoaDropdown('cliente');
   fillCatDropdownFor('receber');
   fillContaDropdown();
+  _finSetStatusOpts('cr');
 }
 
 async function crOpenEdit(id){
@@ -4968,6 +4976,12 @@ async function crOpenEdit(id){
   document.getElementById('fm-obs').value       = r.observacoes||'';
   document.getElementById('fm-parcela-atual').value  = r.parcela_atual||1;
   document.getElementById('fm-total-parcelas').value = r.total_parcelas||1;
+  _finSetStatusOpts('cr');
+  var _st=document.getElementById('fm-status'); if(_st){ _st.value=r.status||'pendente'; finStatusChange(); }
+  if(r.status==='recebido'){
+    var _dp=document.getElementById('fm-data-pgto'); if(_dp) _dp.value=r.data_recebimento||'';
+    var _vp=document.getElementById('fm-valor-pago'); if(_vp) _vp.value=r.valor_recebido||'';
+  }
 }
 
 async function crSave(data){
@@ -5159,6 +5173,11 @@ function finModalOpen(title, sub){
   document.getElementById('fm-parcela-atual').value='1';
   document.getElementById('fm-total-parcelas').value='1';
   if(document.getElementById('fm-recorrencia-freq')) document.getElementById('fm-recorrencia-freq').value='mensal';
+  var _fmSt=document.getElementById('fm-status'); if(_fmSt) _fmSt.value='pendente';
+  var _pgtoF=document.getElementById('fm-pgto-field'); if(_pgtoF) _pgtoF.style.display='none';
+  var _vlrF=document.getElementById('fm-vlrpago-field'); if(_vlrF) _vlrF.style.display='none';
+  var _dp=document.getElementById('fm-data-pgto'); if(_dp) _dp.value='';
+  var _vp=document.getElementById('fm-valor-pago'); if(_vp) _vp.value='';
   fillProjDropdowns();
   document.getElementById('fin-modal').classList.add('open');
 }
@@ -5166,6 +5185,26 @@ function finModalOpen(title, sub){
 function finModalClose(){
   document.getElementById('fin-modal').classList.remove('open');
   FS.mode=null; FS.editId=null;
+}
+
+function finStatusChange(){
+  var s=document.getElementById('fm-status')?.value||'pendente';
+  var isPago=(s==='pago'||s==='recebido');
+  var pf=document.getElementById('fm-pgto-field'); if(pf) pf.style.display=isPago?'':'none';
+  var vf=document.getElementById('fm-vlrpago-field'); if(vf) vf.style.display=isPago?'':'none';
+}
+
+function _finSetStatusOpts(mode){
+  var sel=document.getElementById('fm-status'); if(!sel) return;
+  if(mode==='cp'){
+    sel.innerHTML='<option value="pendente">⏳ Pendente</option><option value="pago">✅ Pago</option><option value="vencido">⚠️ Vencido</option><option value="cancelado">❌ Cancelado</option>';
+    var lbl=document.getElementById('fm-pgto-lbl'); if(lbl) lbl.textContent='Data Pagamento';
+    var vlbl=document.getElementById('fm-vlrpago-lbl'); if(vlbl) vlbl.textContent='Valor Pago (R$)';
+  } else {
+    sel.innerHTML='<option value="pendente">⏳ Pendente</option><option value="recebido">✅ Recebido</option><option value="atrasado">⚠️ Atrasado</option><option value="cancelado">❌ Cancelado</option>';
+    var lbl2=document.getElementById('fm-pgto-lbl'); if(lbl2) lbl2.textContent='Data Recebimento';
+    var vlbl2=document.getElementById('fm-vlrpago-lbl'); if(vlbl2) vlbl2.textContent='Valor Recebido (R$)';
+  }
 }
 
 async function finModalSave(){
@@ -5211,6 +5250,12 @@ async function finModalSave(){
     projNome = pr ? pr.nome : '';
   }
 
+  var fmStatus = document.getElementById('fm-status')?.value || 'pendente';
+  var fmDataPgto = document.getElementById('fm-data-pgto')?.value || null;
+  var fmValorPago = parseFloat(document.getElementById('fm-valor-pago')?.value)||null;
+  var isPagoCP = (FS.mode==='cp' && fmStatus==='pago');
+  var isRecebidoCR = (FS.mode==='cr' && fmStatus==='recebido');
+
   var data = {
     descricao: descricao,
     pessoa_id: pessoaId||null,
@@ -5224,9 +5269,11 @@ async function finModalSave(){
     vencimento: vencimento,
     ...(FS.mode==='cp'?{nota_fiscal:nota||null}:{}),
     observacoes: obs||null,
-    status: 'pendente',
+    status: fmStatus,
     parcela_atual: parseInt(document.getElementById('fm-parcela-atual').value)||1,
     total_parcelas: parseInt(document.getElementById('fm-total-parcelas').value)||1,
+    ...(isPagoCP ? {data_pagamento: fmDataPgto, valor_pago: fmValorPago} : FS.mode==='cp' ? {data_pagamento:null, valor_pago:null} : {}),
+    ...(isRecebidoCR ? {data_recebimento: fmDataPgto, valor_recebido: fmValorPago} : FS.mode==='cr' ? {data_recebimento:null, valor_recebido:null} : {}),
   };
 
   var btn = document.getElementById('fin-modal-save-btn');
@@ -6249,6 +6296,7 @@ function cpOpenNew(){
   fillPessoaDropdown('fornecedor');
   fillCatDropdownFor('pagar');
   fillContaDropdown();
+  _finSetStatusOpts('cp');
 }
 
 async function cpOpenEdit(id){
@@ -6287,6 +6335,12 @@ async function cpOpenEdit(id){
   document.getElementById('fm-obs').value       = r.observacoes||'';
   document.getElementById('fm-parcela-atual').value   = r.parcela_atual||1;
   document.getElementById('fm-total-parcelas').value  = r.total_parcelas||1;
+  _finSetStatusOpts('cp');
+  var _st=document.getElementById('fm-status'); if(_st){ _st.value=r.status||'pendente'; finStatusChange(); }
+  if(r.status==='pago'){
+    var _dp=document.getElementById('fm-data-pgto'); if(_dp) _dp.value=r.data_pagamento||'';
+    var _vp=document.getElementById('fm-valor-pago'); if(_vp) _vp.value=r.valor_pago||'';
+  }
 }
 
 // Calcula a próxima data de vencimento de uma parcela conforme a frequência escolhida
@@ -6415,6 +6469,7 @@ function crOpenNew(){
   fillPessoaDropdown('cliente');
   fillCatDropdownFor('receber');
   fillContaDropdown();
+  _finSetStatusOpts('cr');
 }
 
 async function crOpenEdit(id){
@@ -6453,6 +6508,12 @@ async function crOpenEdit(id){
   document.getElementById('fm-obs').value       = r.observacoes||'';
   document.getElementById('fm-parcela-atual').value  = r.parcela_atual||1;
   document.getElementById('fm-total-parcelas').value = r.total_parcelas||1;
+  _finSetStatusOpts('cr');
+  var _st=document.getElementById('fm-status'); if(_st){ _st.value=r.status||'pendente'; finStatusChange(); }
+  if(r.status==='recebido'){
+    var _dp=document.getElementById('fm-data-pgto'); if(_dp) _dp.value=r.data_recebimento||'';
+    var _vp=document.getElementById('fm-valor-pago'); if(_vp) _vp.value=r.valor_recebido||'';
+  }
 }
 
 async function crSave(data){
@@ -6643,6 +6704,11 @@ function finModalOpen(title, sub){
   document.getElementById('fm-parcela-atual').value='1';
   document.getElementById('fm-total-parcelas').value='1';
   if(document.getElementById('fm-recorrencia-freq')) document.getElementById('fm-recorrencia-freq').value='mensal';
+  var _fmSt=document.getElementById('fm-status'); if(_fmSt) _fmSt.value='pendente';
+  var _pgtoF=document.getElementById('fm-pgto-field'); if(_pgtoF) _pgtoF.style.display='none';
+  var _vlrF=document.getElementById('fm-vlrpago-field'); if(_vlrF) _vlrF.style.display='none';
+  var _dp=document.getElementById('fm-data-pgto'); if(_dp) _dp.value='';
+  var _vp=document.getElementById('fm-valor-pago'); if(_vp) _vp.value='';
   fillProjDropdowns();
   document.getElementById('fin-modal').classList.add('open');
 }
@@ -6650,6 +6716,26 @@ function finModalOpen(title, sub){
 function finModalClose(){
   document.getElementById('fin-modal').classList.remove('open');
   FS.mode=null; FS.editId=null;
+}
+
+function finStatusChange(){
+  var s=document.getElementById('fm-status')?.value||'pendente';
+  var isPago=(s==='pago'||s==='recebido');
+  var pf=document.getElementById('fm-pgto-field'); if(pf) pf.style.display=isPago?'':'none';
+  var vf=document.getElementById('fm-vlrpago-field'); if(vf) vf.style.display=isPago?'':'none';
+}
+
+function _finSetStatusOpts(mode){
+  var sel=document.getElementById('fm-status'); if(!sel) return;
+  if(mode==='cp'){
+    sel.innerHTML='<option value="pendente">⏳ Pendente</option><option value="pago">✅ Pago</option><option value="vencido">⚠️ Vencido</option><option value="cancelado">❌ Cancelado</option>';
+    var lbl=document.getElementById('fm-pgto-lbl'); if(lbl) lbl.textContent='Data Pagamento';
+    var vlbl=document.getElementById('fm-vlrpago-lbl'); if(vlbl) vlbl.textContent='Valor Pago (R$)';
+  } else {
+    sel.innerHTML='<option value="pendente">⏳ Pendente</option><option value="recebido">✅ Recebido</option><option value="atrasado">⚠️ Atrasado</option><option value="cancelado">❌ Cancelado</option>';
+    var lbl2=document.getElementById('fm-pgto-lbl'); if(lbl2) lbl2.textContent='Data Recebimento';
+    var vlbl2=document.getElementById('fm-vlrpago-lbl'); if(vlbl2) vlbl2.textContent='Valor Recebido (R$)';
+  }
 }
 
 async function finModalSave(){
@@ -6695,6 +6781,12 @@ async function finModalSave(){
     projNome = pr ? pr.nome : '';
   }
 
+  var fmStatus = document.getElementById('fm-status')?.value || 'pendente';
+  var fmDataPgto = document.getElementById('fm-data-pgto')?.value || null;
+  var fmValorPago = parseFloat(document.getElementById('fm-valor-pago')?.value)||null;
+  var isPagoCP = (FS.mode==='cp' && fmStatus==='pago');
+  var isRecebidoCR = (FS.mode==='cr' && fmStatus==='recebido');
+
   var data = {
     descricao: descricao,
     pessoa_id: pessoaId||null,
@@ -6708,9 +6800,11 @@ async function finModalSave(){
     vencimento: vencimento,
     ...(FS.mode==='cp'?{nota_fiscal:nota||null}:{}),
     observacoes: obs||null,
-    status: 'pendente',
+    status: fmStatus,
     parcela_atual: parseInt(document.getElementById('fm-parcela-atual').value)||1,
     total_parcelas: parseInt(document.getElementById('fm-total-parcelas').value)||1,
+    ...(isPagoCP ? {data_pagamento: fmDataPgto, valor_pago: fmValorPago} : FS.mode==='cp' ? {data_pagamento:null, valor_pago:null} : {}),
+    ...(isRecebidoCR ? {data_recebimento: fmDataPgto, valor_recebido: fmValorPago} : FS.mode==='cr' ? {data_recebimento:null, valor_recebido:null} : {}),
   };
 
   var btn = document.getElementById('fin-modal-save-btn');
@@ -8572,6 +8666,25 @@ async function orcFecharRealizado(){
         </div>
       </div>
 
+      <!-- Status e Pagamento -->
+      <div class="fin-form-section" id="fm-status-section">
+        <div class="fin-form-section-title">Status e Pagamento</div>
+        <div class="fin-form-row three" style="margin-top:8px">
+          <div class="fin-field">
+            <label>Status</label>
+            <select id="fm-status" onchange="finStatusChange()"></select>
+          </div>
+          <div class="fin-field" id="fm-pgto-field" style="display:none">
+            <label id="fm-pgto-lbl">Data Pagamento</label>
+            <input type="date" id="fm-data-pgto">
+          </div>
+          <div class="fin-field" id="fm-vlrpago-field" style="display:none">
+            <label id="fm-vlrpago-lbl">Valor Pago (R$)</label>
+            <input type="number" id="fm-valor-pago" step="0.01" min="0" placeholder="0,00">
+          </div>
+        </div>
+      </div>
+
       <!-- Recorrência -->
       <div class="fin-recorrencia-box">
         <div class="fin-form-section-title">🔁 Recorrência (parcelamento)</div>
@@ -8765,6 +8878,25 @@ async function orcFecharRealizado(){
             <div class="fin-field"><label>Observações</label>
               <textarea id="fm-obs" placeholder="Observações adicionais..."></textarea>
             </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Status e Pagamento -->
+      <div class="fin-form-section" id="fm-status-section">
+        <div class="fin-form-section-title">Status e Pagamento</div>
+        <div class="fin-form-row three" style="margin-top:8px">
+          <div class="fin-field">
+            <label>Status</label>
+            <select id="fm-status" onchange="finStatusChange()"></select>
+          </div>
+          <div class="fin-field" id="fm-pgto-field" style="display:none">
+            <label id="fm-pgto-lbl">Data Pagamento</label>
+            <input type="date" id="fm-data-pgto">
+          </div>
+          <div class="fin-field" id="fm-vlrpago-field" style="display:none">
+            <label id="fm-vlrpago-lbl">Valor Pago (R$)</label>
+            <input type="number" id="fm-valor-pago" step="0.01" min="0" placeholder="0,00">
           </div>
         </div>
       </div>
