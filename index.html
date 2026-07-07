@@ -3795,7 +3795,8 @@ function _scClassifyFill(fillInfo){
 function _scClassifySituacao(sit){
   var norm = _normTxt(sit);
   if(!norm) return null;
-  if(norm.indexOf('VALIDAR') !== -1) return {status:'pendente', motivo: String(sit).trim()};
+  if(norm.indexOf('VALIDAR')!== -1||norm.indexOf('AGUARD')!==-1||norm.indexOf('LIBERACAO')!==-1)
+    return {status:'pendente', motivo: String(sit).trim()};
   if(norm.indexOf('LIBERAD') !== -1) return {status:'liberado', motivo: String(sit).trim()};
   return {status:'recusado', motivo: String(sit).trim()};
 }
@@ -4001,6 +4002,9 @@ async function crImportRetornoConfirm(){
   try{
     await scImportRetorno(file, venc);
     crRetornoModalClose();
+    var st=document.getElementById('cr-f-status'); if(st) st.value='pendente';
+    var de=document.getElementById('cr-f-de');     if(de) de.value=venc;
+    var ate=document.getElementById('cr-f-ate');   if(ate) ate.value=venc;
     crLoad();
   } finally {
     btn.disabled = false; btn.textContent = 'Importar';
