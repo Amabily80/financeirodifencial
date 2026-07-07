@@ -3956,27 +3956,31 @@ async function scImportRetorno(file, vencimentoOverride, forceCreate){
         if(overall==='recusado') it.motivo = motivoText;
         else delete it.motivo;
 
-        if(overall==='liberado') nLiberado++;
-        else if(overall==='recusado') nRecusado++;
-        else nPendente++;
+        // Conta por linha da planilha (uma por unidade, não por item do sistema)
+        matched.forEach(function(me){
+          if(me.status==='liberado') nLiberado++;
+          else if(me.status==='recusado') nRecusado++;
+          else nPendente++;
+        });
 
-        // Comissão liberada: gera lançamento no Contas a Receber (Bradesco ·
-        // COMISSÕES VENDA - BICALHO). Só uma vez por item (controla via it.cr_lancado).
-        if(overall==='liberado' && (!it.cr_lancado || forceCreate)){
-          var valorPlanilha = matched.reduce(function(s,m){return s+(m.valor||0);},0);
-          crPending.push({
-            item: it,
-            row: {
-              pessoa_nome:       'EMPREENDIMENTO ' + (it.emp||''),
-              categoria_id:      SC_CR_CATEGORIA_ID,
-              categoria_nome:    SC_CR_CATEGORIA_NOME,
-              conta_bancaria_id: SC_CR_CONTA_ID,
-              projeto_nome:      'Venda',
-              descricao:         (it.sigla||'')+(it.unidade||'')+' - '+(it.cliente||''),
-              valor:             valorPlanilha || it.saldo || 0,
-              vencimento:        hojeISO,
-              status:            'pendente'
-            }
+        // Cada linha liberada da planilha gera um lançamento separado no CR
+        if(!it.cr_lancado || forceCreate){
+          matched.forEach(function(me){
+            if(me.status!=='liberado') return;
+            crPending.push({
+              item: it,
+              row: {
+                pessoa_nome:       'EMPREENDIMENTO ' + (it.emp||''),
+                categoria_id:      SC_CR_CATEGORIA_ID,
+                categoria_nome:    SC_CR_CATEGORIA_NOME,
+                conta_bancaria_id: SC_CR_CONTA_ID,
+                projeto_nome:      'Venda',
+                descricao:         (it.sigla||'')+me.parte+' - '+(it.cliente||''),
+                valor:             me.valor || 0,
+                vencimento:        hojeISO,
+                status:            'pendente'
+              }
+            });
           });
         }
         changed = true;
