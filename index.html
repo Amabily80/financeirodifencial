@@ -3808,7 +3808,7 @@ function _scNormCodigo(s){
   return _normTxt(s).replace(/[\s-]/g,'').replace(/REV$/,'');
 }
 
-async function scImportRetorno(file, vencimentoOverride){
+async function scImportRetorno(file, vencimentoOverride, forceCreate){
   if(!file) return;
   try{
     toast('⏳','Lendo planilha de retorno...','info');
@@ -3934,7 +3934,7 @@ async function scImportRetorno(file, vencimentoOverride){
 
         // Comissão liberada: gera lançamento no Contas a Receber (Bradesco ·
         // COMISSÕES VENDA - BICALHO). Só uma vez por item (controla via it.cr_lancado).
-        if(overall==='liberado' && !it.cr_lancado){
+        if(overall==='liberado' && (!it.cr_lancado || forceCreate)){
           crPending.push({
             item: it,
             row: {
@@ -3997,10 +3997,11 @@ async function crImportRetornoConfirm(){
   var venc = document.getElementById('cr-retorno-venc').value;
   if(!file){ toast('⚠️','Selecione a planilha de retorno.','warn'); return; }
   if(!venc){ toast('⚠️','Informe a data de vencimento.','warn'); return; }
+  var force = document.getElementById('cr-retorno-force')?.checked || false;
   var btn = document.getElementById('cr-retorno-confirm-btn');
   btn.disabled = true; btn.textContent = '⏳ Importando...';
   try{
-    await scImportRetorno(file, venc);
+    await scImportRetorno(file, venc, force);
     crRetornoModalClose();
     var st=document.getElementById('cr-f-status'); if(st) st.value='pendente';
     var de=document.getElementById('cr-f-de');     if(de) de.value=venc;
@@ -9062,6 +9063,12 @@ async function orcFecharRealizado(){
       <div class="bulk-form-grp">
         <label>Planilha de Retorno (.xlsx)</label>
         <input type="file" id="cr-retorno-input" accept=".xlsx,.xls">
+      </div>
+      <div class="bulk-form-grp" style="margin-top:4px">
+        <label style="display:flex;align-items:center;gap:8px;cursor:pointer;font-size:12px;color:var(--text-muted)">
+          <input type="checkbox" id="cr-retorno-force">
+          For&#231;ar cria&#231;&#227;o de novos lan&#231;amentos (mesmo que j&#225; importado anteriormente)
+        </label>
       </div>
     </div>
     <div class="bulk-modal-footer">
