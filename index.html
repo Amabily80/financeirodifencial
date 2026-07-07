@@ -3708,6 +3708,13 @@ async function _xlsxParseFirstSheet(arrayBuffer){
     if(rIdx > maxRow) maxRow = rIdx;
     var rowData = {};
     var rowStyles = {};
+    // Cor definida ao nível da linha inteira (quando o usuário pinta a linha no Excel)
+    var rowFill = null;
+    var rowSIdx = rowEl.getAttribute('s');
+    var rowCustom = rowEl.getAttribute('customFormat');
+    if(rowSIdx!=null && (rowCustom==='1'||rowCustom==='true')){
+      rowFill = _xlsxResolveFill(styleInfo, parseInt(rowSIdx,10));
+    }
     rowEl.querySelectorAll('c').forEach(function(c){
       var ref = c.getAttribute('r');
       if(!ref) return;
@@ -3725,8 +3732,12 @@ async function _xlsxParseFirstSheet(arrayBuffer){
       }
       rowData[col] = val;
       var sIdx = c.getAttribute('s');
-      if(sIdx!=null) rowStyles[col] = _xlsxResolveFill(styleInfo, parseInt(sIdx,10));
+      // Célula tem estilo próprio → usa ele; senão herda a cor da linha
+      var cellFill = sIdx!=null ? _xlsxResolveFill(styleInfo, parseInt(sIdx,10)) : null;
+      rowStyles[col] = cellFill || rowFill;
     });
+    // Garante que a cor da linha seja acessível mesmo para colunas sem célula explícita
+    if(rowFill) rowStyles['__row__'] = rowFill;
     rows[rIdx] = rowData;
     styles[rIdx] = rowStyles;
   });
@@ -3775,18 +3786,32 @@ function _xlsxResolveFill(styleInfo, sIdx){
   return styleInfo.fills[fillId] || null;
 }
 
-// Classifica a cor de preenchimento da linha: tema 9 = verde (liberado),
-// tema 5 = vermelho/laranja (não liberado), amarelo = pendente (VALIDAR)
+// Classifica a cor de preenchimento da linha: verde=liberado, amarelo=pendente
 function _scClassifyFill(fillInfo){
   if(!fillInfo || !fillInfo.type) return null;
   if(fillInfo.type==='rgb'){
-    var rgb = (fillInfo.rgb||'').toUpperCase();
-    if(rgb.indexOf('FFFF00')!==-1) return 'pendente';
+    var hex = (fillInfo.rgb||'').toUpperCase().replace(/^FF/,''); // remove alpha
+    if(hex.length<6) return null;
+    var r=parseInt(hex.slice(0,2),16), g=parseInt(hex.slice(2,4),16), b=parseInt(hex.slice(4,6),16);
+    // Amarelo
+    if(r>200 && g>200 && b<80) return 'pendente';
+    // Verde: g dominante e razoavelmente saturado
+    if(g>r && g>b && g>100) return 'liberado';
+    // Vermelho/laranja
+    if(r>180 && g<120 && b<120) return 'recusado';
     return null;
   }
   if(fillInfo.type==='theme'){
-    if(fillInfo.theme===9) return 'liberado';
+    // theme 9=accent6 (verde no tema Office padrão), 6=accent3 também pode ser verde
+    if(fillInfo.theme===9||fillInfo.theme===6) return 'liberado';
     if(fillInfo.theme===5) return 'recusado';
+    // amarelo geralmente fica como RGB, mas algumas versões usam tema 7
+    if(fillInfo.theme===7) return 'pendente';
+  }
+  if(fillInfo.type==='indexed'){
+    // Paleta indexada do Excel: 43=amarelo claro, 10=verde escuro, 11=ciano, 50=verde claro
+    if(fillInfo.indexed===43||fillInfo.indexed===27) return 'pendente';
+    if(fillInfo.indexed===10||fillInfo.indexed===11||fillInfo.indexed===50||fillInfo.indexed===42) return 'liberado';
   }
   return null;
 }
@@ -3853,11 +3878,12 @@ async function scImportRetorno(file, vencimentoOverride, forceCreate){
       if(!rd) continue;
       var sit = colSituacao ? rd[colSituacao] : '';
 
-      // Cor da linha
+      // Cor da linha — verifica células das colunas candidatas e também a cor de linha inteira
       var fillInfo = null;
       var rowStyles = styles[r2] || {};
-      for(var ci=0; ci<candidateCols.length; ci++){
-        var f = rowStyles[candidateCols[ci]];
+      var colorCandidates = candidateCols.concat(['__row__']);
+      for(var ci=0; ci<colorCandidates.length; ci++){
+        var f = rowStyles[colorCandidates[ci]];
         if(f && f.type){ fillInfo = f; break; }
       }
       var colorStatus = _scClassifyFill(fillInfo);
