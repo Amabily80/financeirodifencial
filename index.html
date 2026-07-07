@@ -3829,7 +3829,7 @@ async function scImportRetorno(file, vencimentoOverride, forceCreate){
     if(!headerRow){ toast('❌','Não foi possível localizar a coluna SITUAÇÃO na planilha.','error'); return; }
 
     // Mapeia colunas pelo cabeçalho
-    var colSigla=null, colUnidade=null, colCodigo=null, colSituacao=null;
+    var colSigla=null, colUnidade=null, colCodigo=null, colSituacao=null, colComissao=null;
     var hdr = rows[headerRow];
     for(var c2 in hdr){
       var h = _normTxt(hdr[c2]);
@@ -3837,6 +3837,7 @@ async function scImportRetorno(file, vencimentoOverride, forceCreate){
       else if(h.indexOf('SIGLA')!==-1) colSigla = +c2;
       else if(h==='UNIDADE') colUnidade = +c2;
       else if(h.indexOf('CODIGO')!==-1) colCodigo = +c2;
+      else if(h.indexOf('COMISSOES')!==-1 && h.indexOf('PAGAR')!==-1) colComissao = +c2;
     }
     if(!colSituacao){ toast('❌','Coluna SITUAÇÃO não encontrada.','error'); return; }
 
@@ -3877,7 +3878,8 @@ async function scImportRetorno(file, vencimentoOverride, forceCreate){
       else codigo = (colSigla?rd[colSigla]:'')+''+(colUnidade?rd[colUnidade]:'');
       codigo = _scNormCodigo(codigo);
       if(!codigo) continue;
-      retornoMap[codigo] = {status:status, motivo:motivo};
+      var valorComissao = colComissao ? (parseFloat(rd[colComissao])||0) : 0;
+      retornoMap[codigo] = {status:status, motivo:motivo, valor:valorComissao};
     }
     if(!Object.keys(retornoMap).length){ toast('⚠️','Nenhum item com situação preenchida ou marcação de cor foi encontrado na planilha.','warn'); return; }
 
@@ -3909,7 +3911,7 @@ async function scImportRetorno(file, vencimentoOverride, forceCreate){
         partes.forEach(function(parte){
           var key = _scNormCodigo((it.sigla||'')+parte);
           var m = retornoMap[key];
-          if(m){ matched.push({parte:parte, status:m.status, motivo:m.motivo}); delete retornoMap[key]; }
+          if(m){ matched.push({parte:parte, status:m.status, motivo:m.motivo, valor:m.valor||0}); delete retornoMap[key]; }
         });
         if(!matched.length) return; // ainda sem retorno para este item
 
@@ -3935,6 +3937,7 @@ async function scImportRetorno(file, vencimentoOverride, forceCreate){
         // Comissão liberada: gera lançamento no Contas a Receber (Bradesco ·
         // COMISSÕES VENDA - BICALHO). Só uma vez por item (controla via it.cr_lancado).
         if(overall==='liberado' && (!it.cr_lancado || forceCreate)){
+          var valorPlanilha = matched.reduce(function(s,m){return s+(m.valor||0);},0);
           crPending.push({
             item: it,
             row: {
@@ -3944,7 +3947,7 @@ async function scImportRetorno(file, vencimentoOverride, forceCreate){
               conta_bancaria_id: SC_CR_CONTA_ID,
               projeto_nome:      'Venda',
               descricao:         (it.sigla||'')+(it.unidade||'')+' - '+(it.cliente||''),
-              valor:             it.saldo||0,
+              valor:             valorPlanilha || it.saldo || 0,
               vencimento:        hojeISO,
               status:            'pendente'
             }
