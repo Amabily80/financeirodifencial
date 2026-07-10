@@ -509,6 +509,12 @@ input[type="checkbox"]{width:14px;height:14px;accent-color:var(--green-accent);c
 .fech-line.fech-oculto .fech-line-val{opacity:.35;text-decoration:line-through}
 .fech-modo-adm .fech-line.fech-oculto{display:none}
 .fech-empty-sec{font-size:11px;color:var(--text-dim);padding:5px 18px;font-style:italic}
+.fech-sw{position:relative}
+.fech-sw-eye{display:none;position:absolute;top:6px;right:6px;width:22px;height:22px;border:none;background:none;cursor:pointer;color:var(--text-dim);font-size:14px;opacity:.3;border-radius:4px;align-items:center;justify-content:center;z-index:2;transition:opacity .15s}
+.fech-modo-edit .fech-sw-eye{display:flex}
+.fech-modo-edit .fech-sw:hover .fech-sw-eye{opacity:1}
+.fech-sw.fech-oculto .fech-kpi-row,.fech-sw.fech-oculto .fech-charts-row{opacity:.35}
+.fech-modo-adm .fech-sw.fech-oculto{display:none}
 .fech-geral-alert{margin:10px 14px;padding:10px 14px;background:#fef3c7;border:1px solid #f59e0b;border-radius:8px;font-size:12px;color:#92400e;line-height:1.5}
 .fech-geral-alert strong{display:block;margin-top:2px}
 .fech-geral-alert small{opacity:.8}
@@ -622,6 +628,12 @@ input[type="checkbox"]{width:14px;height:14px;accent-color:var(--green-accent);c
 .fech-line.fech-oculto .fech-line-val{opacity:.35;text-decoration:line-through}
 .fech-modo-adm .fech-line.fech-oculto{display:none}
 .fech-empty-sec{font-size:11px;color:var(--text-dim);padding:5px 18px;font-style:italic}
+.fech-sw{position:relative}
+.fech-sw-eye{display:none;position:absolute;top:6px;right:6px;width:22px;height:22px;border:none;background:none;cursor:pointer;color:var(--text-dim);font-size:14px;opacity:.3;border-radius:4px;align-items:center;justify-content:center;z-index:2;transition:opacity .15s}
+.fech-modo-edit .fech-sw-eye{display:flex}
+.fech-modo-edit .fech-sw:hover .fech-sw-eye{opacity:1}
+.fech-sw.fech-oculto .fech-kpi-row,.fech-sw.fech-oculto .fech-charts-row{opacity:.35}
+.fech-modo-adm .fech-sw.fech-oculto{display:none}
 .fech-geral-alert{margin:10px 14px;padding:10px 14px;background:#fef3c7;border:1px solid #f59e0b;border-radius:8px;font-size:12px;color:#92400e;line-height:1.5}
 .fech-geral-alert strong{display:block;margin-top:2px}
 .fech-geral-alert small{opacity:.8}
@@ -1015,6 +1027,12 @@ input[type="checkbox"]{width:14px;height:14px;accent-color:var(--green-accent);c
 .fech-line.fech-oculto .fech-line-val{opacity:.35;text-decoration:line-through}
 .fech-modo-adm .fech-line.fech-oculto{display:none}
 .fech-empty-sec{font-size:11px;color:var(--text-dim);padding:5px 18px;font-style:italic}
+.fech-sw{position:relative}
+.fech-sw-eye{display:none;position:absolute;top:6px;right:6px;width:22px;height:22px;border:none;background:none;cursor:pointer;color:var(--text-dim);font-size:14px;opacity:.3;border-radius:4px;align-items:center;justify-content:center;z-index:2;transition:opacity .15s}
+.fech-modo-edit .fech-sw-eye{display:flex}
+.fech-modo-edit .fech-sw:hover .fech-sw-eye{opacity:1}
+.fech-sw.fech-oculto .fech-kpi-row,.fech-sw.fech-oculto .fech-charts-row{opacity:.35}
+.fech-modo-adm .fech-sw.fech-oculto{display:none}
 .fech-geral-alert{margin:10px 14px;padding:10px 14px;background:#fef3c7;border:1px solid #f59e0b;border-radius:8px;font-size:12px;color:#92400e;line-height:1.5}
 .fech-geral-alert strong{display:block;margin-top:2px}
 .fech-geral-alert small{opacity:.8}
@@ -1128,6 +1146,12 @@ input[type="checkbox"]{width:14px;height:14px;accent-color:var(--green-accent);c
 .fech-line.fech-oculto .fech-line-val{opacity:.35;text-decoration:line-through}
 .fech-modo-adm .fech-line.fech-oculto{display:none}
 .fech-empty-sec{font-size:11px;color:var(--text-dim);padding:5px 18px;font-style:italic}
+.fech-sw{position:relative}
+.fech-sw-eye{display:none;position:absolute;top:6px;right:6px;width:22px;height:22px;border:none;background:none;cursor:pointer;color:var(--text-dim);font-size:14px;opacity:.3;border-radius:4px;align-items:center;justify-content:center;z-index:2;transition:opacity .15s}
+.fech-modo-edit .fech-sw-eye{display:flex}
+.fech-modo-edit .fech-sw:hover .fech-sw-eye{opacity:1}
+.fech-sw.fech-oculto .fech-kpi-row,.fech-sw.fech-oculto .fech-charts-row{opacity:.35}
+.fech-modo-adm .fech-sw.fech-oculto{display:none}
 .fech-geral-alert{margin:10px 14px;padding:10px 14px;background:#fef3c7;border:1px solid #f59e0b;border-radius:8px;font-size:12px;color:#92400e;line-height:1.5}
 .fech-geral-alert strong{display:block;margin-top:2px}
 .fech-geral-alert small{opacity:.8}
@@ -9029,6 +9053,22 @@ function fechToggleAdm(){
   _fechApplyModo();
 }
 
+function fechToggleSw(key){
+  var stored=JSON.parse(localStorage.getItem('fech_hidden')||'{}');
+  if(stored[key])delete stored[key]; else stored[key]=true;
+  localStorage.setItem('fech_hidden',JSON.stringify(stored));
+  fechState.hidden=stored;
+  var el=document.querySelector('[data-fsk="'+key+'"]');
+  if(el)el.classList.toggle('fech-oculto');
+}
+
+function _fechSw(key,html){
+  var hidden=fechState.hidden[key]?' fech-oculto':'';
+  return '<div class="fech-sw'+hidden+'" data-fsk="'+_fe(key)+'">'
+    +'<button class="fech-sw-eye" onclick="fechToggleSw(\''+_fe(key)+'\')" title="Ocultar/Mostrar">&#128065;</button>'
+    +html+'</div>';
+}
+
 function fechToggleLine(col,label){
   var key=fechState.ano+'-'+String(fechState.mes).padStart(2,'0')+':'+col+':'+label;
   var stored=JSON.parse(localStorage.getItem('fech_hidden')||'{}');
@@ -9446,10 +9486,13 @@ async function fechamentoLoad(){
       +'<div class="fech-kpi fech-kpi-main"><span class="fech-kpi-icon" style="background:#fff7ed;color:var(--brand)">&#9733;</span><div><div class="fech-kpi-lbl">Resultado Final</div><div class="fech-kpi-val '+resAlls+'" style="font-size:17px">'+_fechFmt(resAll)+'</div><div class="fech-rb-margem">após distribuição '+mFinal+'</div></div></div>'
       +'</div>';
 
-    var chartsHtml='<div class="fech-charts-row">'
+    var swPfx=ano+'-'+String(mes).padStart(2,'0')+':section:';
+    kpiHtml=_fechSw(swPfx+'kpis',kpiHtml);
+
+    var chartsHtml=_fechSw(swPfx+'charts','<div class="fech-charts-row">'
       +'<div class="fech-chart-box"><div class="fech-chart-wrap"><canvas id="fech-chart-donut"></canvas></div></div>'
       +'<div class="fech-chart-box"><div class="fech-chart-wrap"><canvas id="fech-chart-bar"></canvas></div></div>'
-      +'</div>';
+      +'</div>');
 
     var colsHtml='<div class="fech-cols">'+venda.html+locacao.html+geral.html+'</div>';
 
