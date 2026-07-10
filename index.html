@@ -458,7 +458,89 @@ input[type="checkbox"]{width:14px;height:14px;accent-color:var(--green-accent);c
 .conc-day-total{display:grid;grid-template-columns:28px 84px 1fr 100px 100px 120px 90px;gap:8px;align-items:center;padding:8px 14px;background:#f8fafc;border-top:1px solid var(--border2);border-bottom:2px solid #e2e8f0;font-size:12px;font-weight:700;color:var(--navy)}
 .conc-badge-lock{font-size:10px;background:#dcfce7;color:#059669;border-radius:4px;padding:2px 7px;font-weight:600;white-space:nowrap;display:inline-block}
 .conc-fechado-banner{background:#fff8e1;border:1px solid #ffd54f;border-radius:10px;padding:14px 18px;margin-bottom:18px;font-size:13px;color:#7c5700;display:flex;align-items:center;gap:12px}
+/* ── FECHAMENTO MENSAL ── */
+.fech-wrap{max-width:1400px;margin:0 auto}
+.fech-hdr{display:flex;align-items:flex-start;justify-content:space-between;margin-bottom:22px;flex-wrap:wrap;gap:12px}
+.fech-controls{display:flex;align-items:center;gap:10px;flex-wrap:wrap}
+.fech-nav-btn{background:var(--surface);border:1px solid var(--border2);border-radius:8px;padding:6px 14px;cursor:pointer;font-size:15px;color:var(--text);line-height:1}
+.fech-nav-btn:hover{background:var(--border2)}
+.fech-mes-lbl{font-size:17px;font-weight:700;color:var(--navy);min-width:170px;text-align:center}
+.fech-btn-mode{display:inline-flex;align-items:center;gap:6px;padding:7px 14px;border-radius:8px;border:1.5px solid var(--border2);color:var(--text-muted);cursor:pointer;font-size:12px;font-weight:600;background:transparent;transition:all .15s}
+.fech-btn-mode:hover{border-color:var(--brand);color:var(--brand)}
+.fech-btn-mode.active-edit{border-color:#f59e0b;background:#fef9ec;color:#92400e}
+.fech-btn-mode.active-adm{border-color:#8b5cf6;background:#f5f3ff;color:#5b21b6}
+.fech-cols{display:grid;grid-template-columns:repeat(3,1fr);gap:18px}
+@media(max-width:960px){.fech-cols{grid-template-columns:1fr}}
+.fech-col{background:var(--surface);border:1px solid var(--border2);border-radius:14px;overflow:hidden;display:flex;flex-direction:column}
+.fech-col-hdr{padding:13px 18px;font-size:12px;font-weight:800;text-transform:uppercase;letter-spacing:.07em;border-bottom:2px solid var(--border2)}
+.fech-col-hdr.venda{background:linear-gradient(135deg,rgba(239,104,32,.1),rgba(239,104,32,.04));color:var(--brand)}
+.fech-col-hdr.locacao{background:linear-gradient(135deg,rgba(79,70,229,.1),rgba(79,70,229,.04));color:#4f46e5}
+.fech-col-hdr.geral{background:linear-gradient(135deg,rgba(5,150,105,.1),rgba(5,150,105,.04));color:#059669}
+.fech-section-lbl{padding:10px 18px 4px;font-size:9px;font-weight:700;text-transform:uppercase;letter-spacing:.08em;color:var(--text-dim);border-top:1px solid var(--border);margin-top:6px}
+.fech-line{display:flex;justify-content:space-between;align-items:center;padding:4px 18px;font-size:12.5px;color:var(--text);gap:8px;min-height:26px}
+.fech-line-name{flex:1;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.fech-line-val{font-variant-numeric:tabular-nums;font-weight:500;white-space:nowrap;flex-shrink:0}
+.fech-line-val.neg{color:var(--red)}
+.fech-line-val.pos{color:#059669}
+.fech-eye{width:20px;height:20px;flex-shrink:0;border:none;background:none;cursor:pointer;color:var(--text-dim);padding:0;font-size:13px;opacity:0;transition:opacity .15s;display:none}
+.fech-modo-edit .fech-eye{display:inline-flex;opacity:.3}
+.fech-modo-edit .fech-line:hover .fech-eye{opacity:1}
+.fech-line.fech-oculto .fech-line-name{opacity:.35;text-decoration:line-through}
+.fech-line.fech-oculto .fech-line-val{opacity:.35;text-decoration:line-through}
+.fech-modo-adm .fech-line.fech-oculto{display:none}
+.fech-subtotal{display:flex;justify-content:space-between;padding:5px 18px;font-size:11.5px;font-weight:600;color:var(--text-muted);background:var(--surface2);border-top:1px dashed var(--border)}
+.fech-total-line{display:flex;justify-content:space-between;padding:8px 18px;font-size:13px;font-weight:700;color:var(--navy);border-top:1.5px solid var(--border2);margin-top:4px}
+.fech-result-box{margin:12px 14px;border-radius:10px;padding:12px 16px;display:flex;justify-content:space-between;align-items:center}
+.fech-result-box.pos{background:#f0fdf4;border:1.5px solid #86efac}
+.fech-result-box.neg{background:#fef2f2;border:1.5px solid #fca5a5}
+.fech-result-box .fech-rb-lbl{font-size:10px;font-weight:700;text-transform:uppercase;letter-spacing:.06em;color:var(--text-muted)}
+.fech-result-box .fech-rb-val{font-size:18px;font-weight:800}
+.fech-result-box.pos .fech-rb-val{color:#166534}
+.fech-result-box.neg .fech-rb-val{color:#991b1b}
+.fech-resumo-line{display:flex;justify-content:space-between;padding:6px 18px;font-size:12px;font-weight:600;color:var(--text-muted);background:var(--surface2)}
+.fech-distrib{display:flex;justify-content:space-between;padding:6px 18px 10px;font-size:12px;color:var(--text-muted);font-style:italic}
 .conc-fechado-banner{background:#fff8e1;border:1px solid #ffd54f;border-radius:10px;padding:14px 18px;margin-bottom:18px;font-size:13px;color:#7c5700;display:flex;align-items:center;gap:12px}
+/* ── FECHAMENTO MENSAL ── */
+.fech-wrap{max-width:1400px;margin:0 auto}
+.fech-hdr{display:flex;align-items:flex-start;justify-content:space-between;margin-bottom:22px;flex-wrap:wrap;gap:12px}
+.fech-controls{display:flex;align-items:center;gap:10px;flex-wrap:wrap}
+.fech-nav-btn{background:var(--surface);border:1px solid var(--border2);border-radius:8px;padding:6px 14px;cursor:pointer;font-size:15px;color:var(--text);line-height:1}
+.fech-nav-btn:hover{background:var(--border2)}
+.fech-mes-lbl{font-size:17px;font-weight:700;color:var(--navy);min-width:170px;text-align:center}
+.fech-btn-mode{display:inline-flex;align-items:center;gap:6px;padding:7px 14px;border-radius:8px;border:1.5px solid var(--border2);color:var(--text-muted);cursor:pointer;font-size:12px;font-weight:600;background:transparent;transition:all .15s}
+.fech-btn-mode:hover{border-color:var(--brand);color:var(--brand)}
+.fech-btn-mode.active-edit{border-color:#f59e0b;background:#fef9ec;color:#92400e}
+.fech-btn-mode.active-adm{border-color:#8b5cf6;background:#f5f3ff;color:#5b21b6}
+.fech-cols{display:grid;grid-template-columns:repeat(3,1fr);gap:18px}
+@media(max-width:960px){.fech-cols{grid-template-columns:1fr}}
+.fech-col{background:var(--surface);border:1px solid var(--border2);border-radius:14px;overflow:hidden;display:flex;flex-direction:column}
+.fech-col-hdr{padding:13px 18px;font-size:12px;font-weight:800;text-transform:uppercase;letter-spacing:.07em;border-bottom:2px solid var(--border2)}
+.fech-col-hdr.venda{background:linear-gradient(135deg,rgba(239,104,32,.1),rgba(239,104,32,.04));color:var(--brand)}
+.fech-col-hdr.locacao{background:linear-gradient(135deg,rgba(79,70,229,.1),rgba(79,70,229,.04));color:#4f46e5}
+.fech-col-hdr.geral{background:linear-gradient(135deg,rgba(5,150,105,.1),rgba(5,150,105,.04));color:#059669}
+.fech-section-lbl{padding:10px 18px 4px;font-size:9px;font-weight:700;text-transform:uppercase;letter-spacing:.08em;color:var(--text-dim);border-top:1px solid var(--border);margin-top:6px}
+.fech-line{display:flex;justify-content:space-between;align-items:center;padding:4px 18px;font-size:12.5px;color:var(--text);gap:8px;min-height:26px}
+.fech-line-name{flex:1;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.fech-line-val{font-variant-numeric:tabular-nums;font-weight:500;white-space:nowrap;flex-shrink:0}
+.fech-line-val.neg{color:var(--red)}
+.fech-line-val.pos{color:#059669}
+.fech-eye{width:20px;height:20px;flex-shrink:0;border:none;background:none;cursor:pointer;color:var(--text-dim);padding:0;font-size:13px;opacity:0;transition:opacity .15s;display:none}
+.fech-modo-edit .fech-eye{display:inline-flex;opacity:.3}
+.fech-modo-edit .fech-line:hover .fech-eye{opacity:1}
+.fech-line.fech-oculto .fech-line-name{opacity:.35;text-decoration:line-through}
+.fech-line.fech-oculto .fech-line-val{opacity:.35;text-decoration:line-through}
+.fech-modo-adm .fech-line.fech-oculto{display:none}
+.fech-subtotal{display:flex;justify-content:space-between;padding:5px 18px;font-size:11.5px;font-weight:600;color:var(--text-muted);background:var(--surface2);border-top:1px dashed var(--border)}
+.fech-total-line{display:flex;justify-content:space-between;padding:8px 18px;font-size:13px;font-weight:700;color:var(--navy);border-top:1.5px solid var(--border2);margin-top:4px}
+.fech-result-box{margin:12px 14px;border-radius:10px;padding:12px 16px;display:flex;justify-content:space-between;align-items:center}
+.fech-result-box.pos{background:#f0fdf4;border:1.5px solid #86efac}
+.fech-result-box.neg{background:#fef2f2;border:1.5px solid #fca5a5}
+.fech-result-box .fech-rb-lbl{font-size:10px;font-weight:700;text-transform:uppercase;letter-spacing:.06em;color:var(--text-muted)}
+.fech-result-box .fech-rb-val{font-size:18px;font-weight:800}
+.fech-result-box.pos .fech-rb-val{color:#166534}
+.fech-result-box.neg .fech-rb-val{color:#991b1b}
+.fech-resumo-line{display:flex;justify-content:space-between;padding:6px 18px;font-size:12px;font-weight:600;color:var(--text-muted);background:var(--surface2)}
+.fech-distrib{display:flex;justify-content:space-between;padding:6px 18px 10px;font-size:12px;color:var(--text-muted);font-style:italic}
 
 /* ── IMPORTAÇÃO CNAB ── */
 .cnab-subtabs{display:flex;gap:8px;margin-bottom:20px;border-bottom:2px solid var(--border);padding-bottom:12px}
@@ -740,7 +822,89 @@ input[type="checkbox"]{width:14px;height:14px;accent-color:var(--green-accent);c
 .conc-day-total{display:grid;grid-template-columns:28px 84px 1fr 100px 100px 120px 90px;gap:8px;align-items:center;padding:8px 14px;background:#f8fafc;border-top:1px solid var(--border2);border-bottom:2px solid #e2e8f0;font-size:12px;font-weight:700;color:var(--navy)}
 .conc-badge-lock{font-size:10px;background:#dcfce7;color:#059669;border-radius:4px;padding:2px 7px;font-weight:600;white-space:nowrap;display:inline-block}
 .conc-fechado-banner{background:#fff8e1;border:1px solid #ffd54f;border-radius:10px;padding:14px 18px;margin-bottom:18px;font-size:13px;color:#7c5700;display:flex;align-items:center;gap:12px}
+/* ── FECHAMENTO MENSAL ── */
+.fech-wrap{max-width:1400px;margin:0 auto}
+.fech-hdr{display:flex;align-items:flex-start;justify-content:space-between;margin-bottom:22px;flex-wrap:wrap;gap:12px}
+.fech-controls{display:flex;align-items:center;gap:10px;flex-wrap:wrap}
+.fech-nav-btn{background:var(--surface);border:1px solid var(--border2);border-radius:8px;padding:6px 14px;cursor:pointer;font-size:15px;color:var(--text);line-height:1}
+.fech-nav-btn:hover{background:var(--border2)}
+.fech-mes-lbl{font-size:17px;font-weight:700;color:var(--navy);min-width:170px;text-align:center}
+.fech-btn-mode{display:inline-flex;align-items:center;gap:6px;padding:7px 14px;border-radius:8px;border:1.5px solid var(--border2);color:var(--text-muted);cursor:pointer;font-size:12px;font-weight:600;background:transparent;transition:all .15s}
+.fech-btn-mode:hover{border-color:var(--brand);color:var(--brand)}
+.fech-btn-mode.active-edit{border-color:#f59e0b;background:#fef9ec;color:#92400e}
+.fech-btn-mode.active-adm{border-color:#8b5cf6;background:#f5f3ff;color:#5b21b6}
+.fech-cols{display:grid;grid-template-columns:repeat(3,1fr);gap:18px}
+@media(max-width:960px){.fech-cols{grid-template-columns:1fr}}
+.fech-col{background:var(--surface);border:1px solid var(--border2);border-radius:14px;overflow:hidden;display:flex;flex-direction:column}
+.fech-col-hdr{padding:13px 18px;font-size:12px;font-weight:800;text-transform:uppercase;letter-spacing:.07em;border-bottom:2px solid var(--border2)}
+.fech-col-hdr.venda{background:linear-gradient(135deg,rgba(239,104,32,.1),rgba(239,104,32,.04));color:var(--brand)}
+.fech-col-hdr.locacao{background:linear-gradient(135deg,rgba(79,70,229,.1),rgba(79,70,229,.04));color:#4f46e5}
+.fech-col-hdr.geral{background:linear-gradient(135deg,rgba(5,150,105,.1),rgba(5,150,105,.04));color:#059669}
+.fech-section-lbl{padding:10px 18px 4px;font-size:9px;font-weight:700;text-transform:uppercase;letter-spacing:.08em;color:var(--text-dim);border-top:1px solid var(--border);margin-top:6px}
+.fech-line{display:flex;justify-content:space-between;align-items:center;padding:4px 18px;font-size:12.5px;color:var(--text);gap:8px;min-height:26px}
+.fech-line-name{flex:1;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.fech-line-val{font-variant-numeric:tabular-nums;font-weight:500;white-space:nowrap;flex-shrink:0}
+.fech-line-val.neg{color:var(--red)}
+.fech-line-val.pos{color:#059669}
+.fech-eye{width:20px;height:20px;flex-shrink:0;border:none;background:none;cursor:pointer;color:var(--text-dim);padding:0;font-size:13px;opacity:0;transition:opacity .15s;display:none}
+.fech-modo-edit .fech-eye{display:inline-flex;opacity:.3}
+.fech-modo-edit .fech-line:hover .fech-eye{opacity:1}
+.fech-line.fech-oculto .fech-line-name{opacity:.35;text-decoration:line-through}
+.fech-line.fech-oculto .fech-line-val{opacity:.35;text-decoration:line-through}
+.fech-modo-adm .fech-line.fech-oculto{display:none}
+.fech-subtotal{display:flex;justify-content:space-between;padding:5px 18px;font-size:11.5px;font-weight:600;color:var(--text-muted);background:var(--surface2);border-top:1px dashed var(--border)}
+.fech-total-line{display:flex;justify-content:space-between;padding:8px 18px;font-size:13px;font-weight:700;color:var(--navy);border-top:1.5px solid var(--border2);margin-top:4px}
+.fech-result-box{margin:12px 14px;border-radius:10px;padding:12px 16px;display:flex;justify-content:space-between;align-items:center}
+.fech-result-box.pos{background:#f0fdf4;border:1.5px solid #86efac}
+.fech-result-box.neg{background:#fef2f2;border:1.5px solid #fca5a5}
+.fech-result-box .fech-rb-lbl{font-size:10px;font-weight:700;text-transform:uppercase;letter-spacing:.06em;color:var(--text-muted)}
+.fech-result-box .fech-rb-val{font-size:18px;font-weight:800}
+.fech-result-box.pos .fech-rb-val{color:#166534}
+.fech-result-box.neg .fech-rb-val{color:#991b1b}
+.fech-resumo-line{display:flex;justify-content:space-between;padding:6px 18px;font-size:12px;font-weight:600;color:var(--text-muted);background:var(--surface2)}
+.fech-distrib{display:flex;justify-content:space-between;padding:6px 18px 10px;font-size:12px;color:var(--text-muted);font-style:italic}
 .conc-fechado-banner{background:#fff8e1;border:1px solid #ffd54f;border-radius:10px;padding:14px 18px;margin-bottom:18px;font-size:13px;color:#7c5700;display:flex;align-items:center;gap:12px}
+/* ── FECHAMENTO MENSAL ── */
+.fech-wrap{max-width:1400px;margin:0 auto}
+.fech-hdr{display:flex;align-items:flex-start;justify-content:space-between;margin-bottom:22px;flex-wrap:wrap;gap:12px}
+.fech-controls{display:flex;align-items:center;gap:10px;flex-wrap:wrap}
+.fech-nav-btn{background:var(--surface);border:1px solid var(--border2);border-radius:8px;padding:6px 14px;cursor:pointer;font-size:15px;color:var(--text);line-height:1}
+.fech-nav-btn:hover{background:var(--border2)}
+.fech-mes-lbl{font-size:17px;font-weight:700;color:var(--navy);min-width:170px;text-align:center}
+.fech-btn-mode{display:inline-flex;align-items:center;gap:6px;padding:7px 14px;border-radius:8px;border:1.5px solid var(--border2);color:var(--text-muted);cursor:pointer;font-size:12px;font-weight:600;background:transparent;transition:all .15s}
+.fech-btn-mode:hover{border-color:var(--brand);color:var(--brand)}
+.fech-btn-mode.active-edit{border-color:#f59e0b;background:#fef9ec;color:#92400e}
+.fech-btn-mode.active-adm{border-color:#8b5cf6;background:#f5f3ff;color:#5b21b6}
+.fech-cols{display:grid;grid-template-columns:repeat(3,1fr);gap:18px}
+@media(max-width:960px){.fech-cols{grid-template-columns:1fr}}
+.fech-col{background:var(--surface);border:1px solid var(--border2);border-radius:14px;overflow:hidden;display:flex;flex-direction:column}
+.fech-col-hdr{padding:13px 18px;font-size:12px;font-weight:800;text-transform:uppercase;letter-spacing:.07em;border-bottom:2px solid var(--border2)}
+.fech-col-hdr.venda{background:linear-gradient(135deg,rgba(239,104,32,.1),rgba(239,104,32,.04));color:var(--brand)}
+.fech-col-hdr.locacao{background:linear-gradient(135deg,rgba(79,70,229,.1),rgba(79,70,229,.04));color:#4f46e5}
+.fech-col-hdr.geral{background:linear-gradient(135deg,rgba(5,150,105,.1),rgba(5,150,105,.04));color:#059669}
+.fech-section-lbl{padding:10px 18px 4px;font-size:9px;font-weight:700;text-transform:uppercase;letter-spacing:.08em;color:var(--text-dim);border-top:1px solid var(--border);margin-top:6px}
+.fech-line{display:flex;justify-content:space-between;align-items:center;padding:4px 18px;font-size:12.5px;color:var(--text);gap:8px;min-height:26px}
+.fech-line-name{flex:1;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.fech-line-val{font-variant-numeric:tabular-nums;font-weight:500;white-space:nowrap;flex-shrink:0}
+.fech-line-val.neg{color:var(--red)}
+.fech-line-val.pos{color:#059669}
+.fech-eye{width:20px;height:20px;flex-shrink:0;border:none;background:none;cursor:pointer;color:var(--text-dim);padding:0;font-size:13px;opacity:0;transition:opacity .15s;display:none}
+.fech-modo-edit .fech-eye{display:inline-flex;opacity:.3}
+.fech-modo-edit .fech-line:hover .fech-eye{opacity:1}
+.fech-line.fech-oculto .fech-line-name{opacity:.35;text-decoration:line-through}
+.fech-line.fech-oculto .fech-line-val{opacity:.35;text-decoration:line-through}
+.fech-modo-adm .fech-line.fech-oculto{display:none}
+.fech-subtotal{display:flex;justify-content:space-between;padding:5px 18px;font-size:11.5px;font-weight:600;color:var(--text-muted);background:var(--surface2);border-top:1px dashed var(--border)}
+.fech-total-line{display:flex;justify-content:space-between;padding:8px 18px;font-size:13px;font-weight:700;color:var(--navy);border-top:1.5px solid var(--border2);margin-top:4px}
+.fech-result-box{margin:12px 14px;border-radius:10px;padding:12px 16px;display:flex;justify-content:space-between;align-items:center}
+.fech-result-box.pos{background:#f0fdf4;border:1.5px solid #86efac}
+.fech-result-box.neg{background:#fef2f2;border:1.5px solid #fca5a5}
+.fech-result-box .fech-rb-lbl{font-size:10px;font-weight:700;text-transform:uppercase;letter-spacing:.06em;color:var(--text-muted)}
+.fech-result-box .fech-rb-val{font-size:18px;font-weight:800}
+.fech-result-box.pos .fech-rb-val{color:#166534}
+.fech-result-box.neg .fech-rb-val{color:#991b1b}
+.fech-resumo-line{display:flex;justify-content:space-between;padding:6px 18px;font-size:12px;font-weight:600;color:var(--text-muted);background:var(--surface2)}
+.fech-distrib{display:flex;justify-content:space-between;padding:6px 18px 10px;font-size:12px;color:var(--text-muted);font-style:italic}
 
 /* ── IMPORTAÇÃO CNAB ── */
 .cnab-subtabs{display:flex;gap:8px;margin-bottom:20px;border-bottom:2px solid var(--border);padding-bottom:12px}
@@ -1069,6 +1233,9 @@ input[type="checkbox"]{width:14px;height:14px;accent-color:var(--green-accent);c
     </button>
     <button class="nav-tab" onclick="goTab('cnab')" id="tab-cnab" title="CNAB">
       <span class="ticon">📂</span><span class="tlabel">CNAB</span>
+    </button>
+    <button class="nav-tab" onclick="goTab('fechamento')" id="tab-fechamento" title="Fechamento Mensal">
+      <span class="ticon">📊</span><span class="tlabel">Fechamento</span>
     </button>
     <div class="sb-sep"></div>
     <div class="sb-section">Comercial</div>
@@ -2152,6 +2319,30 @@ input[type="checkbox"]{width:14px;height:14px;accent-color:var(--green-accent);c
   </div><!-- /page-orcado -->
 
   <!-- ═══════════════════════════════════
+       PAGE: FECHAMENTO MENSAL
+  ═══════════════════════════════════ -->
+  <div id="page-fechamento" style="display:none;padding:24px">
+    <div class="fech-wrap">
+      <div class="fech-hdr">
+        <div>
+          <div class="fin-page-title">Fechamento Mensal</div>
+          <div class="fin-page-sub" id="fech-subtitle">Resultado por projeto</div>
+        </div>
+        <div class="fech-controls">
+          <button class="fech-nav-btn" onclick="fechNavMes(-1)">&#8592;</button>
+          <span class="fech-mes-lbl" id="fech-mes-lbl">—</span>
+          <button class="fech-nav-btn" onclick="fechNavMes(1)">&#8594;</button>
+          <button class="fech-btn-mode" id="fech-btn-edit" onclick="fechToggleEdit()">&#9998; Editar visibilidade ADM</button>
+          <button class="fech-btn-mode" id="fech-btn-adm" onclick="fechToggleAdm()">&#128065; Ver como ADM</button>
+        </div>
+      </div>
+      <div class="fech-cols" id="fech-cols">
+        <div style="color:var(--text-muted);font-size:13px;padding:40px;text-align:center;grid-column:1/-1">Carregando...</div>
+      </div>
+    </div>
+  </div><!-- /page-fechamento -->
+
+  <!-- ═══════════════════════════════════
        PAGE: IMPORTAÇÃO CNAB
   ═══════════════════════════════════ -->
   <div id="page-cnab" style="display:none;padding:24px">
@@ -2461,7 +2652,7 @@ function sidebarToggle(){
   }
 })();
 
-const PAGES=['overview','fc','sc','relatorios','cp','cr','saldo','conciliacao','cnab','leads','comissoes','fc-exec','dre','orcado'];
+const PAGES=['overview','fc','sc','relatorios','cp','cr','saldo','conciliacao','cnab','fechamento','leads','comissoes','fc-exec','dre','orcado'];
 function goTab(id){
   PAGES.forEach(p=>{
     document.getElementById('page-'+p).style.display=p===id?'':'none';
@@ -2486,6 +2677,7 @@ function goTab(id){
   if(id==='fc-exec') fcExecLoad();
   if(id==='dre'){ _dreInitPeriod(); dreLoad(); }
   if(id==='orcado'){ _orcInitPeriod(); orcLoad(); }
+  if(id==='fechamento') fechamentoLoad();
 }
 
 // ═══════════════════════════════════════════════════════
@@ -8502,6 +8694,188 @@ async function orcFecharRealizado(){
     toast('✅','Realizado fechado e salvo!','success');
     await orcLoad();
   }catch(e){toast('❌','Erro: '+e.message,'error');}
+}
+
+// ═══════════════════════════════════════════════════════
+// FECHAMENTO MENSAL
+// ═══════════════════════════════════════════════════════
+var fechState={ano:new Date().getFullYear(),mes:new Date().getMonth()+1,modoEdit:false,modoAdm:false,hidden:{}};
+var FECH_MESES=['Janeiro','Fevereiro','Março','Abril','Maio','Junho','Julho','Agosto','Setembro','Outubro','Novembro','Dezembro'];
+
+function fechNavMes(delta){
+  fechState.mes+=delta;
+  if(fechState.mes<1){fechState.mes=12;fechState.ano--;}
+  if(fechState.mes>12){fechState.mes=1;fechState.ano++;}
+  fechamentoLoad();
+}
+
+function fechToggleEdit(){
+  fechState.modoEdit=!fechState.modoEdit;
+  if(fechState.modoEdit)fechState.modoAdm=false;
+  var wrap=document.getElementById('fech-cols');
+  wrap.classList.toggle('fech-modo-edit',fechState.modoEdit);
+  wrap.classList.remove('fech-modo-adm');
+  document.getElementById('fech-btn-edit').classList.toggle('active-edit',fechState.modoEdit);
+  document.getElementById('fech-btn-adm').classList.remove('active-adm');
+}
+
+function fechToggleAdm(){
+  fechState.modoAdm=!fechState.modoAdm;
+  if(fechState.modoAdm)fechState.modoEdit=false;
+  var wrap=document.getElementById('fech-cols');
+  wrap.classList.toggle('fech-modo-adm',fechState.modoAdm);
+  wrap.classList.remove('fech-modo-edit');
+  document.getElementById('fech-btn-adm').classList.toggle('active-adm',fechState.modoAdm);
+  document.getElementById('fech-btn-edit').classList.remove('active-edit');
+}
+
+function fechToggleLine(col,label){
+  var key=fechState.ano+'-'+String(fechState.mes).padStart(2,'0')+':'+col+':'+label;
+  var stored=JSON.parse(localStorage.getItem('fech_hidden')||'{}');
+  if(stored[key])delete stored[key]; else stored[key]=true;
+  localStorage.setItem('fech_hidden',JSON.stringify(stored));
+  fechState.hidden=stored;
+  var el=document.querySelector('[data-fk="'+key+'"]');
+  if(el)el.classList.toggle('fech-oculto',!!stored[key]);
+}
+
+function _fechFmt(v){
+  return (v||0).toLocaleString('pt-BR',{style:'currency',currency:'BRL'});
+}
+
+function _fechLine(col,label,val,isNeg){
+  var key=fechState.ano+'-'+String(fechState.mes).padStart(2,'0')+':'+col+':'+label;
+  var hidden=fechState.hidden[key]?' fech-oculto':'';
+  var valCls=isNeg?' neg':(val>0?' pos':'');
+  return '<div class="fech-line'+hidden+'" data-fk="'+ex(key)+'">'
+    +'<span class="fech-line-name">'+ex(label)+'</span>'
+    +'<span class="fech-line-val'+valCls+'">'+_fechFmt(val)+'</span>'
+    +'<button class="fech-eye" onclick="fechToggleLine(\''+ex(col)+'\',\''+ex(label)+'\')" title="Ocultar/Mostrar">👁</button>'
+    +'</div>';
+}
+
+function _fechCcNome(r){
+  if(r.centro_custo_nome) return r.centro_custo_nome;
+  if(r.categoria_id){
+    var cat=(FS.refs.categorias||[]).find(function(c){return c.id===r.categoria_id;});
+    if(cat&&cat.centro_custo_nome) return cat.centro_custo_nome;
+    if(cat) return cat.nome;
+  }
+  if(r.categoria_nome) return r.categoria_nome;
+  return 'Outros';
+}
+
+function _fechColHtml(colId,colLabel,crRows,cpRows){
+  var recMap={},despMap={};
+  crRows.forEach(function(r){var k=r.categoria_nome||'Outros';recMap[k]=(recMap[k]||0)+(parseFloat(r.valor)||0);});
+  cpRows.forEach(function(r){var k=_fechCcNome(r);despMap[k]=(despMap[k]||0)+(parseFloat(r.valor)||0);});
+
+  var totalRec=crRows.reduce(function(s,r){return s+(parseFloat(r.valor)||0);},0);
+  var totalDesp=cpRows.reduce(function(s,r){return s+(parseFloat(r.valor)||0);},0);
+  var resultado=totalRec-totalDesp;
+
+  var h='<div class="fech-col"><div class="fech-col-hdr '+colId+'">'+ex(colLabel)+'</div>';
+
+  if(Object.keys(recMap).length){
+    h+='<div class="fech-section-lbl">Receitas</div>';
+    Object.keys(recMap).sort().forEach(function(k){h+=_fechLine(colId,k,recMap[k],false);});
+    h+='<div class="fech-subtotal"><span>Total Receitas</span><span>'+_fechFmt(totalRec)+'</span></div>';
+  }else{
+    h+='<div class="fech-section-lbl">Receitas</div><div class="fech-line" style="color:var(--text-dim);font-size:11px;padding:6px 18px">Nenhum lançamento</div>';
+  }
+
+  if(Object.keys(despMap).length){
+    h+='<div class="fech-section-lbl">Despesas</div>';
+    Object.keys(despMap).sort().forEach(function(k){h+=_fechLine(colId,'desp:'+k,despMap[k],true);});
+    h+='<div class="fech-subtotal"><span>Total Despesas</span><span style="color:var(--red)">'+_fechFmt(totalDesp)+'</span></div>';
+  }else{
+    h+='<div class="fech-section-lbl">Despesas</div><div class="fech-line" style="color:var(--text-dim);font-size:11px;padding:6px 18px">Nenhum lançamento</div>';
+  }
+
+  h+='<div style="flex:1"></div>';
+  h+='<div class="fech-result-box '+(resultado>=0?'pos':'neg')+'">';
+  h+='<span class="fech-rb-lbl">Resultado '+ex(colLabel)+'</span>';
+  h+='<span class="fech-rb-val">'+_fechFmt(resultado)+'</span>';
+  h+='</div></div>';
+  return {html:h,totalRec:totalRec,totalDesp:totalDesp,resultado:resultado};
+}
+
+function _fechGeralHtml(vendaRes,locRes,crRows,cpRows){
+  var recMap={},despMap={};
+  crRows.forEach(function(r){var k=r.categoria_nome||'Outros';recMap[k]=(recMap[k]||0)+(parseFloat(r.valor)||0);});
+  cpRows.forEach(function(r){var k=_fechCcNome(r);despMap[k]=(despMap[k]||0)+(parseFloat(r.valor)||0);});
+  var totalRecG=crRows.reduce(function(s,r){return s+(parseFloat(r.valor)||0);},0);
+  var totalDespG=cpRows.reduce(function(s,r){return s+(parseFloat(r.valor)||0);},0);
+  var resultado=vendaRes+locRes+totalRecG-totalDespG;
+  var col='geral';
+
+  var h='<div class="fech-col"><div class="fech-col-hdr geral">Resultado Geral</div>';
+  h+='<div class="fech-section-lbl">Resultados dos Projetos</div>';
+  h+=_fechLine(col,'Resultado Venda',vendaRes,vendaRes<0);
+  h+=_fechLine(col,'Resultado Locação',locRes,locRes<0);
+
+  if(Object.keys(recMap).length){
+    h+='<div class="fech-section-lbl">Receitas Geral</div>';
+    Object.keys(recMap).sort().forEach(function(k){h+=_fechLine(col,'rec:'+k,recMap[k],false);});
+    h+='<div class="fech-subtotal"><span>Total Receitas</span><span>'+_fechFmt(totalRecG)+'</span></div>';
+  }
+
+  if(Object.keys(despMap).length){
+    h+='<div class="fech-section-lbl">Despesas Geral</div>';
+    Object.keys(despMap).sort().forEach(function(k){h+=_fechLine(col,'desp:'+k,despMap[k],true);});
+    h+='<div class="fech-subtotal"><span>Total Despesas</span><span style="color:var(--red)">'+_fechFmt(totalDespG)+'</span></div>';
+  }
+
+  h+='<div style="flex:1"></div>';
+  h+='<div class="fech-result-box '+(resultado>=0?'pos':'neg')+'">';
+  h+='<span class="fech-rb-lbl">Resultado Final</span>';
+  h+='<span class="fech-rb-val">'+_fechFmt(resultado)+'</span>';
+  h+='</div></div>';
+  return h;
+}
+
+async function fechamentoLoad(){
+  var ano=fechState.ano,mes=fechState.mes;
+  var mesLbl=FECH_MESES[mes-1]+' '+ano;
+  document.getElementById('fech-mes-lbl').textContent=mesLbl;
+  document.getElementById('fech-subtitle').textContent='Fechamento — '+mesLbl;
+  fechState.hidden=JSON.parse(localStorage.getItem('fech_hidden')||'{}');
+
+  var de=ano+'-'+String(mes).padStart(2,'0')+'-01';
+  var lastDay=new Date(ano,mes,0).getDate();
+  var ate=ano+'-'+String(mes).padStart(2,'0')+'-'+String(lastDay).padStart(2,'0');
+
+  document.getElementById('fech-cols').innerHTML='<div style="color:var(--text-muted);font-size:13px;padding:40px;text-align:center;grid-column:1/-1">Carregando...</div>';
+
+  try{
+    var [cpRes,crRes]=await Promise.all([
+      sb.from('contas_pagar').select('*').gte('vencimento',de).lte('vencimento',ate),
+      sb.from('contas_receber').select('*').gte('vencimento',de).lte('vencimento',ate)
+    ]);
+    if(cpRes.error)throw cpRes.error;
+    if(crRes.error)throw crRes.error;
+
+    var cpAll=cpRes.data||[];
+    var crAll=crRes.data||[];
+
+    function isProjVenda(r){return r.projeto_nome==='Venda';}
+    function isProjLocacao(r){var p=r.projeto_nome||'';return p==='Locação'||p==='Locacao';}
+    function isProjGeral(r){return !isProjVenda(r)&&!isProjLocacao(r);}
+
+    var cpVenda=cpAll.filter(isProjVenda),cpLocacao=cpAll.filter(isProjLocacao),cpGeral=cpAll.filter(isProjGeral);
+    var crVenda=crAll.filter(isProjVenda),crLocacao=crAll.filter(isProjLocacao),crGeral=crAll.filter(isProjGeral);
+
+    var venda=_fechColHtml('venda','Venda',crVenda,cpVenda);
+    var locacao=_fechColHtml('locacao','Locação',crLocacao,cpLocacao);
+    var geralHtml=_fechGeralHtml(venda.resultado,locacao.resultado,crGeral,cpGeral);
+
+    var wrap=document.getElementById('fech-cols');
+    wrap.innerHTML=venda.html+locacao.html+geralHtml;
+    wrap.classList.toggle('fech-modo-edit',!!fechState.modoEdit);
+    wrap.classList.toggle('fech-modo-adm',!!fechState.modoAdm);
+  }catch(e){
+    document.getElementById('fech-cols').innerHTML='<div style="color:var(--red);padding:40px;text-align:center;grid-column:1/-1">Erro ao carregar: '+ex(e.message)+'</div>';
+  }
 }
 
 </script>
