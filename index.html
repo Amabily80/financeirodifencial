@@ -9269,16 +9269,17 @@ function fechDrilldown(el){
   var recs=sec==='rec'?(d.recRecs[cleanKey]||[]):sec==='com'?(d.comRecs[cleanKey]||[]):(d.despRecs[cleanKey]||[]);
   var isRec=sec==='rec';
 
-  var projetos=['Venda','Locação','Compartilhado','Geral'];
+  var todosProjetos=(FS.refs.projetos||[]).map(function(p){return p.nome;});
 
   var html=recs.length?recs.map(function(r){
-    var cats=(FS.refs.categorias||[]).filter(function(c){return c.tipo===(isRec?'receita':'custo')||c.tipo==='ambos';});
+    var cats=(FS.refs.categorias||[]);
     var catOpts=cats.map(function(c){
       return '<option value="'+_fe(c.id)+'|'+_fe(c.nome)+'"'+(c.id===r.categoria_id?' selected':'')+'>'+_fe(c.nome)+'</option>';
     }).join('');
-    var projOpts=projetos.map(function(p){
-      return '<option'+(r.projeto_nome===p?' selected':'')+'>'+_fe(p)+'</option>';
-    }).join('');
+    var projOpts='<option value=""'+((!r.projeto_nome||r.projeto_nome==='')?' selected':'')+'>— sem projeto —</option>'
+      +todosProjetos.map(function(p){
+        return '<option'+(r.projeto_nome===p?' selected':'')+'>'+_fe(p)+'</option>';
+      }).join('');
     return '<div class="fdrill-row" data-id="'+_fe(r.id)+'" data-table="'+_fe(r._table)+'">'
       +'<div class="fdrill-desc" title="'+_fe(r.descricao||r.pessoa_nome||'')+'">'+_fe(r.descricao||r.pessoa_nome||'—')+'</div>'
       +'<div class="fdrill-meta">'
