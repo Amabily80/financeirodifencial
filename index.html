@@ -8699,6 +8699,7 @@ async function orcFecharRealizado(){
 // ═══════════════════════════════════════════════════════
 // FECHAMENTO MENSAL
 // ═══════════════════════════════════════════════════════
+function _fechEsc(s){return String(s||'').replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;');}
 var fechState={ano:new Date().getFullYear(),mes:new Date().getMonth()+1,modoEdit:false,modoAdm:false,hidden:{}};
 var FECH_MESES=['Janeiro','Fevereiro','Março','Abril','Maio','Junho','Julho','Agosto','Setembro','Outubro','Novembro','Dezembro'];
 
@@ -8747,10 +8748,10 @@ function _fechLine(col,label,val,isNeg){
   var key=fechState.ano+'-'+String(fechState.mes).padStart(2,'0')+':'+col+':'+label;
   var hidden=fechState.hidden[key]?' fech-oculto':'';
   var valCls=isNeg?' neg':(val>0?' pos':'');
-  return '<div class="fech-line'+hidden+'" data-fk="'+ex(key)+'">'
-    +'<span class="fech-line-name">'+ex(label)+'</span>'
+  return '<div class="fech-line'+hidden+'" data-fk="'+_fechEsc(key)+'">'
+    +'<span class="fech-line-name">'+_fechEsc(label)+'</span>'
     +'<span class="fech-line-val'+valCls+'">'+_fechFmt(val)+'</span>'
-    +'<button class="fech-eye" onclick="fechToggleLine(\''+ex(col)+'\',\''+ex(label)+'\')" title="Ocultar/Mostrar">👁</button>'
+    +'<button class="fech-eye" onclick="fechToggleLine(\''+_fechEsc(col)+'\',\''+_fechEsc(label)+'\')" title="Ocultar/Mostrar">&#128065;</button>'
     +'</div>';
 }
 
@@ -8774,7 +8775,7 @@ function _fechColHtml(colId,colLabel,crRows,cpRows){
   var totalDesp=cpRows.reduce(function(s,r){return s+(parseFloat(r.valor)||0);},0);
   var resultado=totalRec-totalDesp;
 
-  var h='<div class="fech-col"><div class="fech-col-hdr '+colId+'">'+ex(colLabel)+'</div>';
+  var h='<div class="fech-col"><div class="fech-col-hdr '+colId+'">'+_fechEsc(colLabel)+'</div>';
 
   if(Object.keys(recMap).length){
     h+='<div class="fech-section-lbl">Receitas</div>';
@@ -8794,7 +8795,7 @@ function _fechColHtml(colId,colLabel,crRows,cpRows){
 
   h+='<div style="flex:1"></div>';
   h+='<div class="fech-result-box '+(resultado>=0?'pos':'neg')+'">';
-  h+='<span class="fech-rb-lbl">Resultado '+ex(colLabel)+'</span>';
+  h+='<span class="fech-rb-lbl">Resultado '+_fechEsc(colLabel)+'</span>';
   h+='<span class="fech-rb-val">'+_fechFmt(resultado)+'</span>';
   h+='</div></div>';
   return {html:h,totalRec:totalRec,totalDesp:totalDesp,resultado:resultado};
@@ -8849,8 +8850,8 @@ async function fechamentoLoad(){
 
   try{
     var [cpRes,crRes]=await Promise.all([
-      sb.from('contas_pagar').select('*').gte('vencimento',de).lte('vencimento',ate),
-      sb.from('contas_receber').select('*').gte('vencimento',de).lte('vencimento',ate)
+      sb.from('contas_pagar').select('*').eq('conciliado',true).gte('vencimento',de).lte('vencimento',ate),
+      sb.from('contas_receber').select('*').eq('conciliado',true).gte('vencimento',de).lte('vencimento',ate)
     ]);
     if(cpRes.error)throw cpRes.error;
     if(crRes.error)throw crRes.error;
@@ -8874,7 +8875,7 @@ async function fechamentoLoad(){
     wrap.classList.toggle('fech-modo-edit',!!fechState.modoEdit);
     wrap.classList.toggle('fech-modo-adm',!!fechState.modoAdm);
   }catch(e){
-    document.getElementById('fech-cols').innerHTML='<div style="color:var(--red);padding:40px;text-align:center;grid-column:1/-1">Erro ao carregar: '+ex(e.message)+'</div>';
+    document.getElementById('fech-cols').innerHTML='<div style="color:var(--red);padding:40px;text-align:center;grid-column:1/-1">Erro ao carregar: '+_fechEsc(e.message)+'</div>';
   }
 }
 
