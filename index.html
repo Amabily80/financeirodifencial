@@ -8942,7 +8942,7 @@ function _isComissao(catNome){
 }
 
 function _fechLine(col,rawLabel,val,isNeg){
-  var label=rawLabel.replace(/^(desp:|rec:)/,'');
+  var label=rawLabel.replace(/^(desp:|rec:|com:)/,'');
   var key=fechState.ano+'-'+String(fechState.mes).padStart(2,'0')+':'+col+':'+rawLabel;
   var hidden=fechState.hidden[key]?' fech-oculto':'';
   var valCls=isNeg?' neg':(val>0?' pos':'');
