@@ -9123,12 +9123,27 @@ async function fechamentoLoad(){
 
     var cpAll=cpRes.data||[];
     var crAll=crRes.data||[];
+
+    var COMP_VENDA=0.85, COMP_LOC=0.15;
     function isVenda(r){return r.projeto_nome==='Venda';}
     function isLocacao(r){var p=r.projeto_nome||'';return p==='Locação'||p==='Locacao';}
-    function isGeral(r){return !isVenda(r)&&!isLocacao(r);}
+    function isComp(r){return (r.projeto_nome||'').toUpperCase()==='COMPARTILHADO';}
+    function isGeral(r){return !isVenda(r)&&!isLocacao(r)&&!isComp(r);}
 
-    var venda  =_fechColHtml('venda','Venda',crAll.filter(isVenda),cpAll.filter(isVenda));
-    var locacao=_fechColHtml('locacao','Locação',crAll.filter(isLocacao),cpAll.filter(isLocacao));
+    // Compartilhado: rateio 85% Venda / 15% Locação por categoria original
+    function ratearComp(rows, pct){
+      return rows.filter(isComp).map(function(r){
+        return Object.assign({},r,{valor:(parseFloat(r.valor)||0)*pct,_comp:true});
+      });
+    }
+
+    var crVenda  =crAll.filter(isVenda).concat(ratearComp(crAll,COMP_VENDA));
+    var crLocacao=crAll.filter(isLocacao).concat(ratearComp(crAll,COMP_LOC));
+    var cpVenda  =cpAll.filter(isVenda).concat(ratearComp(cpAll,COMP_VENDA));
+    var cpLocacao=cpAll.filter(isLocacao).concat(ratearComp(cpAll,COMP_LOC));
+
+    var venda  =_fechColHtml('venda','Venda',crVenda,cpVenda);
+    var locacao=_fechColHtml('locacao','Locação',crLocacao,cpLocacao);
     var geral  =_fechGeralHtml(venda.resultado,locacao.resultado,crAll.filter(isGeral),cpAll.filter(isGeral));
 
     var totalRecAll=venda.totalRec+locacao.totalRec;
