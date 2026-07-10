@@ -9519,8 +9519,12 @@ async function fechamentoLoad(){
     if(cpRes.error)throw cpRes.error;
     if(crRes.error)throw crRes.error;
 
+    var crRaw=crRes.data||[];
+    var resgateTotal=crRaw.filter(function(r){return (r.categoria_nome||'')==='Resgate Investimento';})
+      .reduce(function(s,r){return s+(parseFloat(r.valor)||0);},0);
+
     var cpAll=(cpRes.data||[]).filter(function(r){return r.projeto_nome!=='Transferência entre Contas';});
-    var crAll=(crRes.data||[]).filter(function(r){return r.projeto_nome!=='Transferência entre Contas';});
+    var crAll=crRaw.filter(function(r){return r.projeto_nome!=='Transferência entre Contas';});
 
     var COMP_VENDA=0.85, COMP_LOC=0.15;
     function isVenda(r){return r.projeto_nome==='Venda';}
@@ -9574,8 +9578,7 @@ async function fechamentoLoad(){
     var colsHtml='<div class="fech-cols">'+venda.html+locacao.html+geral.html+'</div>';
 
     // Card de Investimentos
-    var totalResgate=crAll.filter(function(r){return (r.categoria_nome||'')==='Resgate Investimento';})
-      .reduce(function(s,r){return s+(parseFloat(r.valor)||0);},0);
+    var totalResgate=resgateTotal;
     var invMonthKey=ano+'-'+String(mes).padStart(2,'0');
     var invStored=JSON.parse(localStorage.getItem('fech_invest_'+invMonthKey)||'{}');
     var invCaucao=invStored.caucao||0;
