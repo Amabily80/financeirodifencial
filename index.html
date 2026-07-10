@@ -512,7 +512,7 @@ input[type="checkbox"]{width:14px;height:14px;accent-color:var(--green-accent);c
 .fech-sw-eye{display:none;position:absolute;top:6px;right:6px;width:22px;height:22px;border:none;background:none;cursor:pointer;color:var(--text-dim);font-size:14px;opacity:.3;border-radius:4px;align-items:center;justify-content:center;z-index:2;transition:opacity .15s}
 .fech-modo-edit .fech-sw-eye{display:flex}
 .fech-modo-edit .fech-sw:hover .fech-sw-eye{opacity:1}
-.fech-sw.fech-oculto .fech-kpi-row,.fech-sw.fech-oculto .fech-charts-row{opacity:.35}
+.fech-sw.fech-oculto .fech-kpi-row,.fech-sw.fech-oculto .fech-charts-row,.fech-sw.fech-oculto .fech-hero{opacity:.35}
 .fech-modo-adm .fech-sw.fech-oculto{display:none}
 .fech-retirada-headline{display:flex;align-items:center;gap:10px;margin:10px 14px 4px;padding:12px 16px;background:linear-gradient(135deg,#fef2f2,#fff1f2);border:1px solid #fca5a5;border-radius:10px}
 .fech-retirada-headline-ico{color:#dc2626;font-size:8px;flex-shrink:0}
@@ -682,7 +682,7 @@ input[type="checkbox"]{width:14px;height:14px;accent-color:var(--green-accent);c
 .fech-sw-eye{display:none;position:absolute;top:6px;right:6px;width:22px;height:22px;border:none;background:none;cursor:pointer;color:var(--text-dim);font-size:14px;opacity:.3;border-radius:4px;align-items:center;justify-content:center;z-index:2;transition:opacity .15s}
 .fech-modo-edit .fech-sw-eye{display:flex}
 .fech-modo-edit .fech-sw:hover .fech-sw-eye{opacity:1}
-.fech-sw.fech-oculto .fech-kpi-row,.fech-sw.fech-oculto .fech-charts-row{opacity:.35}
+.fech-sw.fech-oculto .fech-kpi-row,.fech-sw.fech-oculto .fech-charts-row,.fech-sw.fech-oculto .fech-hero{opacity:.35}
 .fech-modo-adm .fech-sw.fech-oculto{display:none}
 .fech-retirada-headline{display:flex;align-items:center;gap:10px;margin:10px 14px 4px;padding:12px 16px;background:linear-gradient(135deg,#fef2f2,#fff1f2);border:1px solid #fca5a5;border-radius:10px}
 .fech-retirada-headline-ico{color:#dc2626;font-size:8px;flex-shrink:0}
@@ -1132,7 +1132,7 @@ input[type="checkbox"]{width:14px;height:14px;accent-color:var(--green-accent);c
 .fech-sw-eye{display:none;position:absolute;top:6px;right:6px;width:22px;height:22px;border:none;background:none;cursor:pointer;color:var(--text-dim);font-size:14px;opacity:.3;border-radius:4px;align-items:center;justify-content:center;z-index:2;transition:opacity .15s}
 .fech-modo-edit .fech-sw-eye{display:flex}
 .fech-modo-edit .fech-sw:hover .fech-sw-eye{opacity:1}
-.fech-sw.fech-oculto .fech-kpi-row,.fech-sw.fech-oculto .fech-charts-row{opacity:.35}
+.fech-sw.fech-oculto .fech-kpi-row,.fech-sw.fech-oculto .fech-charts-row,.fech-sw.fech-oculto .fech-hero{opacity:.35}
 .fech-modo-adm .fech-sw.fech-oculto{display:none}
 .fech-retirada-headline{display:flex;align-items:center;gap:10px;margin:10px 14px 4px;padding:12px 16px;background:linear-gradient(135deg,#fef2f2,#fff1f2);border:1px solid #fca5a5;border-radius:10px}
 .fech-retirada-headline-ico{color:#dc2626;font-size:8px;flex-shrink:0}
@@ -1302,7 +1302,7 @@ input[type="checkbox"]{width:14px;height:14px;accent-color:var(--green-accent);c
 .fech-sw-eye{display:none;position:absolute;top:6px;right:6px;width:22px;height:22px;border:none;background:none;cursor:pointer;color:var(--text-dim);font-size:14px;opacity:.3;border-radius:4px;align-items:center;justify-content:center;z-index:2;transition:opacity .15s}
 .fech-modo-edit .fech-sw-eye{display:flex}
 .fech-modo-edit .fech-sw:hover .fech-sw-eye{opacity:1}
-.fech-sw.fech-oculto .fech-kpi-row,.fech-sw.fech-oculto .fech-charts-row{opacity:.35}
+.fech-sw.fech-oculto .fech-kpi-row,.fech-sw.fech-oculto .fech-charts-row,.fech-sw.fech-oculto .fech-hero{opacity:.35}
 .fech-modo-adm .fech-sw.fech-oculto{display:none}
 .fech-retirada-headline{display:flex;align-items:center;gap:10px;margin:10px 14px 4px;padding:12px 16px;background:linear-gradient(135deg,#fef2f2,#fff1f2);border:1px solid #fca5a5;border-radius:10px}
 .fech-retirada-headline-ico{color:#dc2626;font-size:8px;flex-shrink:0}
@@ -9721,7 +9721,8 @@ async function fechamentoLoad(){
     var mLocacao=_fechPct(locacao.resultado,locacao.totalRec);
     var mLucro  =_fechPct(lucroEmpresa,totalRecAll);
 
-    var heroHtml=_fechHeroHtml(geral,mesLbl);
+    var swPfx=ano+'-'+String(mes).padStart(2,'0')+':section:';
+    var heroHtml=_fechSw(swPfx+'hero',_fechHeroHtml(geral,mesLbl));
 
     var kpiHtml='<div class="fech-kpi-row">'
       +'<div class="fech-kpi"><span class="fech-kpi-icon" style="background:#f0fdf4;color:#16a34a">&#9650;</span><div><div class="fech-kpi-lbl">Total Receitas</div><div class="fech-kpi-val pos">'+_fechFmt(totalRecAll)+'</div></div></div>'
@@ -9730,7 +9731,6 @@ async function fechamentoLoad(){
       +'<div class="fech-kpi"><span class="fech-kpi-icon" style="background:#f0fdf4;color:#0891b2">&#9670;</span><div><div class="fech-kpi-lbl">Lucro da Empresa</div><div class="fech-kpi-val '+(lucroEmpresa>=0?'pos':'neg')+'">'+_fechFmt(lucroEmpresa)+'</div><div class="fech-rb-margem">margem '+mLucro+'</div></div></div>'
       +'</div>';
 
-    var swPfx=ano+'-'+String(mes).padStart(2,'0')+':section:';
     kpiHtml=_fechSw(swPfx+'kpis',kpiHtml);
 
     var chartsHtml=_fechSw(swPfx+'charts','<div class="fech-charts-row">'
