@@ -515,6 +515,10 @@ input[type="checkbox"]{width:14px;height:14px;accent-color:var(--green-accent);c
 .fech-modo-edit .fech-sw:hover .fech-sw-eye{opacity:1}
 .fech-sw.fech-oculto .fech-kpi-row,.fech-sw.fech-oculto .fech-charts-row{opacity:.35}
 .fech-modo-adm .fech-sw.fech-oculto{display:none}
+.fech-retirada-headline{display:flex;align-items:center;gap:10px;margin:10px 14px 4px;padding:12px 16px;background:linear-gradient(135deg,#fef2f2,#fff1f2);border:1px solid #fca5a5;border-radius:10px}
+.fech-retirada-headline-ico{color:#dc2626;font-size:8px;flex-shrink:0}
+.fech-retirada-headline-lbl{font-size:10px;font-weight:700;text-transform:uppercase;letter-spacing:.06em;color:#991b1b}
+.fech-retirada-headline-val{font-size:19px;font-weight:700;color:#dc2626;font-variant-numeric:tabular-nums;margin-top:2px}
 .fech-geral-alert{margin:10px 14px;padding:10px 14px;background:#fef3c7;border:1px solid #f59e0b;border-radius:8px;font-size:12px;color:#92400e;line-height:1.5}
 .fech-geral-alert strong{display:block;margin-top:2px}
 .fech-geral-alert small{opacity:.8}
@@ -649,6 +653,10 @@ input[type="checkbox"]{width:14px;height:14px;accent-color:var(--green-accent);c
 .fech-modo-edit .fech-sw:hover .fech-sw-eye{opacity:1}
 .fech-sw.fech-oculto .fech-kpi-row,.fech-sw.fech-oculto .fech-charts-row{opacity:.35}
 .fech-modo-adm .fech-sw.fech-oculto{display:none}
+.fech-retirada-headline{display:flex;align-items:center;gap:10px;margin:10px 14px 4px;padding:12px 16px;background:linear-gradient(135deg,#fef2f2,#fff1f2);border:1px solid #fca5a5;border-radius:10px}
+.fech-retirada-headline-ico{color:#dc2626;font-size:8px;flex-shrink:0}
+.fech-retirada-headline-lbl{font-size:10px;font-weight:700;text-transform:uppercase;letter-spacing:.06em;color:#991b1b}
+.fech-retirada-headline-val{font-size:19px;font-weight:700;color:#dc2626;font-variant-numeric:tabular-nums;margin-top:2px}
 .fech-geral-alert{margin:10px 14px;padding:10px 14px;background:#fef3c7;border:1px solid #f59e0b;border-radius:8px;font-size:12px;color:#92400e;line-height:1.5}
 .fech-geral-alert strong{display:block;margin-top:2px}
 .fech-geral-alert small{opacity:.8}
@@ -1063,6 +1071,10 @@ input[type="checkbox"]{width:14px;height:14px;accent-color:var(--green-accent);c
 .fech-modo-edit .fech-sw:hover .fech-sw-eye{opacity:1}
 .fech-sw.fech-oculto .fech-kpi-row,.fech-sw.fech-oculto .fech-charts-row{opacity:.35}
 .fech-modo-adm .fech-sw.fech-oculto{display:none}
+.fech-retirada-headline{display:flex;align-items:center;gap:10px;margin:10px 14px 4px;padding:12px 16px;background:linear-gradient(135deg,#fef2f2,#fff1f2);border:1px solid #fca5a5;border-radius:10px}
+.fech-retirada-headline-ico{color:#dc2626;font-size:8px;flex-shrink:0}
+.fech-retirada-headline-lbl{font-size:10px;font-weight:700;text-transform:uppercase;letter-spacing:.06em;color:#991b1b}
+.fech-retirada-headline-val{font-size:19px;font-weight:700;color:#dc2626;font-variant-numeric:tabular-nums;margin-top:2px}
 .fech-geral-alert{margin:10px 14px;padding:10px 14px;background:#fef3c7;border:1px solid #f59e0b;border-radius:8px;font-size:12px;color:#92400e;line-height:1.5}
 .fech-geral-alert strong{display:block;margin-top:2px}
 .fech-geral-alert small{opacity:.8}
@@ -1197,6 +1209,10 @@ input[type="checkbox"]{width:14px;height:14px;accent-color:var(--green-accent);c
 .fech-modo-edit .fech-sw:hover .fech-sw-eye{opacity:1}
 .fech-sw.fech-oculto .fech-kpi-row,.fech-sw.fech-oculto .fech-charts-row{opacity:.35}
 .fech-modo-adm .fech-sw.fech-oculto{display:none}
+.fech-retirada-headline{display:flex;align-items:center;gap:10px;margin:10px 14px 4px;padding:12px 16px;background:linear-gradient(135deg,#fef2f2,#fff1f2);border:1px solid #fca5a5;border-radius:10px}
+.fech-retirada-headline-ico{color:#dc2626;font-size:8px;flex-shrink:0}
+.fech-retirada-headline-lbl{font-size:10px;font-weight:700;text-transform:uppercase;letter-spacing:.06em;color:#991b1b}
+.fech-retirada-headline-val{font-size:19px;font-weight:700;color:#dc2626;font-variant-numeric:tabular-nums;margin-top:2px}
 .fech-geral-alert{margin:10px 14px;padding:10px 14px;background:#fef3c7;border:1px solid #f59e0b;border-radius:8px;font-size:12px;color:#92400e;line-height:1.5}
 .fech-geral-alert strong{display:block;margin-top:2px}
 .fech-geral-alert small{opacity:.8}
@@ -9282,7 +9298,8 @@ function _fechColHtml(colId,colLabel,crRows,cpRows){
   h+=_fechManualBlock(colId,'receitas');
 
   if(d.totalCom>0){
-    h+='<div class="fech-section-lbl" style="margin-top:10px"><span>(-) Comissões Pagas</span><span class="fech-section-tot" style="color:var(--red)">'+_fechFmt(d.totalCom)+'</span></div>';
+    var pctCom=_fechPct(d.totalCom,d.totalRec);
+    h+='<div class="fech-section-lbl" style="margin-top:10px"><span>(-) Comissões Pagas <small style="font-weight:400;opacity:.7">('+pctCom+' da receita)</small></span><span class="fech-section-tot" style="color:var(--red)">'+_fechFmt(d.totalCom)+'</span></div>';
     Object.keys(d.comMap).sort().forEach(function(k){h+=_fechLine(colId,'com:'+k,d.comMap[k],true,'com');});
     h+=_fechManualBlock(colId,'comissoes');
     h+='<div class="fech-cascade-sub"><span>= Após Comissões</span><span class="'+(aposComissoes>=0?'pos':'neg')+'">'+_fechFmt(aposComissoes)+'</span></div>';
@@ -9332,6 +9349,10 @@ function _fechGeralHtml(vendaRes,locRes,crRows,cpRows){
     +'<span class="fech-col-hdr-name">Resultado Final</span>'
     +'<span class="fech-col-res '+resCls+'">'+_fechFmt(resultado)+'</span>'
     +'</div>';
+
+  if(retirada>0){
+    h+='<div class="fech-retirada-headline"><span class="fech-retirada-headline-ico">&#9679;</span><div><div class="fech-retirada-headline-lbl">Retirada acima do lucro do mês</div><div class="fech-retirada-headline-val">'+_fechFmt(retirada)+'</div></div></div>';
+  }
 
   if(alertCats.length){
     h+='<div class="fech-geral-alert">&#9888; '+alertCats.length+' categoria'+(alertCats.length>1?'s':'')+' no projeto Geral precisam de revisão: <strong>'+_fe(alertCats.join(', '))+'</strong><br><small>Use o drill-down para corrigir o projeto de cada lançamento.</small></div>';
