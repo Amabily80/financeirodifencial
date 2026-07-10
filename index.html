@@ -9352,8 +9352,8 @@ async function fechamentoLoad(){
     if(cpRes.error)throw cpRes.error;
     if(crRes.error)throw crRes.error;
 
-    var cpAll=cpRes.data||[];
-    var crAll=crRes.data||[];
+    var cpAll=(cpRes.data||[]).filter(function(r){return r.projeto_nome!=='Transferência entre Contas';});
+    var crAll=(crRes.data||[]).filter(function(r){return r.projeto_nome!=='Transferência entre Contas';});
 
     var COMP_VENDA=0.85, COMP_LOC=0.15;
     function isVenda(r){return r.projeto_nome==='Venda';}
