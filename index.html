@@ -872,6 +872,7 @@ input[type="checkbox"]{width:14px;height:14px;accent-color:var(--green-accent);c
 .dre-section-hdr.receita{background:#059669}.dre-section-hdr.custo{background:#dc2626}.dre-section-hdr.resultado{background:var(--brand)}
 .dre-row{padding:9px 14px;border-bottom:1px solid var(--border);display:flex;justify-content:space-between;font-size:13px;align-items:center}
 .dre-row:hover{background:rgba(0,0,0,.02)}
+.dre-proj-hdr{padding:8px 14px;background:var(--surface2);border-bottom:1px solid var(--border);display:flex;justify-content:space-between;font-size:11.5px;font-weight:700;text-transform:uppercase;letter-spacing:.05em;color:var(--navy)}
 .dre-total{padding:11px 14px;display:flex;justify-content:space-between;font-size:14px;font-weight:700;background:var(--surface2)}
 .rag-green{color:#059669;font-weight:700}.rag-yellow{color:#d97706;font-weight:700}.rag-red{color:#dc2626;font-weight:700}
 .rag-dot{display:inline-block;width:9px;height:9px;border-radius:50%;margin-right:5px;vertical-align:middle}
@@ -1492,6 +1493,7 @@ input[type="checkbox"]{width:14px;height:14px;accent-color:var(--green-accent);c
 .dre-section-hdr.receita{background:#059669}.dre-section-hdr.custo{background:#dc2626}.dre-section-hdr.resultado{background:var(--brand)}
 .dre-row{padding:9px 14px;border-bottom:1px solid var(--border);display:flex;justify-content:space-between;font-size:13px;align-items:center}
 .dre-row:hover{background:rgba(0,0,0,.02)}
+.dre-proj-hdr{padding:8px 14px;background:var(--surface2);border-bottom:1px solid var(--border);display:flex;justify-content:space-between;font-size:11.5px;font-weight:700;text-transform:uppercase;letter-spacing:.05em;color:var(--navy)}
 .dre-total{padding:11px 14px;display:flex;justify-content:space-between;font-size:14px;font-weight:700;background:var(--surface2)}
 .rag-green{color:#059669;font-weight:700}.rag-yellow{color:#d97706;font-weight:700}.rag-red{color:#dc2626;font-weight:700}
 .rag-dot{display:inline-block;width:9px;height:9px;border-radius:50%;margin-right:5px;vertical-align:middle}
@@ -2742,7 +2744,7 @@ input[type="checkbox"]{width:14px;height:14px;accent-color:var(--green-accent);c
     <div class="fin-page-hdr" style="margin-bottom:20px">
       <div>
         <h2 class="fin-page-title">📋 DRE</h2>
-        <p style="font-size:12px;color:var(--text-muted);margin-top:3px">Demonstrativo de Resultado por Centro de Custo</p>
+        <p style="font-size:12px;color:var(--text-muted);margin-top:3px">Demonstrativo de Resultado por Categoria e Projeto</p>
       </div>
       <button class="btn-primary" onclick="dreLoad()">↺ Atualizar</button>
     </div>
@@ -2811,7 +2813,7 @@ input[type="checkbox"]{width:14px;height:14px;accent-color:var(--green-accent);c
     </div>
     <div class="exec-table-wrap">
       <div class="exec-table-hdr">
-        <div class="exec-table-title">📊 Detalhamento por Centro de Custo</div>
+        <div class="exec-table-title">📊 Detalhamento por Categoria e Projeto</div>
         <div style="font-size:11px;color:var(--text-muted)">
           <span class="rag-dot green"></span>≤5% &nbsp;
           <span class="rag-dot yellow"></span>5–15% &nbsp;
@@ -2821,7 +2823,7 @@ input[type="checkbox"]{width:14px;height:14px;accent-color:var(--green-accent);c
       <div style="overflow-x:auto">
         <table class="exec-tbl">
           <thead><tr>
-            <th style="text-align:left">Centro de Custo / Tipo</th>
+            <th style="text-align:left">Categoria · Projeto / Tipo</th>
             <th>Projetado</th><th>Realizado</th><th>Variação R$</th><th>Variação %</th><th>Status</th>
           </tr></thead>
           <tbody id="orc-tbody"><tr><td colspan="6" style="text-align:center;padding:30px;color:var(--text-muted)">Clique em Atualizar para carregar.</td></tr></tbody>
@@ -8921,8 +8923,8 @@ async function dreLoad(){
   var fim=ano+'-'+mes+'-31';
   try{
     var [rCp,rCr,rSc]=await Promise.all([
-      sb.from('contas_pagar').select('valor,valor_pago,data_pagamento,vencimento,status,categoria_id,categoria_nome').limit(9999),
-      sb.from('contas_receber').select('valor,valor_recebido,data_recebimento,vencimento,status,categoria_id,categoria_nome').limit(9999),
+      sb.from('contas_pagar').select('valor,valor_pago,data_pagamento,vencimento,status,categoria_id,categoria_nome,projeto_nome').limit(9999),
+      sb.from('contas_receber').select('valor,valor_recebido,data_recebimento,vencimento,status,categoria_id,categoria_nome,projeto_nome').limit(9999),
       sb.from('solicitacoes_comissao').select('data_solicitacao,itens').gte('data_solicitacao',ini).lte('data_solicitacao',fim+'T23:59:59').limit(9999),
     ]);
     var filt=function(r,dt){return r.status!=='cancelado'&&dt&&dt>=ini&&dt<=fim;};
@@ -8933,37 +8935,36 @@ async function dreLoad(){
   }catch(e){toast('❌','Erro: '+e.message,'error');}
 }
 
-function _dreCCMap(){
-  var m={};
-  (FS.refs.categorias||[]).forEach(function(c){
-    var cc=c.centro_custo_nome||'Sem Centro de Custo';
-    if(c.id) m['id:'+c.id]=cc;
-    m[c.nome]=cc;
-  });
-  return m;
+function _orcCatProjKey(r){
+  var cat=r.categoria_nome||'Sem Categoria';
+  var proj=r.projeto_nome||'Sem Projeto';
+  return cat+' · '+proj;
 }
-function _dreGetCC(r,m){
-  if(r.categoria_id&&m['id:'+r.categoria_id])return m['id:'+r.categoria_id];
-  if(r.categoria_nome&&m[r.categoria_nome])return m[r.categoria_nome];
-  return r.categoria_nome||'Sem Categoria';
+
+function _dreGrpByProjCat(rows,valGetter){
+  var grp={};
+  rows.forEach(function(r){
+    var proj=r.projeto_nome||'Sem Projeto';
+    var cat=r.categoria_nome||'Sem Categoria';
+    if(!grp[proj])grp[proj]={};
+    grp[proj][cat]=(grp[proj][cat]||0)+valGetter(r);
+  });
+  return grp;
 }
 
 function dreRender(mes,ano,acu){
-  var ccMap=_dreCCMap();
-  var recGrp={}, cusGrp={};
-  _dreCrData.forEach(function(r){
-    var cc=_dreGetCC(r,ccMap);
-    recGrp[cc]=(recGrp[cc]||0)+(r.status==='recebido'?(parseFloat(r.valor_recebido)||parseFloat(r.valor)||0):(parseFloat(r.valor)||0));
-  });
-  _dreCpData.forEach(function(r){
-    var cc=_dreGetCC(r,ccMap);
-    cusGrp[cc]=(cusGrp[cc]||0)+(r.status==='pago'?(parseFloat(r.valor_pago)||parseFloat(r.valor)||0):(parseFloat(r.valor)||0));
-  });
+  var recGrp=_dreGrpByProjCat(_dreCrData,function(r){return r.status==='recebido'?(parseFloat(r.valor_recebido)||parseFloat(r.valor)||0):(parseFloat(r.valor)||0);});
+  var cusGrp=_dreGrpByProjCat(_dreCpData,function(r){return r.status==='pago'?(parseFloat(r.valor_pago)||parseFloat(r.valor)||0):(parseFloat(r.valor)||0);});
   var provTotal=0;
   _dreScData.forEach(function(s){provTotal+=_fceCalcScProv(Array.isArray(s.itens)?s.itens:[]);});
 
-  var totRec=Object.values(recGrp).reduce(function(s,v){return s+v;},0);
-  var totCusBruto=Object.values(cusGrp).reduce(function(s,v){return s+v;},0);
+  function grpTotal(grp){
+    var t=0;
+    Object.keys(grp).forEach(function(p){Object.keys(grp[p]).forEach(function(c){t+=grp[p][c];});});
+    return t;
+  }
+  var totRec=grpTotal(recGrp);
+  var totCusBruto=grpTotal(cusGrp);
   var totCus=totCusBruto+provTotal;
   var res=totRec-totCus, mg=totRec>0?res/totRec*100:0;
 
@@ -8971,9 +8972,16 @@ function dreRender(mes,ano,acu){
   document.getElementById('dre-periodo-titulo').textContent='DRE — '+(acu?'Jan → ':'')+mNomes[parseInt(mes)-1]+'/'+ano;
 
   function grpRows(grp,cls){
-    var ks=Object.keys(grp).sort();
-    if(!ks.length)return'<div class="dre-row" style="color:var(--text-muted)"><span>Nenhum lançamento no período</span><span>—</span></div>';
-    return ks.map(function(k){return'<div class="dre-row"><span>'+k+'</span><span class="'+cls+'">'+fmtBRL(grp[k])+'</span></div>';}).join('');
+    var projs=Object.keys(grp).sort();
+    if(!projs.length)return'<div class="dre-row" style="color:var(--text-muted)"><span>Nenhum lançamento no período</span><span>—</span></div>';
+    return projs.map(function(p){
+      var cats=grp[p];
+      var subtotal=Object.keys(cats).reduce(function(s,c){return s+cats[c];},0);
+      var catRows=Object.keys(cats).sort().map(function(c){
+        return '<div class="dre-row"><span style="padding-left:16px;color:var(--text-muted)">'+c+'</span><span class="'+cls+'">'+fmtBRL(cats[c])+'</span></div>';
+      }).join('');
+      return '<div class="dre-proj-hdr"><span>'+p+'</span><span>'+fmtBRL(subtotal)+'</span></div>'+catRows;
+    }).join('');
   }
 
   document.getElementById('dre-body').innerHTML=
@@ -9019,8 +9027,8 @@ async function orcLoad(){
   var ini=ano+'-'+mes+'-01', fim=ano+'-'+mes+'-31';
   try{
     var [rCp,rCr,rSnap]=await Promise.all([
-      sb.from('contas_pagar').select('valor,valor_pago,data_pagamento,vencimento,status,categoria_id,categoria_nome').limit(9999),
-      sb.from('contas_receber').select('valor,valor_recebido,data_recebimento,vencimento,status,categoria_id,categoria_nome').limit(9999),
+      sb.from('contas_pagar').select('valor,valor_pago,data_pagamento,vencimento,status,categoria_id,categoria_nome,projeto_nome').limit(9999),
+      sb.from('contas_receber').select('valor,valor_recebido,data_recebimento,vencimento,status,categoria_id,categoria_nome,projeto_nome').limit(9999),
       sb.from('orcamentos').select('*').eq('ano',parseInt(ano)).eq('mes',parseInt(mes)),
     ]);
     var cp=rCp.data||[], cr=rCr.data||[];
@@ -9036,8 +9044,7 @@ async function orcLoad(){
 }
 
 function orcRender(mes,ano){
-  var ccMap=_dreCCMap();
-  function getCC(r){return _dreGetCC(r,ccMap);}
+  function getCC(r){return _orcCatProjKey(r);}
 
   var planejamentoFixado=_orcSnapshot.some(function(s){return s.tipo==='receita'||s.tipo==='custo';});
   var snapData=_orcSnapshot.filter(function(s){return s.tipo==='receita'||s.tipo==='custo';});
@@ -9168,8 +9175,7 @@ function orcRender(mes,ano){
 
 async function orcFecharPlanejamento(){
   if(!confirm('Fixar o planejamento de '+document.getElementById('orc-mes').options[document.getElementById('orc-mes').selectedIndex].text+'/'+document.getElementById('orc-ano').value+'?\n\nOs valores projetados atuais serão congelados e não mudarão mais automaticamente.')) return;
-  var ccMap=_dreCCMap();
-  function getCC(r){return _dreGetCC(r,ccMap);}
+  function getCC(r){return _orcCatProjKey(r);}
   var projRec={}, projCus={};
   _orcCrOrc.forEach(function(r){var cc=getCC(r); projRec[cc]=(projRec[cc]||0)+(parseFloat(r.valor)||0);});
   _orcCpOrc.forEach(function(r){var cc=getCC(r); projCus[cc]=(projCus[cc]||0)+(parseFloat(r.valor)||0);});
@@ -9202,8 +9208,7 @@ async function orcReabrirPlanejamento(){
 
 async function orcFecharRealizado(){
   if(!confirm('Fechar o Realizado? Os valores efetivamente pagos/recebidos serão congelados para histórico.')) return;
-  var ccMap=_dreCCMap();
-  function getCC(r){return _dreGetCC(r,ccMap);}
+  function getCC(r){return _orcCatProjKey(r);}
   var realRec={}, realCus={};
   _orcCrReal.forEach(function(r){var cc=getCC(r); realRec[cc]=(realRec[cc]||0)+(parseFloat(r.valor_recebido)||parseFloat(r.valor)||0);});
   _orcCpReal.forEach(function(r){var cc=getCC(r); realCus[cc]=(realCus[cc]||0)+(parseFloat(r.valor_pago)||parseFloat(r.valor)||0);});
