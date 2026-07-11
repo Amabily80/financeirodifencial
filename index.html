@@ -8781,11 +8781,13 @@ async function fcExecLoad(){
     _fceCpData=rCp.data||[];
     _fceCrData=rCr.data||[];
     _fceScData=rSc.data||[];
-    // Auto-preencher data de início com a menor data_saldo_inicial das contas bancárias
+    // Auto-preencher data de início com a menor data_saldo_inicial das contas bancárias (nunca antes do piso do sistema)
     var dtIniEl=document.getElementById('fce-dt-ini');
+    var floorStr=FECH_FLOOR_ANO+'-'+String(FECH_FLOOR_MES).padStart(2,'0')+'-01';
     if(dtIniEl&&!dtIniEl.value){
       var datas=(FS.refs.bancarias||[]).map(function(b){return b.data_saldo_inicial;}).filter(Boolean).sort();
-      dtIniEl.value=datas.length?datas[0]:'';
+      var menor=datas.length?datas[0]:floorStr;
+      dtIniEl.value=menor<floorStr?floorStr:menor;
     }
     fcExecRender();
   }catch(e){toast('❌','Erro: '+e.message,'error');}
@@ -8819,6 +8821,8 @@ function fcExecRender(){
     var dtIniFirstOfMonth=new Date(dtIniDate.getFullYear(),dtIniDate.getMonth(),1);
     if(dtIniFirstOfMonth>ini) ini=dtIniFirstOfMonth;
   }
+  var floorDate=new Date(FECH_FLOOR_ANO,FECH_FLOOR_MES-1,1);
+  if(ini<floorDate) ini=floorDate;
   var meses=[];
   for(var i=0;i<_fceMonths;i++){
     var d=new Date(ini.getFullYear(),ini.getMonth()+i,1);
@@ -8901,11 +8905,13 @@ function fcExecRender(){
 // ═══════════════════════════════════════════════════
 var _dreCpData=[], _dreCrData=[], _dreScData=[];
 
+var FECH_FLOOR_ANO=2026, FECH_FLOOR_MES=6;
+
 function _dreInitPeriod(){
   var now=new Date();
   var aEl=document.getElementById('dre-ano'); if(!aEl)return;
   if(!aEl.options.length){
-    for(var y=now.getFullYear();y>=now.getFullYear()-4;y--)
+    for(var y=now.getFullYear();y>=FECH_FLOOR_ANO;y--)
       aEl.innerHTML+='<option value="'+y+'">'+y+'</option>';
   }
   if(!aEl.dataset.init){aEl.value=String(now.getFullYear());aEl.dataset.init='1';}
@@ -8918,6 +8924,10 @@ async function dreLoad(){
   if(!sb)return;
   var mes=document.getElementById('dre-mes').value;
   var ano=document.getElementById('dre-ano').value;
+  if(parseInt(ano)===FECH_FLOOR_ANO&&parseInt(mes)<FECH_FLOOR_MES){
+    mes=String(FECH_FLOOR_MES).padStart(2,'0');
+    document.getElementById('dre-mes').value=mes;
+  }
   var acu=document.getElementById('dre-acumulado').checked;
   var ini=ano+'-'+(acu?'01':mes)+'-01';
   var fim=ano+'-'+mes+'-31';
@@ -9011,7 +9021,7 @@ function _orcInitPeriod(){
   var now=new Date();
   var aEl=document.getElementById('orc-ano'); if(!aEl)return;
   if(!aEl.options.length){
-    for(var y=now.getFullYear();y>=now.getFullYear()-4;y--)
+    for(var y=now.getFullYear();y>=FECH_FLOOR_ANO;y--)
       aEl.innerHTML+='<option value="'+y+'">'+y+'</option>';
   }
   if(!aEl.dataset.init){aEl.value=String(now.getFullYear());aEl.dataset.init='1';}
@@ -9024,6 +9034,10 @@ async function orcLoad(){
   if(!sb)return;
   var mes=document.getElementById('orc-mes').value;
   var ano=document.getElementById('orc-ano').value;
+  if(parseInt(ano)===FECH_FLOOR_ANO&&parseInt(mes)<FECH_FLOOR_MES){
+    mes=String(FECH_FLOOR_MES).padStart(2,'0');
+    document.getElementById('orc-mes').value=mes;
+  }
   var ini=ano+'-'+mes+'-01', fim=ano+'-'+mes+'-31';
   try{
     var [rCp,rCr,rSnap]=await Promise.all([
@@ -9235,9 +9249,14 @@ var fechState={ano:new Date().getFullYear(),mes:new Date().getMonth()+1,modoEdit
 var FECH_MESES=['Janeiro','Fevereiro','Março','Abril','Maio','Junho','Julho','Agosto','Setembro','Outubro','Novembro','Dezembro'];
 
 function fechNavMes(delta){
-  fechState.mes+=delta;
-  if(fechState.mes<1){fechState.mes=12;fechState.ano--;}
-  if(fechState.mes>12){fechState.mes=1;fechState.ano++;}
+  var novoMes=fechState.mes+delta, novoAno=fechState.ano;
+  if(novoMes<1){novoMes=12;novoAno--;}
+  if(novoMes>12){novoMes=1;novoAno++;}
+  if(novoAno<FECH_FLOOR_ANO||(novoAno===FECH_FLOOR_ANO&&novoMes<FECH_FLOOR_MES)){
+    toast('⚠️','Não há dados de fechamento antes de '+FECH_FLOOR_MES+'/'+FECH_FLOOR_ANO+'.','warn');
+    return;
+  }
+  fechState.mes=novoMes; fechState.ano=novoAno;
   fechamentoLoad();
 }
 
