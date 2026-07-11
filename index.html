@@ -867,6 +867,32 @@ input[type="checkbox"]{width:14px;height:14px;accent-color:var(--green-accent);c
 .exec-tbl tr:last-child td{border-bottom:none}
 .exec-tbl tr.total td{font-weight:700;background:var(--surface2);border-top:2px solid var(--border2)}
 .exec-tbl .pos{color:#059669}.exec-tbl .neg{color:#dc2626}
+.fce-flow-card{background:var(--surface);border:1px solid var(--border2);border-radius:14px;padding:20px 22px;margin-bottom:20px;box-shadow:0 1px 4px rgba(0,0,0,.05)}
+.fce-flow-title{font-size:14px;font-weight:700;color:var(--navy)}
+.fce-period-chips{display:flex;gap:8px;flex-wrap:wrap;margin-top:14px}
+.fce-flow-label{font-size:12px;color:var(--text-muted);margin-top:12px;font-weight:600}
+.fce-flow-kpis{display:grid;grid-template-columns:repeat(3,1fr);gap:14px;margin-top:12px}
+@media(max-width:700px){.fce-flow-kpis{grid-template-columns:1fr}}
+.fce-flow-kpi{border-radius:12px;padding:16px 18px;text-align:center}
+.fce-flow-kpi.rec{background:#f0fdf4;border:1px solid #86efac}
+.fce-flow-kpi.pag{background:#fef2f2;border:1px solid #fca5a5}
+.fce-flow-kpi.sal{background:var(--surface2);border:1px solid var(--border2)}
+.fce-flow-kpi-lbl{font-size:10.5px;font-weight:700;text-transform:uppercase;letter-spacing:.07em;color:var(--text-muted);margin-bottom:6px}
+.fce-flow-kpi-val{font-size:22px;font-weight:800;font-variant-numeric:tabular-nums}
+.fce-flow-kpi.rec .fce-flow-kpi-val{color:#059669}
+.fce-flow-kpi.pag .fce-flow-kpi-val{color:#dc2626}
+.fce-flow-kpi-val.pos{color:#059669}.fce-flow-kpi-val.neg{color:#dc2626}
+.fce-flow-kpi-count{font-size:11px;color:var(--text-muted);margin-top:4px}
+.fce-flow-list{margin-top:16px;max-height:320px;overflow-y:auto;border-top:1px solid var(--border)}
+.fce-flow-item{display:flex;align-items:center;gap:10px;padding:8px 4px;border-bottom:1px solid var(--border);font-size:12.5px}
+.fce-flow-item-tag{flex-shrink:0;font-size:9.5px;font-weight:700;text-transform:uppercase;letter-spacing:.05em;padding:3px 8px;border-radius:5px}
+.fce-flow-item-tag.rec{background:#dcfce7;color:#15803d}
+.fce-flow-item-tag.pag{background:#fee2e2;color:#b91c1c}
+.fce-flow-item-desc{flex:1;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;font-weight:500;color:var(--text)}
+.fce-flow-item-cat{flex-shrink:0;color:var(--text-muted);font-size:11px;max-width:160px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.fce-flow-item-date{flex-shrink:0;color:var(--text-muted);font-size:11.5px;white-space:nowrap}
+.fce-flow-item-date.atraso{color:#dc2626;font-weight:700}
+.fce-flow-item-val{flex-shrink:0;font-weight:700;font-variant-numeric:tabular-nums;min-width:100px;text-align:right}
 .dre-section{margin-bottom:4px}
 .dre-section-hdr{padding:10px 14px;background:var(--navy);color:#fff;font-size:11px;font-weight:700;text-transform:uppercase;letter-spacing:.07em;display:flex;justify-content:space-between}
 .dre-section-hdr.receita{background:#059669}.dre-section-hdr.custo{background:#dc2626}.dre-section-hdr.resultado{background:var(--brand)}
@@ -1488,6 +1514,32 @@ input[type="checkbox"]{width:14px;height:14px;accent-color:var(--green-accent);c
 .exec-tbl tr:last-child td{border-bottom:none}
 .exec-tbl tr.total td{font-weight:700;background:var(--surface2);border-top:2px solid var(--border2)}
 .exec-tbl .pos{color:#059669}.exec-tbl .neg{color:#dc2626}
+.fce-flow-card{background:var(--surface);border:1px solid var(--border2);border-radius:14px;padding:20px 22px;margin-bottom:20px;box-shadow:0 1px 4px rgba(0,0,0,.05)}
+.fce-flow-title{font-size:14px;font-weight:700;color:var(--navy)}
+.fce-period-chips{display:flex;gap:8px;flex-wrap:wrap;margin-top:14px}
+.fce-flow-label{font-size:12px;color:var(--text-muted);margin-top:12px;font-weight:600}
+.fce-flow-kpis{display:grid;grid-template-columns:repeat(3,1fr);gap:14px;margin-top:12px}
+@media(max-width:700px){.fce-flow-kpis{grid-template-columns:1fr}}
+.fce-flow-kpi{border-radius:12px;padding:16px 18px;text-align:center}
+.fce-flow-kpi.rec{background:#f0fdf4;border:1px solid #86efac}
+.fce-flow-kpi.pag{background:#fef2f2;border:1px solid #fca5a5}
+.fce-flow-kpi.sal{background:var(--surface2);border:1px solid var(--border2)}
+.fce-flow-kpi-lbl{font-size:10.5px;font-weight:700;text-transform:uppercase;letter-spacing:.07em;color:var(--text-muted);margin-bottom:6px}
+.fce-flow-kpi-val{font-size:22px;font-weight:800;font-variant-numeric:tabular-nums}
+.fce-flow-kpi.rec .fce-flow-kpi-val{color:#059669}
+.fce-flow-kpi.pag .fce-flow-kpi-val{color:#dc2626}
+.fce-flow-kpi-val.pos{color:#059669}.fce-flow-kpi-val.neg{color:#dc2626}
+.fce-flow-kpi-count{font-size:11px;color:var(--text-muted);margin-top:4px}
+.fce-flow-list{margin-top:16px;max-height:320px;overflow-y:auto;border-top:1px solid var(--border)}
+.fce-flow-item{display:flex;align-items:center;gap:10px;padding:8px 4px;border-bottom:1px solid var(--border);font-size:12.5px}
+.fce-flow-item-tag{flex-shrink:0;font-size:9.5px;font-weight:700;text-transform:uppercase;letter-spacing:.05em;padding:3px 8px;border-radius:5px}
+.fce-flow-item-tag.rec{background:#dcfce7;color:#15803d}
+.fce-flow-item-tag.pag{background:#fee2e2;color:#b91c1c}
+.fce-flow-item-desc{flex:1;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;font-weight:500;color:var(--text)}
+.fce-flow-item-cat{flex-shrink:0;color:var(--text-muted);font-size:11px;max-width:160px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.fce-flow-item-date{flex-shrink:0;color:var(--text-muted);font-size:11.5px;white-space:nowrap}
+.fce-flow-item-date.atraso{color:#dc2626;font-weight:700}
+.fce-flow-item-val{flex-shrink:0;font-weight:700;font-variant-numeric:tabular-nums;min-width:100px;text-align:right}
 .dre-section{margin-bottom:4px}
 .dre-section-hdr{padding:10px 14px;background:var(--navy);color:#fff;font-size:11px;font-weight:700;text-transform:uppercase;letter-spacing:.07em;display:flex;justify-content:space-between}
 .dre-section-hdr.receita{background:#059669}.dre-section-hdr.custo{background:#dc2626}.dre-section-hdr.resultado{background:var(--brand)}
@@ -2702,27 +2754,51 @@ input[type="checkbox"]{width:14px;height:14px;accent-color:var(--green-accent);c
       <label style="font-size:11px;color:var(--text-muted);font-weight:600;text-transform:uppercase;letter-spacing:.08em">A partir de:</label>
       <input type="date" id="fce-dt-ini" class="fc-select" style="padding:4px 8px;font-size:12px" onchange="fcExecRender()">
     </div>
+    <div class="fce-flow-card">
+      <div class="fce-flow-hdr">
+        <div class="fce-flow-title">💰 O que temos a pagar e a receber</div>
+      </div>
+      <div class="fce-period-chips">
+        <button class="pill-btn" onclick="fceSetFlowPeriod('7d',this)">Próximos 7 dias</button>
+        <button class="pill-btn" onclick="fceSetFlowPeriod('15d',this)">Próximos 15 dias</button>
+        <button class="pill-btn active" onclick="fceSetFlowPeriod('mes',this)">Resto do mês</button>
+        <button class="pill-btn" onclick="fceSetFlowPeriod('prox_mes',this)">Próximo mês</button>
+        <button class="pill-btn" onclick="fceSetFlowPeriod('30d',this)">Próximos 30 dias</button>
+        <button class="pill-btn" id="fce-flow-custom-btn" onclick="fceSetFlowPeriod('custom',this)">Personalizado</button>
+        <span id="fce-flow-custom-dates" style="display:none;gap:6px;align-items:center">
+          <input type="date" id="fce-flow-de" class="fc-select" style="padding:4px 8px;font-size:12px" onchange="fceRenderFlow()">
+          <span style="font-size:12px;color:var(--text-muted)">até</span>
+          <input type="date" id="fce-flow-ate" class="fc-select" style="padding:4px 8px;font-size:12px" onchange="fceRenderFlow()">
+        </span>
+      </div>
+      <div class="fce-flow-label" id="fce-flow-periodo-lbl"></div>
+      <div class="fce-flow-kpis">
+        <div class="fce-flow-kpi rec">
+          <div class="fce-flow-kpi-lbl">A Receber</div>
+          <div class="fce-flow-kpi-val" id="fce-flow-rec">R$ 0,00</div>
+          <div class="fce-flow-kpi-count" id="fce-flow-rec-count">0 lançamentos</div>
+        </div>
+        <div class="fce-flow-kpi pag">
+          <div class="fce-flow-kpi-lbl">A Pagar</div>
+          <div class="fce-flow-kpi-val" id="fce-flow-pag">R$ 0,00</div>
+          <div class="fce-flow-kpi-count" id="fce-flow-pag-count">0 lançamentos</div>
+        </div>
+        <div class="fce-flow-kpi sal">
+          <div class="fce-flow-kpi-lbl">Saldo do Período</div>
+          <div class="fce-flow-kpi-val" id="fce-flow-saldo">R$ 0,00</div>
+        </div>
+      </div>
+      <div class="fce-flow-list" id="fce-flow-list"></div>
+    </div>
     <div class="exec-kpi-grid">
       <div class="exec-kpi"><div class="exec-kpi-lbl">Entradas (CR)</div><div class="exec-kpi-val blue" id="fce-k-entradas">—</div></div>
       <div class="exec-kpi"><div class="exec-kpi-lbl">Saídas (CP)</div><div class="exec-kpi-val red" id="fce-k-saidas">—</div></div>
       <div class="exec-kpi"><div class="exec-kpi-lbl">Prov. Comissões</div><div class="exec-kpi-val" style="color:#d97706" id="fce-k-provcom">—</div></div>
-      <div class="exec-kpi"><div class="exec-kpi-lbl">Saldo Líquido</div><div class="exec-kpi-val" id="fce-k-saldo">—</div></div>
+      <div class="exec-kpi"><div class="exec-kpi-lbl">Saldo Líquido (realizado)</div><div class="exec-kpi-val" id="fce-k-saldo">—</div></div>
     </div>
     <div class="exec-table-wrap">
       <div class="exec-table-hdr">
-        <div class="exec-table-title">🔭 Projeção — próximos dias (pendentes)</div>
-      </div>
-      <table class="exec-tbl">
-        <thead><tr>
-          <th style="text-align:left">Horizonte</th>
-          <th>Entradas previstas</th><th>Saídas previstas</th><th>Saldo projetado</th>
-        </tr></thead>
-        <tbody id="fce-proj-tbody"><tr><td colspan="4" style="text-align:center;padding:20px;color:var(--text-muted)">Clique em Atualizar.</td></tr></tbody>
-      </table>
-    </div>
-    <div class="exec-table-wrap">
-      <div class="exec-table-hdr">
-        <div class="exec-table-title">📅 Breakdown Mensal</div>
+        <div class="exec-table-title">📅 Histórico Mensal (realizado)</div>
         <div id="fce-sub" style="font-size:11px;color:var(--text-muted)"></div>
       </div>
       <div style="overflow-x:auto">
@@ -8774,8 +8850,8 @@ async function fcExecLoad(){
   if(!sb){toast('⚠️','Supabase não conectado','warn');return;}
   try{
     var [rCp,rCr,rSc]=await Promise.all([
-      sb.from('contas_pagar').select('id,valor,valor_pago,vencimento,data_pagamento,status,categoria_id,categoria_nome').limit(9999),
-      sb.from('contas_receber').select('id,valor,valor_recebido,vencimento,data_recebimento,status,categoria_id,categoria_nome').limit(9999),
+      sb.from('contas_pagar').select('id,valor,valor_pago,vencimento,data_pagamento,status,categoria_id,categoria_nome,descricao,pessoa_nome').limit(9999),
+      sb.from('contas_receber').select('id,valor,valor_recebido,vencimento,data_recebimento,status,categoria_id,categoria_nome,descricao,pessoa_nome').limit(9999),
       sb.from('solicitacoes_comissao').select('data_solicitacao,itens').limit(9999),
     ]);
     _fceCpData=rCp.data||[];
@@ -8877,26 +8953,101 @@ function fcExecRender(){
       +'<td class="'+(acc>=0?'pos':'neg')+'">'+fmtBRL(acc)+'</td></tr>';
   }).join('');
 
-  var hojeStr=hoje.toISOString().split('T')[0];
-  document.getElementById('fce-proj-tbody').innerHTML=[30,60,90].map(function(dias){
-    var lim=new Date(hoje); lim.setDate(lim.getDate()+dias);
-    var limStr=lim.toISOString().split('T')[0];
-    var pe=0,ps=0;
-    _fceCrData.forEach(function(r){
-      if(r.status==='recebido'||r.status==='cancelado')return;
-      if(!r.vencimento||r.vencimento<hojeStr||r.vencimento>limStr)return;
-      pe+=parseFloat(r.valor)||0;
-    });
-    _fceCpData.forEach(function(r){
-      if(r.status==='pago'||r.status==='cancelado')return;
-      if(!r.vencimento||r.vencimento<hojeStr||r.vencimento>limStr)return;
-      ps+=parseFloat(r.valor)||0;
-    });
-    var psal=pe-ps;
-    return '<tr><td style="text-align:left;font-weight:600">Próximos '+dias+' dias</td>'
-      +'<td class="pos">'+fmtBRL(pe)+'</td>'
-      +'<td class="neg">'+fmtBRL(ps)+'</td>'
-      +'<td class="'+(psal>=0?'pos':'neg')+'">'+fmtBRL(psal)+'</td></tr>';
+  fceRenderFlow();
+}
+
+// ═══════════════════════════════════════════════════
+// FC EXECUTIVO — A Pagar / A Receber por período flexível
+// ═══════════════════════════════════════════════════
+var _fceFlowPeriod='mes';
+
+function fceSetFlowPeriod(p,el){
+  _fceFlowPeriod=p;
+  document.querySelectorAll('[onclick*="fceSetFlowPeriod"]').forEach(function(b){b.classList.remove('active');});
+  if(el)el.classList.add('active');
+  var customEl=document.getElementById('fce-flow-custom-dates');
+  if(p==='custom'){
+    customEl.style.display='inline-flex';
+    var hojeStr=new Date().toISOString().split('T')[0];
+    if(!document.getElementById('fce-flow-de').value)document.getElementById('fce-flow-de').value=hojeStr;
+    if(!document.getElementById('fce-flow-ate').value)document.getElementById('fce-flow-ate').value=hojeStr;
+  }else{
+    customEl.style.display='none';
+  }
+  fceRenderFlow();
+}
+
+function _fceFlowRange(){
+  var hoje=new Date(); hoje.setHours(0,0,0,0);
+  var de=new Date(hoje), ate=new Date(hoje), lbl='';
+  if(_fceFlowPeriod==='7d'){ate.setDate(ate.getDate()+7); lbl='Próximos 7 dias';}
+  else if(_fceFlowPeriod==='15d'){ate.setDate(ate.getDate()+15); lbl='Próximos 15 dias';}
+  else if(_fceFlowPeriod==='30d'){ate.setDate(ate.getDate()+30); lbl='Próximos 30 dias';}
+  else if(_fceFlowPeriod==='mes'){ate=new Date(hoje.getFullYear(),hoje.getMonth()+1,0); lbl='Resto do mês ('+_mesLabel(hoje.getFullYear()+'-'+String(hoje.getMonth()+1).padStart(2,'0'))+')';}
+  else if(_fceFlowPeriod==='prox_mes'){
+    de=new Date(hoje.getFullYear(),hoje.getMonth()+1,1);
+    ate=new Date(hoje.getFullYear(),hoje.getMonth()+2,0);
+    lbl='Próximo mês ('+_mesLabel(de.getFullYear()+'-'+String(de.getMonth()+1).padStart(2,'0'))+')';
+  }else if(_fceFlowPeriod==='custom'){
+    var deVal=(document.getElementById('fce-flow-de')||{}).value;
+    var ateVal=(document.getElementById('fce-flow-ate')||{}).value;
+    de=deVal?new Date(deVal+'T00:00:00'):hoje;
+    ate=ateVal?new Date(ateVal+'T00:00:00'):hoje;
+    lbl='Período personalizado';
+  }
+  var deStr=de.toISOString().split('T')[0], ateStr=ate.toISOString().split('T')[0];
+  return {de:deStr,ate:ateStr,lbl:lbl};
+}
+
+function fceRenderFlow(){
+  var lblEl=document.getElementById('fce-flow-periodo-lbl');
+  if(!lblEl)return;
+  var r=_fceFlowRange();
+  var deFmt=r.de.split('-').reverse().join('/'), ateFmt=r.ate.split('-').reverse().join('/');
+  lblEl.textContent=r.lbl+' · '+deFmt+' até '+ateFmt;
+
+  var recItens=[], pagItens=[];
+  (_fceCrData||[]).forEach(function(x){
+    if(x.status==='recebido'||x.status==='cancelado')return;
+    if(!x.vencimento||x.vencimento<r.de||x.vencimento>r.ate)return;
+    recItens.push(x);
+  });
+  (_fceCpData||[]).forEach(function(x){
+    if(x.status==='pago'||x.status==='cancelado')return;
+    if(!x.vencimento||x.vencimento<r.de||x.vencimento>r.ate)return;
+    pagItens.push(x);
+  });
+  var totRec=recItens.reduce(function(s,x){return s+(parseFloat(x.valor)||0);},0);
+  var totPag=pagItens.reduce(function(s,x){return s+(parseFloat(x.valor)||0);},0);
+
+  document.getElementById('fce-flow-rec').textContent=fmtBRL(totRec);
+  document.getElementById('fce-flow-rec-count').textContent=recItens.length+' lançamento'+(recItens.length!==1?'s':'');
+  document.getElementById('fce-flow-pag').textContent=fmtBRL(totPag);
+  document.getElementById('fce-flow-pag-count').textContent=pagItens.length+' lançamento'+(pagItens.length!==1?'s':'');
+  var saldo=totRec-totPag;
+  var saldoEl=document.getElementById('fce-flow-saldo');
+  saldoEl.textContent=fmtBRL(saldo);
+  saldoEl.className='fce-flow-kpi-val '+(saldo>=0?'pos':'neg');
+
+  var todos=recItens.map(function(x){return {tipo:'rec',x:x};}).concat(pagItens.map(function(x){return {tipo:'pag',x:x};}));
+  todos.sort(function(a,b){return a.x.vencimento<b.x.vencimento?-1:1;});
+  var listEl=document.getElementById('fce-flow-list');
+  if(!todos.length){
+    listEl.innerHTML='<div style="text-align:center;padding:24px;color:var(--text-muted);font-size:12.5px">Nada pendente neste período.</div>';
+    return;
+  }
+  listEl.innerHTML=todos.map(function(it){
+    var x=it.x, isRec=it.tipo==='rec';
+    var desc=x.descricao||x.pessoa_nome||x.categoria_nome||'—';
+    var dt=x.vencimento.split('-').reverse().join('/');
+    var atraso=x.vencimento<new Date().toISOString().split('T')[0];
+    return '<div class="fce-flow-item">'
+      +'<span class="fce-flow-item-tag '+(isRec?'rec':'pag')+'">'+(isRec?'Receber':'Pagar')+'</span>'
+      +'<span class="fce-flow-item-desc">'+_fe(desc)+'</span>'
+      +'<span class="fce-flow-item-cat">'+_fe(x.categoria_nome||'')+'</span>'
+      +'<span class="fce-flow-item-date'+(atraso?' atraso':'')+'">'+dt+(atraso?' ⚠':'')+'</span>'
+      +'<span class="fce-flow-item-val '+(isRec?'pos':'neg')+'">'+fmtBRL(parseFloat(x.valor)||0)+'</span>'
+      +'</div>';
   }).join('');
 }
 
