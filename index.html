@@ -3654,8 +3654,8 @@ async function fcDashLoad(){
   if(upEl) upEl.textContent='Atualizando...';
   try{
     var [rCp,rCr,rBanc]=await Promise.all([
-      sb.from('contas_pagar').select('id,descricao,pessoa_nome,categoria_nome,valor,valor_pago,data_pagamento,vencimento,status,conta_bancaria_id').limit(9999),
-      sb.from('contas_receber').select('id,descricao,pessoa_nome,valor,valor_recebido,data_recebimento,vencimento,status,conta_bancaria_id').limit(9999),
+      sbAll(function(){return sb.from('contas_pagar').select('id,descricao,pessoa_nome,categoria_nome,valor,valor_pago,data_pagamento,vencimento,status,conta_bancaria_id');}),
+      sbAll(function(){return sb.from('contas_receber').select('id,descricao,pessoa_nome,valor,valor_recebido,data_recebimento,vencimento,status,conta_bancaria_id');}),
       sb.from('contas_bancarias').select('id,nome,saldo_inicial,data_saldo_inicial').eq('ativo',true),
     ]);
     _dashCp=(rCp.data||[]).filter(function(r){return r.status!=='cancelado';});
@@ -4220,8 +4220,8 @@ async function overviewLoad(){
   try {
     // Queries paralelas
     var results = await Promise.all([
-      sb.from('contas_pagar').select('valor,vencimento,data_pagamento,conta_bancaria_id,status,categoria_nome,projeto_nome'),
-      sb.from('contas_receber').select('valor,vencimento,data_recebimento,status,projeto_nome'),
+      sbAll(function(){return sb.from('contas_pagar').select('valor,vencimento,data_pagamento,conta_bancaria_id,status,categoria_nome,projeto_nome');}),
+      sbAll(function(){return sb.from('contas_receber').select('valor,vencimento,data_recebimento,status,projeto_nome');}),
       sb.from('solicitacoes_comissao').select('*').gte('data_solicitacao',mesIni).lte('data_solicitacao',mesFim+'T23:59:59').limit(9999),
       sb.from('contas_bancarias').select('id,nome')
     ]);
@@ -5238,6 +5238,21 @@ var FS = {
   refs: { pessoas:[], categorias:[], bancarias:[], projetos:[], centrosCusto:[] }
 };
 
+// Supabase/PostgREST limita cada resposta a 1000 linhas por padrão, mesmo com .limit(9999).
+// Esta função pagina automaticamente até trazer todas as linhas da consulta.
+async function sbAll(buildFn){
+  var all=[], from=0, page=1000;
+  while(true){
+    var res=await buildFn().range(from,from+page-1);
+    if(res.error) return res;
+    var rows=res.data||[];
+    all=all.concat(rows);
+    if(rows.length<page) break;
+    from+=page;
+  }
+  return {data:all,error:null};
+}
+
 // ── FORMATADORES ──
 function fmtBRL(v){
   v = parseFloat(v)||0;
@@ -5410,26 +5425,29 @@ function crSetSort(col){
 async function cpLoad(){
   if(!sb){ cpRender(); return; }
   try{
-    var q = sb.from('contas_pagar').select('*').order('vencimento').limit(9999);
     var fStatus = document.getElementById('cp-f-status')?.value;
     var fProj   = document.getElementById('cp-f-proj')?.value;
     var fCat    = document.getElementById('cp-f-cat')?.value;
     var fDe     = document.getElementById('cp-f-de')?.value;
     var fAte    = document.getElementById('cp-f-ate')?.value;
-    if(fStatus) q = q.eq('status', fStatus);
-    if(fProj){
-      var _pNome=((FS.refs.projetos||[]).find(function(p){return p.id===fProj;})||{}).nome||'';
-      if(_pNome) q=q.or('projeto_id.eq.'+fProj+',projeto_nome.eq.'+_pNome);
-      else q=q.eq('projeto_id',fProj);
+    var _pNome = fProj ? (((FS.refs.projetos||[]).find(function(p){return p.id===fProj;})||{}).nome||'') : '';
+    var _cNome = fCat ? (((FS.refs.cats||[]).find(function(c){return c.id===fCat;})||{}).nome||'') : '';
+    function _cpBuildQ(){
+      var q = sb.from('contas_pagar').select('*').order('vencimento');
+      if(fStatus) q = q.eq('status', fStatus);
+      if(fProj){
+        if(_pNome) q=q.or('projeto_id.eq.'+fProj+',projeto_nome.eq.'+_pNome);
+        else q=q.eq('projeto_id',fProj);
+      }
+      if(fCat){
+        if(_cNome) q=q.or('categoria_id.eq.'+fCat+',categoria_nome.eq.'+_cNome);
+        else q=q.eq('categoria_id',fCat);
+      }
+      if(fDe)     q = q.gte('vencimento', fDe);
+      if(fAte)    q = q.lte('vencimento', fAte);
+      return q;
     }
-    if(fCat){
-      var _cNome=((FS.refs.cats||[]).find(function(c){return c.id===fCat;})||{}).nome||'';
-      if(_cNome) q=q.or('categoria_id.eq.'+fCat+',categoria_nome.eq.'+_cNome);
-      else q=q.eq('categoria_id',fCat);
-    }
-    if(fDe)     q = q.gte('vencimento', fDe);
-    if(fAte)    q = q.lte('vencimento', fAte);
-    var {data, error} = await q;
+    var {data, error} = await sbAll(_cpBuildQ);
     if(error) throw error;
     FS.cpRows = data || [];
     cpRender();
@@ -5660,26 +5678,29 @@ async function cpDelete(id){
 async function crLoad(){
   if(!sb){ crRender(); return; }
   try{
-    var q = sb.from('contas_receber').select('*').order('vencimento').limit(9999);
     var fStatus = document.getElementById('cr-f-status')?.value;
     var fProj   = document.getElementById('cr-f-proj')?.value;
     var fCat    = document.getElementById('cr-f-cat')?.value;
     var fDe     = document.getElementById('cr-f-de')?.value;
     var fAte    = document.getElementById('cr-f-ate')?.value;
-    if(fStatus) q = q.eq('status', fStatus);
-    if(fProj){
-      var _pNome=((FS.refs.projetos||[]).find(function(p){return p.id===fProj;})||{}).nome||'';
-      if(_pNome) q=q.or('projeto_id.eq.'+fProj+',projeto_nome.eq.'+_pNome);
-      else q=q.eq('projeto_id',fProj);
+    var _pNome = fProj ? (((FS.refs.projetos||[]).find(function(p){return p.id===fProj;})||{}).nome||'') : '';
+    var _cNome = fCat ? (((FS.refs.cats||[]).find(function(c){return c.id===fCat;})||{}).nome||'') : '';
+    function _crBuildQ(){
+      var q = sb.from('contas_receber').select('*').order('vencimento');
+      if(fStatus) q = q.eq('status', fStatus);
+      if(fProj){
+        if(_pNome) q=q.or('projeto_id.eq.'+fProj+',projeto_nome.eq.'+_pNome);
+        else q=q.eq('projeto_id',fProj);
+      }
+      if(fCat){
+        if(_cNome) q=q.or('categoria_id.eq.'+fCat+',categoria_nome.eq.'+_cNome);
+        else q=q.eq('categoria_id',fCat);
+      }
+      if(fDe)     q = q.gte('vencimento', fDe);
+      if(fAte)    q = q.lte('vencimento', fAte);
+      return q;
     }
-    if(fCat){
-      var _cNome=((FS.refs.cats||[]).find(function(c){return c.id===fCat;})||{}).nome||'';
-      if(_cNome) q=q.or('categoria_id.eq.'+fCat+',categoria_nome.eq.'+_cNome);
-      else q=q.eq('categoria_id',fCat);
-    }
-    if(fDe)     q = q.gte('vencimento', fDe);
-    if(fAte)    q = q.lte('vencimento', fAte);
-    var {data, error} = await q;
+    var {data, error} = await sbAll(_crBuildQ);
     if(error) throw error;
     FS.crRows = data || [];
     crRender();
@@ -5896,8 +5917,8 @@ async function saldoLoad(){
   try{
     var [rBanc, rCP, rCR] = await Promise.all([
       sb.from('contas_bancarias').select('id,nome,banco,saldo_inicial,data_saldo_inicial,ativo').eq('ativo',true).order('nome'),
-      sb.from('contas_pagar').select('conta_bancaria_id,valor,valor_pago,data_pagamento').eq('status','pago'),
-      sb.from('contas_receber').select('conta_bancaria_id,valor,valor_recebido,data_recebimento').eq('status','recebido'),
+      sbAll(function(){return sb.from('contas_pagar').select('conta_bancaria_id,valor,valor_pago,data_pagamento').eq('status','pago');}),
+      sbAll(function(){return sb.from('contas_receber').select('conta_bancaria_id,valor,valor_recebido,data_recebimento').eq('status','recebido');}),
     ]);
     var bancos = rBanc.data||[];
     var pagamentos = rCP.data||[];
@@ -6574,7 +6595,6 @@ async function relLoad(){
   if(!cfg) return;
   document.getElementById('rel-loading').style.display='inline';
   try {
-    var q = sb.from(cfg.table).select('*, pessoas(cpf_cnpj)');
     var de  = document.getElementById('rel-de').value;
     var ate = document.getElementById('rel-ate').value;
     var busca = (document.getElementById('rel-busca').value||'').trim();
@@ -6585,17 +6605,21 @@ async function relLoad(){
     var vmin  = document.getElementById('rel-vmin').value;
     var vmax  = document.getElementById('rel-vmax').value;
 
-    if(de)     q = q.gte(cfg.dateField, de);
-    if(ate)    q = q.lte(cfg.dateField, ate);
-    if(status) q = q.in('status', status);
-    if(cat)    q = q.in('categoria_id', cat);
-    if(proj)   q = q.in('projeto_id', proj);
-    if(banco)  q = q.in('conta_bancaria_id', banco);
-    if(vmin)   q = q.gte('valor', parseFloat(vmin));
-    if(vmax)   q = q.lte('valor', parseFloat(vmax));
-    q = q.order('pessoa_nome', {ascending:true}).order(cfg.dateField, {ascending:true});
+    function _relBuildQ(){
+      var q = sb.from(cfg.table).select('*, pessoas(cpf_cnpj)');
+      if(de)     q = q.gte(cfg.dateField, de);
+      if(ate)    q = q.lte(cfg.dateField, ate);
+      if(status) q = q.in('status', status);
+      if(cat)    q = q.in('categoria_id', cat);
+      if(proj)   q = q.in('projeto_id', proj);
+      if(banco)  q = q.in('conta_bancaria_id', banco);
+      if(vmin)   q = q.gte('valor', parseFloat(vmin));
+      if(vmax)   q = q.lte('valor', parseFloat(vmax));
+      q = q.order('pessoa_nome', {ascending:true}).order(cfg.dateField, {ascending:true});
+      return q;
+    }
 
-    var res = await q;
+    var res = await sbAll(_relBuildQ);
     if(res.error) throw res.error;
     var data = res.data || [];
 
@@ -6922,6 +6946,21 @@ var FS = {
   refs: { pessoas:[], categorias:[], bancarias:[], projetos:[], centrosCusto:[] }
 };
 
+// Supabase/PostgREST limita cada resposta a 1000 linhas por padrão, mesmo com .limit(9999).
+// Esta função pagina automaticamente até trazer todas as linhas da consulta.
+async function sbAll(buildFn){
+  var all=[], from=0, page=1000;
+  while(true){
+    var res=await buildFn().range(from,from+page-1);
+    if(res.error) return res;
+    var rows=res.data||[];
+    all=all.concat(rows);
+    if(rows.length<page) break;
+    from+=page;
+  }
+  return {data:all,error:null};
+}
+
 // ── FORMATADORES ──
 function fmtBRL(v){
   v = parseFloat(v)||0;
@@ -7094,26 +7133,29 @@ function crSetSort(col){
 async function cpLoad(){
   if(!sb){ cpRender(); return; }
   try{
-    var q = sb.from('contas_pagar').select('*').order('vencimento').limit(9999);
     var fStatus = document.getElementById('cp-f-status')?.value;
     var fProj   = document.getElementById('cp-f-proj')?.value;
     var fCat    = document.getElementById('cp-f-cat')?.value;
     var fDe     = document.getElementById('cp-f-de')?.value;
     var fAte    = document.getElementById('cp-f-ate')?.value;
-    if(fStatus) q = q.eq('status', fStatus);
-    if(fProj){
-      var _pNome=((FS.refs.projetos||[]).find(function(p){return p.id===fProj;})||{}).nome||'';
-      if(_pNome) q=q.or('projeto_id.eq.'+fProj+',projeto_nome.eq.'+_pNome);
-      else q=q.eq('projeto_id',fProj);
+    var _pNome = fProj ? (((FS.refs.projetos||[]).find(function(p){return p.id===fProj;})||{}).nome||'') : '';
+    var _cNome = fCat ? (((FS.refs.cats||[]).find(function(c){return c.id===fCat;})||{}).nome||'') : '';
+    function _cpBuildQ(){
+      var q = sb.from('contas_pagar').select('*').order('vencimento');
+      if(fStatus) q = q.eq('status', fStatus);
+      if(fProj){
+        if(_pNome) q=q.or('projeto_id.eq.'+fProj+',projeto_nome.eq.'+_pNome);
+        else q=q.eq('projeto_id',fProj);
+      }
+      if(fCat){
+        if(_cNome) q=q.or('categoria_id.eq.'+fCat+',categoria_nome.eq.'+_cNome);
+        else q=q.eq('categoria_id',fCat);
+      }
+      if(fDe)     q = q.gte('vencimento', fDe);
+      if(fAte)    q = q.lte('vencimento', fAte);
+      return q;
     }
-    if(fCat){
-      var _cNome=((FS.refs.cats||[]).find(function(c){return c.id===fCat;})||{}).nome||'';
-      if(_cNome) q=q.or('categoria_id.eq.'+fCat+',categoria_nome.eq.'+_cNome);
-      else q=q.eq('categoria_id',fCat);
-    }
-    if(fDe)     q = q.gte('vencimento', fDe);
-    if(fAte)    q = q.lte('vencimento', fAte);
-    var {data, error} = await q;
+    var {data, error} = await sbAll(_cpBuildQ);
     if(error) throw error;
     FS.cpRows = data || [];
     cpRender();
@@ -7267,26 +7309,29 @@ async function cpDelete(id){
 async function crLoad(){
   if(!sb){ crRender(); return; }
   try{
-    var q = sb.from('contas_receber').select('*').order('vencimento').limit(9999);
     var fStatus = document.getElementById('cr-f-status')?.value;
     var fProj   = document.getElementById('cr-f-proj')?.value;
     var fCat    = document.getElementById('cr-f-cat')?.value;
     var fDe     = document.getElementById('cr-f-de')?.value;
     var fAte    = document.getElementById('cr-f-ate')?.value;
-    if(fStatus) q = q.eq('status', fStatus);
-    if(fProj){
-      var _pNome=((FS.refs.projetos||[]).find(function(p){return p.id===fProj;})||{}).nome||'';
-      if(_pNome) q=q.or('projeto_id.eq.'+fProj+',projeto_nome.eq.'+_pNome);
-      else q=q.eq('projeto_id',fProj);
+    var _pNome = fProj ? (((FS.refs.projetos||[]).find(function(p){return p.id===fProj;})||{}).nome||'') : '';
+    var _cNome = fCat ? (((FS.refs.cats||[]).find(function(c){return c.id===fCat;})||{}).nome||'') : '';
+    function _crBuildQ(){
+      var q = sb.from('contas_receber').select('*').order('vencimento');
+      if(fStatus) q = q.eq('status', fStatus);
+      if(fProj){
+        if(_pNome) q=q.or('projeto_id.eq.'+fProj+',projeto_nome.eq.'+_pNome);
+        else q=q.eq('projeto_id',fProj);
+      }
+      if(fCat){
+        if(_cNome) q=q.or('categoria_id.eq.'+fCat+',categoria_nome.eq.'+_cNome);
+        else q=q.eq('categoria_id',fCat);
+      }
+      if(fDe)     q = q.gte('vencimento', fDe);
+      if(fAte)    q = q.lte('vencimento', fAte);
+      return q;
     }
-    if(fCat){
-      var _cNome=((FS.refs.cats||[]).find(function(c){return c.id===fCat;})||{}).nome||'';
-      if(_cNome) q=q.or('categoria_id.eq.'+fCat+',categoria_nome.eq.'+_cNome);
-      else q=q.eq('categoria_id',fCat);
-    }
-    if(fDe)     q = q.gte('vencimento', fDe);
-    if(fAte)    q = q.lte('vencimento', fAte);
-    var {data, error} = await q;
+    var {data, error} = await sbAll(_crBuildQ);
     if(error) throw error;
     FS.crRows = data || [];
     crRender();
@@ -7427,8 +7472,8 @@ async function saldoLoad(){
   try{
     var [rBanc, rCP, rCR] = await Promise.all([
       sb.from('contas_bancarias').select('id,nome,banco,saldo_inicial,data_saldo_inicial,ativo').eq('ativo',true).order('nome'),
-      sb.from('contas_pagar').select('conta_bancaria_id,valor,valor_pago,data_pagamento').eq('status','pago'),
-      sb.from('contas_receber').select('conta_bancaria_id,valor,valor_recebido,data_recebimento').eq('status','recebido'),
+      sbAll(function(){return sb.from('contas_pagar').select('conta_bancaria_id,valor,valor_pago,data_pagamento').eq('status','pago');}),
+      sbAll(function(){return sb.from('contas_receber').select('conta_bancaria_id,valor,valor_recebido,data_recebimento').eq('status','recebido');}),
     ]);
     var bancos = rBanc.data||[];
     var pagamentos = rCP.data||[];
@@ -8610,21 +8655,22 @@ async function comLoad() {
   var loadEl = document.getElementById('com-loading');
   if (loadEl) loadEl.style.display = 'inline';
   try {
-    var q = sb.from('contas_pagar')
-      .select('*')
-      .or('categoria_nome.ilike.%Comissão%,categoria_nome.ilike.%comissao%,categoria_nome.ilike.%Comissao%');
-
     var status = document.getElementById('com-f-status').value;
     var de     = document.getElementById('com-f-de').value;
     var ate    = document.getElementById('com-f-ate').value;
 
-    if (status) q = q.eq('status', status);
-    if (de)     q = q.gte('vencimento', de);
-    if (ate)    q = q.lte('vencimento', ate);
+    function _comBuildQ(){
+      var q = sb.from('contas_pagar')
+        .select('*')
+        .or('categoria_nome.ilike.%Comissão%,categoria_nome.ilike.%comissao%,categoria_nome.ilike.%Comissao%');
+      if (status) q = q.eq('status', status);
+      if (de)     q = q.gte('vencimento', de);
+      if (ate)    q = q.lte('vencimento', ate);
+      q = q.order('vencimento', { ascending: false });
+      return q;
+    }
 
-    q = q.order('vencimento', { ascending: false });
-
-    var res = await q;
+    var res = await sbAll(_comBuildQ);
     if (res.error) throw res.error;
     var data = res.data || [];
 
@@ -8850,8 +8896,8 @@ async function fcExecLoad(){
   if(!sb){toast('⚠️','Supabase não conectado','warn');return;}
   try{
     var [rCp,rCr,rSc]=await Promise.all([
-      sb.from('contas_pagar').select('id,valor,valor_pago,vencimento,data_pagamento,status,categoria_id,categoria_nome,descricao,pessoa_nome').limit(9999),
-      sb.from('contas_receber').select('id,valor,valor_recebido,vencimento,data_recebimento,status,categoria_id,categoria_nome,descricao,pessoa_nome').limit(9999),
+      sbAll(function(){return sb.from('contas_pagar').select('id,valor,valor_pago,vencimento,data_pagamento,status,categoria_id,categoria_nome,descricao,pessoa_nome');}),
+      sbAll(function(){return sb.from('contas_receber').select('id,valor,valor_recebido,vencimento,data_recebimento,status,categoria_id,categoria_nome,descricao,pessoa_nome');}),
       sb.from('solicitacoes_comissao').select('data_solicitacao,itens').limit(9999),
     ]);
     _fceCpData=rCp.data||[];
@@ -9084,8 +9130,8 @@ async function dreLoad(){
   var fim=ano+'-'+mes+'-31';
   try{
     var [rCp,rCr,rSc]=await Promise.all([
-      sb.from('contas_pagar').select('valor,valor_pago,data_pagamento,vencimento,status,categoria_id,categoria_nome,projeto_nome').limit(9999),
-      sb.from('contas_receber').select('valor,valor_recebido,data_recebimento,vencimento,status,categoria_id,categoria_nome,projeto_nome').limit(9999),
+      sbAll(function(){return sb.from('contas_pagar').select('valor,valor_pago,data_pagamento,vencimento,status,categoria_id,categoria_nome,projeto_nome');}),
+      sbAll(function(){return sb.from('contas_receber').select('valor,valor_recebido,data_recebimento,vencimento,status,categoria_id,categoria_nome,projeto_nome');}),
       sb.from('solicitacoes_comissao').select('data_solicitacao,itens').gte('data_solicitacao',ini).lte('data_solicitacao',fim+'T23:59:59').limit(9999),
     ]);
     var filt=function(r,dt){return r.status!=='cancelado'&&dt&&dt>=ini&&dt<=fim;};
@@ -9192,8 +9238,8 @@ async function orcLoad(){
   var ini=ano+'-'+mes+'-01', fim=ano+'-'+mes+'-31';
   try{
     var [rCp,rCr,rSnap]=await Promise.all([
-      sb.from('contas_pagar').select('valor,valor_pago,data_pagamento,vencimento,status,categoria_id,categoria_nome,projeto_nome').limit(9999),
-      sb.from('contas_receber').select('valor,valor_recebido,data_recebimento,vencimento,status,categoria_id,categoria_nome,projeto_nome').limit(9999),
+      sbAll(function(){return sb.from('contas_pagar').select('valor,valor_pago,data_pagamento,vencimento,status,categoria_id,categoria_nome,projeto_nome');}),
+      sbAll(function(){return sb.from('contas_receber').select('valor,valor_recebido,data_recebimento,vencimento,status,categoria_id,categoria_nome,projeto_nome');}),
       sb.from('orcamentos').select('*').eq('ano',parseInt(ano)).eq('mes',parseInt(mes)),
     ]);
     var cp=rCp.data||[], cr=rCr.data||[];
@@ -10670,25 +10716,25 @@ async function conciliacaoFetch(){
   if(loadingEl) loadingEl.style.display='inline';
   try{
     var [rCP, rCR, rFech, rHistCP, rHistCR] = await Promise.all([
-      sb.from('contas_pagar')
+      sbAll(function(){return sb.from('contas_pagar')
         .select('id,descricao,pessoa_nome,valor,valor_pago,data_pagamento,categoria_nome,conciliado')
         .eq('status','pago').eq('conta_bancaria_id',contaId)
         .gte('data_pagamento',inicioMes).lte('data_pagamento',fimMes)
-        .order('data_pagamento').limit(9999),
-      sb.from('contas_receber')
+        .order('data_pagamento');}),
+      sbAll(function(){return sb.from('contas_receber')
         .select('id,descricao,pessoa_nome,valor,valor_recebido,data_recebimento,categoria_nome,conciliado')
         .eq('status','recebido').eq('conta_bancaria_id',contaId)
         .gte('data_recebimento',inicioMes).lte('data_recebimento',fimMes)
-        .order('data_recebimento').limit(9999),
+        .order('data_recebimento');}),
       sb.from('periodos_fechados').select('id,fechado_em,fechado_por')
         .eq('conta_bancaria_id',contaId).eq('ano',ano).eq('mes',mes).maybeSingle(),
       // Histórico de CP antes do período para saldo inicial
-      sb.from('contas_pagar').select('valor,valor_pago,data_pagamento')
+      sbAll(function(){return sb.from('contas_pagar').select('valor,valor_pago,data_pagamento')
         .eq('status','pago').eq('conta_bancaria_id',contaId)
-        .lt('data_pagamento',inicioMes).limit(9999),
-      sb.from('contas_receber').select('valor,valor_recebido,data_recebimento')
+        .lt('data_pagamento',inicioMes);}),
+      sbAll(function(){return sb.from('contas_receber').select('valor,valor_recebido,data_recebimento')
         .eq('status','recebido').eq('conta_bancaria_id',contaId)
-        .lt('data_recebimento',inicioMes).limit(9999),
+        .lt('data_recebimento',inicioMes);}),
     ]);
     concState.cpRows = rCP.data||[];
     concState.crRows = rCR.data||[];
