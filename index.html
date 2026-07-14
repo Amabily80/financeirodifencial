@@ -11295,6 +11295,11 @@ function cnabResetRepRetorno(){
 function _cnabRepKeyNV(nome, valor){
   return (nome||'').trim().toUpperCase().replace(/\s+/g,' ')+'|'+Number(valor).toFixed(2);
 }
+// ── Chave para detecção de duplicidade na remessa (nome + valor + vencimento) ──
+// Usa data também: mesmo favorecido/valor em meses diferentes não é duplicidade.
+function _cnabRepKeyNVD(nome, valor, data){
+  return _cnabRepKeyNV(nome, valor)+'|'+(data||'');
+}
 
 // ── Parser linha-padrão de Repasse (Segmento A) ─────────────────────
 // CNAB 400 Itaú Pagamento a Fornecedores/Repasses, registro tipo "3", segmento "A":
@@ -11614,17 +11619,17 @@ async function cnabHandleRepRemessa(file){
       toast('❌','Nenhum repasse encontrado. Verifique se é CNAB 400 Itaú (remessa de pagamentos).','err'); return;
     }
 
-    // Verificar duplicatas no Supabase (mesmo favorecido + valor já importado)
+    // Verificar duplicatas no Supabase (mesmo favorecido + valor + vencimento já importado)
     var jaExist = {};
     if(sb){
-      var {data:ex} = await sb.from('contas_pagar')
-        .select('pessoa_nome,valor')
-        .like('observacoes', CNAB_REP_MARK+'%');
-      (ex||[]).forEach(function(r){ jaExist[_cnabRepKeyNV(r.pessoa_nome,r.valor)] = true; });
+      var {data:ex} = await sbAll(function(){return sb.from('contas_pagar')
+        .select('pessoa_nome,valor,vencimento')
+        .like('observacoes', CNAB_REP_MARK+'%');});
+      (ex||[]).forEach(function(r){ jaExist[_cnabRepKeyNVD(r.pessoa_nome,r.valor,r.vencimento)] = true; });
     }
 
     _cnabRepRemParsed = records.map(function(r){
-      return { ...r, existente: !!jaExist[_cnabRepKeyNV(r.nome,r.valor)] };
+      return { ...r, existente: !!jaExist[_cnabRepKeyNVD(r.nome,r.valor,r.data)] };
     });
     cnabRenderRepRemPreview();
   };
