@@ -4262,12 +4262,12 @@ async function overviewLoad(){
     document.getElementById('ov-cr-vencida').textContent   = fmtBRL(sum(crVenc));
     document.getElementById('ov-cr-vencida-n').textContent = crVenc.length+' conta(s) em atraso';
 
-    // ── SOLICITAÇÕES DA SEMANA ──
-    var solTotal = solic.reduce(function(s,x){return s+(parseFloat(x.total_valor)||0);},0);
-    var allItens = [];
-    solic.forEach(function(s){if(Array.isArray(s.itens)) allItens=allItens.concat(s.itens);});
+    // ── SOLICITAÇÕES DA SEMANA (somente a última solicitação realizada) ──
+    var ultimaSolic = solic.length ? solic.slice().sort(function(a,b){return (b.data_solicitacao||'').localeCompare(a.data_solicitacao||'');})[0] : null;
+    var solTotal = ultimaSolic ? (parseFloat(ultimaSolic.total_valor)||0) : 0;
+    var allItens = (ultimaSolic&&Array.isArray(ultimaSolic.itens)) ? ultimaSolic.itens : [];
     document.getElementById('ov-solic-valor').textContent  = fmtBRL(solTotal);
-    document.getElementById('ov-solic-count').textContent  = solic.length+' solicitação(ões)';
+    document.getElementById('ov-solic-count').textContent  = ultimaSolic ? 'última solicitação' : '0 solicitação(ões)';
     document.getElementById('ov-solic-items').textContent  = allItens.length;
 
     // ── PREVISÃO CP ──
@@ -4311,7 +4311,7 @@ async function overviewLoad(){
       else if(it.perc===3&&!it.jaRecebeuPrimeiros3){ corretorTotal+=val*0.01; gerenteBase+=val; }
       else { corretorTotal+=val*0.01; }
     });
-    _ovComData={corretorTotal:corretorTotal,gerenteBase:gerenteBase,totalItens:allItens.length,solicsCount:solic.length};
+    _ovComData={corretorTotal:corretorTotal,gerenteBase:gerenteBase,totalItens:allItens.length,solicsCount:ultimaSolic?1:0};
 
   } catch(e) {
     toast('❌','Erro ao carregar visão geral: '+e.message,'error');
@@ -4329,7 +4329,7 @@ function ovRenderComissoes(){
       +(_ovComData?'Nenhuma solicitação este mês.':'Carregando...')+'</td></tr>';
     if(info) info.textContent=''; return;
   }
-  if(info) info.textContent=_ovComData.totalItens+' contrato(s) em '+_ovComData.solicsCount+' solicitação(ões)';
+  if(info) info.textContent=_ovComData.totalItens+' contrato(s) na última solicitação';
   var coms=[
     {nome:'Corretor',  tipo:'Corretor', calc:'2% nos de 6% · 1% nos de 3%',   valor:_ovComData.corretorTotal},
     {nome:'Ariel',     tipo:'Gerência', calc:'0,235% · somente 1ª comissão',   valor:_ovComData.gerenteBase*0.00235},
