@@ -8347,6 +8347,8 @@ document.addEventListener('DOMContentLoaded', function(){
   if(bem) bem.addEventListener('click', function(e){ if(e.target===this) bulkEditClose(); });
   var crBem = document.getElementById('cr-bulk-edit-modal');
   if(crBem) crBem.addEventListener('click', function(e){ if(e.target===this) crBulkEditClose(); });
+  var crBrm = document.getElementById('cr-bulk-receive-modal');
+  if(crBrm) crBrm.addEventListener('click', function(e){ if(e.target===this) crBulkReceiveClose(); });
 });
 
 async function cpCancelSelected(){
@@ -8425,22 +8427,42 @@ async function crCancelSelected(){
 }
 function crBulkReceiveOpen(){
   if(!crSelected.size) return;
-  var hoje=new Date().toISOString().slice(0,10);
-  var dp=prompt('Data de recebimento (AAAA-MM-DD):',hoje);
-  if(dp===null) return;
-  crBulkReceiveConfirm(dp);
+  var hoje=new Date().toLocaleDateString('pt-BR');
+  document.getElementById('cr-bulk-receive-hoje-lbl').textContent='Data de hoje ('+hoje+')';
+  document.getElementById('cr-bulk-receive-data').value=new Date().toISOString().slice(0,10);
+  var sel=document.getElementById('cr-bulk-receive-banco');
+  sel.innerHTML='<option value="">Nenhuma (manter atual)</option>';
+  (FS.refs.bancarias||[]).forEach(function(b){ sel.innerHTML+='<option value="'+b.id+'">'+b.nome+'</option>'; });
+  document.getElementById('cr-bulk-receive-modal').style.display='flex';
 }
-async function crBulkReceiveConfirm(dp){
+function crBulkReceiveClose(){ document.getElementById('cr-bulk-receive-modal').style.display='none'; }
+function crBulkReceiveSelect(div,tipo){
+  document.querySelectorAll('#cr-bulk-receive-modal .bulk-option').forEach(function(d){ d.classList.remove('selected'); });
+  div.classList.add('selected');
+  div.querySelector('input[type=radio]').checked=true;
+  document.getElementById('cr-bulk-receive-date-wrap').style.display=tipo==='especifica'?'block':'none';
+}
+async function crBulkReceiveConfirm(){
+  var tipo=document.querySelector('input[name="cr-bulk-receive-tipo"]:checked').value;
+  var bancoId=document.getElementById('cr-bulk-receive-banco').value||null;
+  var today=new Date().toISOString().slice(0,10);
+  var especifica=document.getElementById('cr-bulk-receive-data').value;
   var ids=Array.from(crSelected);
   var user=authCurrentUser()?authCurrentUser().login:'';
   try{
     for(var i=0;i<ids.length;i++){
-      var rec=FS.crRows.find(function(r){ return r.id===ids[i]; });
-      var upd={status:'recebido',data_recebimento:dp,valor_recebido:parseFloat(rec&&rec.valor)||0,alterado_por:user};
-      var res=await sb.from('contas_receber').update(upd).eq('id',ids[i]);
+      var id=ids[i];
+      var rec=FS.crRows.find(function(r){ return r.id===id; });
+      var dataReceb = tipo==='previsao' ? (rec&&rec.vencimento?rec.vencimento:today)
+                    : tipo==='hoje'     ? today
+                    :                     especifica;
+      var upd={status:'recebido',data_recebimento:dataReceb,valor_recebido:parseFloat(rec&&rec.valor)||0,alterado_por:user};
+      if(bancoId) upd.conta_bancaria_id=bancoId;
+      var res=await sb.from('contas_receber').update(upd).eq('id',id);
       if(res.error) throw res.error;
     }
     toast('\u2705',ids.length+' conta(s) marcada(s) como recebida(s)!','success');
+    crBulkReceiveClose();
     crClearSelection(); crLoad();
   }catch(e){ toast('\u274c','Erro: '+e.message,'error'); }
 }
@@ -10548,6 +10570,43 @@ async function fechamentoLoad(){
   </div>
 </div>
 
+
+<!-- CR Bulk Receive Modal -->
+<div id="cr-bulk-receive-modal" style="position:fixed;inset:0;z-index:9100;background:rgba(26,29,46,.65);backdrop-filter:blur(6px);display:none;align-items:center;justify-content:center">
+  <div class="bulk-modal-box">
+    <div class="bulk-modal-hdr">
+      <h3>&#9889; Registrar Recebimento</h3>
+      <button class="bulk-modal-close" onclick="crBulkReceiveClose()">&#10005;</button>
+    </div>
+    <div class="bulk-modal-body">
+      <p style="font-size:13px;color:var(--text-muted);margin-bottom:16px">Selecione como registrar o recebimento das contas selecionadas:</p>
+      <div class="bulk-option selected" onclick="crBulkReceiveSelect(this,'previsao')">
+        <input type="radio" class="bulk-option-radio" name="cr-bulk-receive-tipo" value="previsao" checked>
+        <div><div class="bulk-option-label">Data de previs&#227;o de cada conta</div><div class="bulk-option-sub">Cada conta ser&#225; recebida na sua data de vencimento</div></div>
+      </div>
+      <div class="bulk-option" onclick="crBulkReceiveSelect(this,'hoje')">
+        <input type="radio" class="bulk-option-radio" name="cr-bulk-receive-tipo" value="hoje">
+        <div><div class="bulk-option-label" id="cr-bulk-receive-hoje-lbl">Data de hoje</div><div class="bulk-option-sub">Todas as contas ser&#227;o recebidas com a data atual</div></div>
+      </div>
+      <div class="bulk-option" onclick="crBulkReceiveSelect(this,'especifica')">
+        <input type="radio" class="bulk-option-radio" name="cr-bulk-receive-tipo" value="especifica">
+        <div style="flex:1"><div class="bulk-option-label">Data espec&#237;fica</div>
+          <div class="bulk-date-field" id="cr-bulk-receive-date-wrap">
+            <input type="date" id="cr-bulk-receive-data" class="fin-form-input" style="margin-top:8px;width:100%">
+          </div>
+        </div>
+      </div>
+      <div style="margin-top:14px" class="bulk-form-grp">
+        <label>Conta Banc&#225;ria</label>
+        <select id="cr-bulk-receive-banco"><option value="">Selecione (opcional)</option></select>
+      </div>
+    </div>
+    <div class="bulk-modal-footer">
+      <button class="fin-btn-cancel" onclick="crBulkReceiveClose()">Cancelar</button>
+      <button class="fin-btn-save" onclick="crBulkReceiveConfirm()">&#9889; Receber Agora</button>
+    </div>
+  </div>
+</div>
 
 <!-- CR Bulk Edit Modal -->
 <div id="cr-bulk-edit-modal" style="position:fixed;inset:0;z-index:9100;background:rgba(26,29,46,.65);backdrop-filter:blur(6px);display:none;align-items:center;justify-content:center">
